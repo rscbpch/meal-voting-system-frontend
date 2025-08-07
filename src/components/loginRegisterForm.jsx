@@ -1,10 +1,12 @@
-import React from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import WelcomeLogo from '../assets/WelcomeLogo.png';
+
 const LoginRegisterForm = ({ mode }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -23,6 +25,15 @@ const LoginRegisterForm = ({ mode }) => {
         setPassword('');
         setConfirmPassword('');
     };
+
+    const handleToggleMode = () => {
+        if (mode === 'login') {
+            navigate('/register');
+        } else {
+            navigate('/login');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex justify-center items-center gap-6">
             <img 
@@ -35,21 +46,21 @@ const LoginRegisterForm = ({ mode }) => {
                     <h2 className="justify-center flex font-bold text-2xl">
                         {mode === 'login' ? 'Log In' : 'Register'}
                     </h2>
-                    <div style={{ marginBottom: '1rem' }}>
-                    <label>Email</label> <br />
-                    <input 
-                        className="w-full p-1 border rounded-2xl placeholder-gray-400"
-                        type="email"
-                        value={email}
-                        placeholder="Your school email"
-                        required
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
+                    <div className="mb-3">
+                        <label>Email</label> <br />
+                        <input 
+                            className="w-full h-8 p-1 border rounded-2xl placeholder-gray-400 px-2.5 text-sm"
+                            type="email"
+                            value={email}
+                            placeholder="Your school email"
+                            required
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
                     </div>
-                    <div style={{ marginBottom: '1rem'}}>
+                    <div className="mb-3">
                         <label>Password</label><br />
                         <input
-                            className="w-full p-1 border rounded-2xl placeholder-gray-400"
+                            className="w-full h-8 p-1 border rounded-2xl placeholder-gray-400 px-2.5 text-sm"
                             type="password" 
                             value={password}
                             placeholder="Your password"
@@ -72,10 +83,10 @@ const LoginRegisterForm = ({ mode }) => {
                         )}
                     </div>
                     { mode === 'register' && (
-                            <div style={{ marginBottom: '1rem'}}>
+                            <div className="mb-3">
                                 <label>Confirm Password</label>
                                 <input 
-                                    className="w-full p-1 border rounded-2xl placeholder-gray-400"
+                                    className="w-full h-8 p-1 border rounded-2xl placeholder-gray-400 px-2.5 text-sm"
                                     type="password"
                                     value={confirmPassword}
                                     placeholder="Confirm Password"
@@ -85,7 +96,7 @@ const LoginRegisterForm = ({ mode }) => {
                             </div>
                     )}
                     <div className="flex justify-center mt-8">
-                        <button className="bg-[#386641] text-white rounded-2xl p-1 w-25">
+                        <button className="bg-[#429818] text-white rounded-full px-6 py-2 w-25 font-semibold">
                             { mode === 'login' ? 'Login' : 'Register'}
                         </button>
                     </div>
@@ -96,13 +107,12 @@ const LoginRegisterForm = ({ mode }) => {
                             href="#"
                             onClick={(e) => {
                                 e.preventDefault();
-                                alert('ot dg dak ey');
+                                handleToggleMode();
                             }}
                         >
                             { mode === 'login' ? 'Sign Up' : 'Log In'}
                         </a>
                     </div>
-
                 </form>
             </div>
         </div>
