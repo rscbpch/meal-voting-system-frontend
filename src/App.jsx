@@ -13,7 +13,7 @@ const App = () => {
 
     return (
         <div>
-            {!hideNavbar && <nav><Navbar isAuthenticated={isAuthenticated}/></nav>}
+            {!hideNavbar && <Navbar isAuthenticated={isAuthenticated}/>}
 
             <Routes>
                 <Route path="/" element={<Homepage />}/>

@@ -97,7 +97,7 @@ const Homepage = () => {
                                 exactly what's in demand; fresher, tastier, and waste-free.
                             </p>
                             <div>
-                                <button className="bg-[#429818] font-['Quicksand'] text-white px-6 py-2 rounded-[10px] font-semibold hover:bg-[#386641] transition-colors">
+                                <button className="cursor-pointer bg-[#429818] font-['Quicksand'] text-white px-6 py-2 rounded-[10px] font-semibold hover:bg-[#386641] transition-colors">
                                     Vote now
                                 </button>
                             </div>
