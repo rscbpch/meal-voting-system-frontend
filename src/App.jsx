@@ -5,13 +5,14 @@ import Homepage from "./pages/Homepage";
 import LoginPage from "./pages/auth/Login";
 import RegisterPage from "./pages/auth/Register";
 import AuthService from "./services/authService";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
     const location = useLocation();
 
-    const hideNavbar = ['/login', '/register'].includes(location.pathname);
+    const hideNavbar = ['/login', '/register', '/verify-email'].includes(location.pathname);
 
     useEffect(() => {
         const checkAuth = () => {
@@ -71,6 +72,7 @@ const App = () => {
                 <Route path="/" element={<Homepage isAuthenticated={isAuthenticated} setIsAuthenticated={updateAuthState} />}/>
                 <Route path="/login" element={<LoginPage updateAuthState={updateAuthState}/>}/>
                 <Route path="/register" element={<RegisterPage />}/>
+                <Route path="/verify-email" element={<VerifyEmail />}/>
             </Routes>
         </div>
     );
