@@ -99,15 +99,30 @@ class AuthService {
             });
 
             console.log('AuthService: Response status:', response.status);
+            console.log('AuthService: Response ok:', response.ok);
             
-            const data = await response.json();
-            console.log('AuthService: Response data:', data);
-
-            if (!response.ok) {
-                throw new Error(data.error || data.message || 'Verification failed');
+            // Handle different response types
+            let data;
+            const contentType = response.headers.get('content-type');
+            
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                // If not JSON, try to get text
+                const text = await response.text();
+                console.log('AuthService: Non-JSON response:', text);
+                data = { message: text };
             }
+            
+            console.log('AuthService: Parsed response data:', data);
 
-            return data;
+            // Check if response is successful (200-299)
+            if (response.ok) {
+                return data;
+            } else {
+                // Response not ok, throw error with backend message
+                throw new Error(data.error || data.message || `HTTP ${response.status}: Verification failed`);
+            }
         } catch (error) {
             console.error('AuthService: Email verification error:', error);
             throw error;
