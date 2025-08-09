@@ -1,2 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Quicksand:wght@300..700&display=swap');
-@import "tailwindcss"
+@import "tailwindcss";
+
+/* font for body and subtitles */
+body {
+    font-family: 'Quicksand', sans-serif;
+}
+
+/* font for titles */
+.font-title {
+    font-family: 'Nunito', sans-serif;
+}
+
+/* for main text (green) */
+.main-text {
+    @apply text-[#429818];
+}
+
+/* for main text with hover (text with links) */
+.main-text-w-hover {
+    @apply cursor-pointer text-[#429818] hover:text-[#386641] font-semibold;
+}
+
+/* for buttons with green bg*/
+.main-button {
+    @apply cursor-pointer px-6 py-2 rounded-[10px] font-semibold bg-[#429818] text-white hover:bg-[#386641] transition-colors;
+}
+
+/* for buttons with green border and white bg */
+.main-border-button {
+    @apply cursor-pointer px-6 py-2 rounded-[10px] font-semibold border-2 border-[#429818] text-[#429818] hover:border-[#386641] hover:text-[#386641] transition-colors;
+}
+
+/* for displaying options buttons on white bg (in sidebar) */
+.option-button {
+    @apply cursor-pointer px-4 py-2 hover:bg-gray-100 hover:bg-gray-100 hover:text-[#429818] transition-colors;
+}

@@ -91,13 +91,13 @@ const Homepage = () => {
                 <div className="max-w-7xl mx-auto px-16"> 
                     <div className="flex items-center justify-between">
                         <div className="flex-1">
-                            <p className="text-[48px] font-extrabold font-['Nunito']">Your Meal, Your <span className="text-[#429818]">Choice</span></p>
-                            <p className="text-[18px] font-medium leading-tight mb-6 font-['Quicksand'] text-[#606060]">
+                            <p className="font-title text-[48px] font-extrabold">Your Meal, Your <span className="main-text">Choice</span></p>
+                            <p className="text-[18px] font-medium leading-tight mb-6 text-[#606060]">
                                 Vote daily on your preferred meals and help the canteen prepare 
                                 exactly what's in demand; fresher, tastier, and waste-free.
                             </p>
                             <div>
-                                <button className="cursor-pointer bg-[#429818] font-['Quicksand'] text-white px-6 py-2 rounded-[10px] font-semibold hover:bg-[#386641] transition-colors">
+                                <button className="main-button">
                                     Vote now
                                 </button>
                             </div>
@@ -127,46 +127,46 @@ const Homepage = () => {
                         <div className="flex-1 text-right pr-6">
                             {timeLeft ? (
                                 <div>
-                                    <h2 className="text-[32px] font-bold text-[#3A4038] font-['Nunito']">{timeLeft}</h2>
+                                    <h2 className="text-[32px] font-bold text-[#3A4038] font-title">{timeLeft}</h2>
                                 </div>
                             ) : (
                                 <>
-                                    <h2 className="text-[32px] font-bold text-[#3A4038] mb-4 font-['Nunito']">Vote close in</h2>
+                                    <h2 className="text-[32px] font-bold text-[#3A4038] mb-4 font-title">Vote close in</h2>
                                     <div className="flex justify-end items-center space-x-4">
                                         <div className="text-center">
                                             <div className="flex space-x-2">
                                                 <div className="w-16 h-20 bg-[#3A4038] rounded-[10px] flex items-center justify-center">
-                                                    <span className="text-white text-3xl font-['Quicksand'] font-bold">{hours[0]}</span>
+                                                    <span className="text-white text-3xl font-bold">{hours[0]}</span>
                                                 </div>
                                                 <div className="w-16 h-20 bg-[#3A4038] rounded-[10px] flex items-center justify-center">
-                                                    <span className="text-white text-3xl font-['Quicksand'] font-bold">{hours[1]}</span>
+                                                    <span className="text-white text-3xl font-bold">{hours[1]}</span>
                                                 </div>
                                             </div>
-                                            <p className="text-[#3A4038] text-sm mt-2 font-['Quicksand'] font-medium">hours</p>
+                                            <p className="text-[#3A4038] text-sm mt-2 font-medium">hours</p>
                                         </div>
                                         <div className="text-[#3A4038] text-3xl pb-6">:</div>
                                         <div className="text-center">
                                             <div className="flex space-x-2">
                                                 <div className="w-16 h-20 bg-[#3A4038] rounded-[10px] flex items-center justify-center">
-                                                    <span className="text-white text-3xl font-['Quicksand'] font-bold">{minutes[0]}</span>
+                                                    <span className="text-white text-3xl font-bold">{minutes[0]}</span>
                                                 </div>
                                                 <div className="w-16 h-20 bg-[#3A4038] rounded-[10px] flex items-center justify-center">
-                                                    <span className="text-white text-3xl font-['Quicksand'] font-bold">{minutes[1]}</span>
+                                                    <span className="text-white text-3xl font-bold">{minutes[1]}</span>
                                                 </div>
                                             </div>
-                                            <p className="text-[#3A4038] text-sm mt-2 font-['Quicksand'] font-medium">minutes</p>
+                                            <p className="text-[#3A4038] text-sm mt-2 font-medium">minutes</p>
                                         </div>
                                         <div className="text-[#3A4038] text-3xl pb-6">:</div>
                                         <div className="text-center">
                                             <div className="flex space-x-2">
                                                 <div className="w-16 h-20 bg-[#3A4038] rounded-[10px] flex items-center justify-center">
-                                                    <span className="text-white text-3xl font-['Quicksand'] font-bold">{seconds[0]}</span>
+                                                    <span className="text-white text-3xl font-bold">{seconds[0]}</span>
                                                 </div>
                                                 <div className="w-16 h-20 bg-[#3A4038] rounded-[10px] flex items-center justify-center">
-                                                    <span className="text-white text-3xl font-['Quicksand'] font-bold">{seconds[1]}</span>
+                                                    <span className="text-white text-3xl font-bold">{seconds[1]}</span>
                                                 </div>
                                             </div>
-                                            <p className="text-[#3A4038] text-sm mt-2 font-['Quicksand'] font-medium">seconds</p>
+                                            <p className="text-[#3A4038] text-sm mt-2 font-medium">seconds</p>
                                         </div>
                                     </div>
                                 </>
