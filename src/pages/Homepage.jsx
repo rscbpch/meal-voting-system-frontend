@@ -1,43 +1,43 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BayCanteenVideo from '../assets/BayCanteenAnimation.mp4';
 import Annoucing from '../assets/Annoucing.png';
 import AnnoucingV2 from '../assets/AnnoucingV2.png';
+import AuthService from '../services/authService';
 
-const Homepage = () => {
+const Homepage = ({ isAuthenticated = false, setIsAuthenticated }) => {
     const [timeLeft, setTimeLeft] = useState('');
     const [hours, setHours] = useState('00');
     const [minutes, setMinutes] = useState('00');
     const [seconds, setSeconds] = useState('00');
+    const [userLoggedIn, setUserLoggedIn] = useState(false); 
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // const calculateTimeLeft = () => {
-        //     const now = new Date();
-        //     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const checkAuthStatus = () => {
+            const authStatus = AuthService.isAuthenticated();
+            console.log('Homepage: Checking auth status:', authStatus); 
+            console.log('Homepage: Token exists:', !!AuthService.getStoredToken()); 
+            console.log('Homepage: User data exists:', !!AuthService.getStoredUser()); 
+            
+            setUserLoggedIn(authStatus || isAuthenticated);
+        };
 
-        //     const endTime = new Date(today);
-        //     endTime.setDate(endTime.getDate() + 1); 
-        //     endTime.setHours(0, 0, 0, 0); 
+        checkAuthStatus();
 
-        //     const timeDiff = endTime - now;
+        const handleStorageChange = () => {
+            checkAuthStatus();
+        };
 
-        //     if (timeDiff <= 0) {
-        //         setTimeLeft("Voting has ended");
-        //         setHours('00');
-        //         setMinutes('00');
-        //         setSeconds('00');
-        //         return;
-        //     }
+        window.addEventListener('storage', handleStorageChange);
 
-        //     const h = Math.floor(timeDiff / (1000 * 60 * 60));
-        //     const m = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-        //     const s = Math.floor((timeDiff % (1000 * 60)) / 1000);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, [isAuthenticated]);
 
-        //     setHours(h.toString().padStart(2, '0'));
-        //     setMinutes(m.toString().padStart(2, '0'));
-        //     setSeconds(s.toString().padStart(2, '0'));
-        // };
-
-        // Countdown from 6 AM to 5 PM
+    useEffect(() => {
+        // 6am to 5pm
         const calculateTimeLeft = () => {
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -85,6 +85,27 @@ const Homepage = () => {
         return () => clearInterval(timer);
     }, []);
 
+    const handleVoteNowClick = () => {
+        console.log('Vote now clicked. User logged in:', userLoggedIn); 
+        console.log('AuthService auth check:', AuthService.isAuthenticated()); 
+        
+        if (userLoggedIn || AuthService.isAuthenticated()) {
+            console.log('Navigating to menu'); 
+            navigate('/menu');
+        } else {
+            console.log('Navigating to login'); 
+            navigate('/login');
+        }
+    };
+
+    // Dynamic button text
+    const getButtonText = () => {
+        if (userLoggedIn || AuthService.isAuthenticated()) {
+            return 'Vote now';
+        }
+        return 'Login to vote';
+    };
+
     return (
         <div>
             <section className="py-10 my-8">
@@ -97,8 +118,11 @@ const Homepage = () => {
                                 exactly what's in demand; fresher, tastier, and waste-free.
                             </p>
                             <div>
-                                <button className="main-button">
-                                    Vote now
+                                <button 
+                                    className="main-button"
+                                    onClick={handleVoteNowClick}
+                                >
+                                    {getButtonText()}
                                 </button>
                             </div>
                         </div>
