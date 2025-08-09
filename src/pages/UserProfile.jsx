@@ -10,7 +10,6 @@ const UserProfile = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     
-    // Change password states
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -20,7 +19,6 @@ const UserProfile = () => {
         confirm: false
     });
     
-    // Deactivate account states
     const [deactivatePassword, setDeactivatePassword] = useState('');
     const [showDeactivatePassword, setShowDeactivatePassword] = useState(false);
     const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
@@ -36,10 +34,8 @@ const UserProfile = () => {
             setLoading(true);
             setError('');
             const response = await AuthService.getProfile();
-            console.log('Profile response:', response); // Debug log
+            console.log('Profile response:', response); 
             
-            // Handle the response structure from your backend
-            // Based on your getOwnProfile function, it returns: { success: true, message: '...', data: { user: {...} } }
             if (response.success && response.data && response.data.user) {
                 setUserProfile(response.data.user);
             } else if (response.data) {
@@ -47,14 +43,12 @@ const UserProfile = () => {
             } else if (response.user) {
                 setUserProfile(response.user);
             } else {
-                // Fallback in case response structure is different
                 setUserProfile(response);
             }
         } catch (error) {
             setError('Failed to load profile. Please try again.');
             console.error('Profile fetch error:', error);
             
-            // If unauthorized, redirect to login
             if (error.message.includes('token') || error.message.includes('unauthorized') || error.message.includes('authentication')) {
                 navigate('/login');
             }
@@ -117,11 +111,10 @@ const UserProfile = () => {
             await AuthService.deactivateAccount(deactivatePassword);
             setSuccess('Account deactivated successfully. You will be logged out shortly.');
             
-            // Logout and redirect after 3 seconds
             setTimeout(async () => {
                 await AuthService.logout();
                 navigate('/');
-                window.location.reload(); // Force page refresh to update auth state
+                window.location.reload(); 
             }, 3000);
         } catch (error) {
             setError(error.message || 'Failed to deactivate account. Please try again.');
@@ -174,36 +167,30 @@ const UserProfile = () => {
     return (
         <div className="min-h-screen bg-gray-100 py-8">
             <div className="max-w-4xl mx-auto px-4">
-                {/* Header */}
                 <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <button
                                 onClick={() => navigate('/')}
-                                className="flex items-center space-x-2 text-gray-600 hover:text-[#429818] transition-colors"
+                                className="flex items-center space-x-2 main-text-w-hover"
                             >
                                 <FiArrowLeft size={20} />
                                 <span>Back to Home</span>
                             </button>
                         </div>
-                        <h1 className="text-2xl font-bold font-title text-[#429818]">User Profile</h1>
+                        <h1 className="text-2xl font-bold font-title main-text">User Profile</h1>
                     </div>
                 </div>
-
-                {/* Alert Messages */}
                 {error && (
                     <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                         {error}
                     </div>
                 )}
-
                 {success && (
                     <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
                         {success}
                     </div>
                 )}
-
-                {/* Tab Navigation */}
                 <div className="bg-white rounded-lg shadow-md mb-6">
                     <div className="border-b border-gray-200">
                         <nav className="flex space-x-8 px-6">
@@ -211,7 +198,7 @@ const UserProfile = () => {
                                 onClick={() => setActiveTab('profile')}
                                 className={`py-4 px-2 border-b-2 font-medium text-sm ${
                                     activeTab === 'profile'
-                                        ? 'border-[#429818] text-[#429818]'
+                                        ? 'border-[#429818] main-text'
                                         : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                             >
@@ -224,7 +211,7 @@ const UserProfile = () => {
                                 onClick={() => setActiveTab('password')}
                                 className={`py-4 px-2 border-b-2 font-medium text-sm ${
                                     activeTab === 'password'
-                                        ? 'border-[#429818] text-[#429818]'
+                                        ? 'border-[#429818] main-text'
                                         : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                             >
@@ -248,14 +235,10 @@ const UserProfile = () => {
                             </button>
                         </nav>
                     </div>
-
-                    {/* Tab Content */}
                     <div className="p-6">
-                        {/* Profile Tab */}
                         {activeTab === 'profile' && userProfile && (
                             <div className="space-y-6">
                                 <h2 className="text-xl font-semibold font-title">Profile Information</h2>
-                                
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">User ID</label>
@@ -263,23 +246,20 @@ const UserProfile = () => {
                                             <span className="font-mono text-sm">{userProfile.id || 'N/A'}</span>
                                         </div>
                                     </div>
-
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border">
                                             <span className="font-medium">{userProfile.email || 'N/A'}</span>
                                         </div>
                                     </div>
-                                    
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border">
-                                            <span className="capitalize font-medium text-[#429818]">
+                                            <span className="capitalize font-medium main-text">
                                                 {userProfile.role || 'Student'}
                                             </span>
                                         </div>
                                     </div>
-                                    
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Account Status</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border">
@@ -295,7 +275,6 @@ const UserProfile = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Email Verification</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border">
@@ -311,7 +290,6 @@ const UserProfile = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Member Since</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border">
@@ -320,7 +298,6 @@ const UserProfile = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Last Updated</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border">
@@ -330,8 +307,6 @@ const UserProfile = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Additional Profile Info */}
                                 <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                     <h3 className="font-medium text-blue-800 mb-2">Account Information</h3>
                                     <div className="text-sm text-blue-700 space-y-1">
@@ -343,12 +318,9 @@ const UserProfile = () => {
                                 </div>
                             </div>
                         )}
-
-                        {/* Change Password Tab */}
                         {activeTab === 'password' && (
                             <form onSubmit={handleChangePassword} className="space-y-6">
                                 <h2 className="text-xl font-semibold font-title">Change Password</h2>
-                                
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
                                     <div className="relative">
@@ -363,13 +335,12 @@ const UserProfile = () => {
                                         <button
                                             type="button"
                                             onClick={() => togglePasswordVisibility('current')}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 option-button"
                                         >
                                             {showPasswords.current ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                                         </button>
                                     </div>
                                 </div>
-                                
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
                                     <div className="relative">
@@ -384,14 +355,13 @@ const UserProfile = () => {
                                         <button
                                             type="button"
                                             onClick={() => togglePasswordVisibility('new')}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 option-button"
                                         >
                                             {showPasswords.new ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                                         </button>
                                     </div>
                                     <p className="text-sm text-gray-500 mt-1">Password must be at least 6 characters long</p>
                                 </div>
-                                
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
                                     <div className="relative">
@@ -406,13 +376,12 @@ const UserProfile = () => {
                                         <button
                                             type="button"
                                             onClick={() => togglePasswordVisibility('confirm')}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 option-button"
                                         >
                                             {showPasswords.confirm ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                                         </button>
                                     </div>
                                 </div>
-                                
                                 <button
                                     type="submit"
                                     disabled={loading}
@@ -422,8 +391,6 @@ const UserProfile = () => {
                                 </button>
                             </form>
                         )}
-
-                        {/* Deactivate Account Tab */}
                         {activeTab === 'deactivate' && (
                             <div className="space-y-6">
                                 <div>
@@ -433,7 +400,6 @@ const UserProfile = () => {
                                         You can reactivate your account by registering again with the same email.
                                     </p>
                                 </div>
-                                
                                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                                     <h3 className="font-medium text-red-800 mb-2">Warning:</h3>
                                     <ul className="text-sm text-red-700 space-y-1">
@@ -443,11 +409,10 @@ const UserProfile = () => {
                                         <li>• This action requires password confirmation</li>
                                     </ul>
                                 </div>
-                                
                                 {!showDeactivateConfirm ? (
                                     <button
                                         onClick={() => setShowDeactivateConfirm(true)}
-                                        className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                        className="main-border-button text-red-600 border-red-600 hover:text-red-700 hover:border-red-700"
                                     >
                                         I want to deactivate my account
                                     </button>
@@ -469,18 +434,17 @@ const UserProfile = () => {
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowDeactivatePassword(!showDeactivatePassword)}
-                                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 option-button"
                                                 >
                                                     {showDeactivatePassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                                                 </button>
                                             </div>
                                         </div>
-                                        
                                         <div className="flex space-x-4">
                                             <button
                                                 type="submit"
                                                 disabled={loading}
-                                                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="main-button bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 {loading ? 'Deactivating...' : 'Confirm Deactivation'}
                                             </button>
@@ -490,7 +454,7 @@ const UserProfile = () => {
                                                     setShowDeactivateConfirm(false);
                                                     setDeactivatePassword('');
                                                 }}
-                                                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                                className="main-border-button"
                                             >
                                                 Cancel
                                             </button>
