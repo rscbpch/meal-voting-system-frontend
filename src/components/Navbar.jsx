@@ -88,7 +88,7 @@ const Navbar = ({ isAuthenticated = false, setIsAuthenticated }) => {
                     <div className="absolute right-0 top-8 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
                         <button
                             onClick={() => {
-                                console.log('Change password...');
+                                navigate('/profile'); // Navigate to profile page
                                 setShowUserDropdown(false);
                             }}
                             className="option-button w-full text-left flex items-center gap-2 font-normal"

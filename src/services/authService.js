@@ -136,6 +136,100 @@ class AuthService {
         }
     }
 
+    async getProfile() {
+        try {
+            const token = this.getStoredToken();
+            
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(`${API_BASE_URL}/me`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch profile');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get profile error:', error);
+            throw error;
+        }
+    }
+
+    async changePassword(currentPassword, newPassword) {
+        try {
+            const token = this.getStoredToken();
+            
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(`${API_BASE_URL}/change-password`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    currentPassword,
+                    newPassword
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to change password');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Change password error:', error);
+            throw error;
+        }
+    }
+
+    async deactivateAccount(confirmPassword) {
+        try {
+            const token = this.getStoredToken();
+            
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(`${API_BASE_URL}/deactivate-account`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    confirmPassword
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to deactivate account');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Deactivate account error:', error);
+            throw error;
+        }
+    }
+
     getStoredUser() {
         const userData = localStorage.getItem('userData');
         return userData ? JSON.parse(userData) : null;
