@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { FiUser, FiLogOut, FiLock } from "react-icons/fi";
-import LogoWhite from "../assets/LogoWhite.png"
+import { FiUser, FiLogOut, FiSettings } from "react-icons/fi";
+import LogoWhite from "../assets/LogoWhite.png";
+import AuthService from "../services/authService";
 
-const Navbar = ({ isAuthenticated = false }) => {
+const Navbar = ({ isAuthenticated = false, setIsAuthenticated }) => {
     const navigate = useNavigate();
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const dropdownRef = useRef(null);
@@ -21,10 +22,22 @@ const Navbar = ({ isAuthenticated = false }) => {
         };
     }, []);
 
-    const handleLogout = () => {
-        console.log('Logging out...');
-        setShowUserDropdown(false);
-        navigate('/login');
+    const handleLogout = async () => {
+        try {
+            console.log('Logging out user...');
+            
+            await AuthService.logout();
+            setShowUserDropdown(false);
+
+            if (setIsAuthenticated) setIsAuthenticated(false);
+            console.log('Logout successful.');
+
+            navigate('/');
+        } catch (error) {
+            console.error('Logout error:', error);
+            if (setIsAuthenticated) setIsAuthenticated(false);
+            navigate('/');
+        }
     };
 
     if (!isAuthenticated) {
@@ -36,13 +49,13 @@ const Navbar = ({ isAuthenticated = false }) => {
                 <div className="flex space-x-4">
                     <button 
                         onClick={() => navigate('/login')} 
-                        className="cursor-pointer border-2 border-[#429818] font-['Quicksand'] text-[#429818] px-6 py-2 rounded-[10px] font-semibold hover:border-[#386641] hover:text-[#386641] transition-colors"
+                        className="main-border-button font-title"
                     >
                         Login
                     </button>
                     <button 
                         onClick={() => navigate('/register')} 
-                        className="cursor-pointer bg-[#429818] font-['Quicksand'] text-white px-6 py-2 rounded-[10px] font-semibold hover:bg-[#386641] transition-colors"
+                        className="main-button font-normal"
                     >
                         Sign Up
                     </button>
@@ -58,16 +71,16 @@ const Navbar = ({ isAuthenticated = false }) => {
             </div>
             <div>
                 <ul className=" flex list-none space-x-6">
-                    <li onClick={() => navigate('')} className="cursor-pointer text-[#429818] hover:text-[#386641] font-semibold">Home</li>
-                    <li onClick={() => navigate('')} className="cursor-pointer text-[#429818] hover:text-[#386641] font-semibold">Today's Menu</li>
-                    <li onClick={() => navigate('')} className="cursor-pointer text-[#429818] hover:text-[#386641] font-semibold">Wishlist</li>
-                    <li onClick={() => navigate('')} className="cursor-pointer text-[#429818] hover:text-[#386641] font-semibold">History</li>
+                    <li onClick={() => navigate('/')} className="cursor-pointer main-text-w-hover font-title font-semibold">Home</li>
+                    <li onClick={() => navigate('/menu')} className="cursor-pointer main-text-w-hover font-title font-semibold">Today's Menu</li>
+                    <li onClick={() => navigate('/wishlist')} className="cursor-pointer main-text-w-hover font-title font-semibold">Wishlist</li>
+                    <li onClick={() => navigate('/history')} className="cursor-pointer main-text-w-hover font-title font-semibold">History</li>
                 </ul>
             </div>
             <div className="relative" ref={dropdownRef}>
                 <FiUser 
                     size={24} 
-                    className="cursor-pointer text-[#429818] hover:text-[#386641]"
+                    className="cursor-pointer main-text-w-hover"
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
                 />
                 
@@ -78,14 +91,14 @@ const Navbar = ({ isAuthenticated = false }) => {
                                 console.log('Change password...');
                                 setShowUserDropdown(false);
                             }}
-                            className="cursor-pointer w-full text-left px-4 py-2 text-[#3A4038] hover:bg-gray-100 hover:text-[#429818] transition-colors flex items-center gap-2"
+                            className="option-button w-full text-left flex items-center gap-2 font-normal"
                         >
-                            <FiLock size={16} />
-                            Change Password
+                            <FiSettings size={16} />
+                            Settings
                         </button>
                         <button
                             onClick={handleLogout}
-                            className="cursor-pointer w-full text-left px-4 py-2 text-[#3A4038] hover:bg-gray-100 hover:text-[#429818] transition-colors flex items-center gap-2"
+                            className="option-button w-full text-left flex items-center gap-2 font-normal"
                         >
                             <FiLogOut size={16} />
                             Logout
