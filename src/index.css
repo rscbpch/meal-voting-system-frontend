@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Bayon&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Quicksand:wght@300..700&display=swap');
+@import "tailwindcss";
+
+body {
+  font-family: 'Quicksand';
+}
+
+/* use this font for titles */
+.title-font {
+  font-family: 'Nunito';
+}
+
+/* use this font for khmer texts */
+.khmer-font {
+  font-family: 'Bayon';
+}
+
+/* use this color for green text */
+.main-color {
+  @apply text-[#429818];
+}
+
+/* use this fro green texts with hover */
+.green-hover {
+  @apply cursor-pointer text-[#429818] hover:text-[#386641] font-semibold;
+}
