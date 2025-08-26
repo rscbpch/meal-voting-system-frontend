@@ -1,9 +1,12 @@
-function App() {
-  return (
-    <div>
-      <p className="main-text bg-amber-400 ">Meal voting system</p>
-    </div>
-  )
-}
+import Homepage from "./pages/Homepage";
+import { BrowserRouter } from "react-router-dom";
 
-export default App
+const App = () => {
+    return (
+        <BrowserRouter>
+            <Homepage />
+        </BrowserRouter>
+    );
+};
+
+export default App;

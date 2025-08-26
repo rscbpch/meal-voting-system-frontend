@@ -3,6 +3,7 @@
 
 body {
   font-family: 'Quicksand';
+  color: #3A4038;
 }
 
 /* use this font for titles */
@@ -18,9 +19,4 @@ body {
 /* use this color for green text */
 .main-color {
   @apply text-[#429818];
-}
-
-/* use this fro green texts with hover */
-.green-hover {
-  @apply cursor-pointer text-[#429818] hover:text-[#386641] font-semibold;
 }
