@@ -1,8 +1,17 @@
+
+import { useNavigate } from 'react-router-dom';
 import LogoWhite from '../../assets/LogoWhite.svg';
 
 const SignIn = () => {
+    const navigate = useNavigate();
     return (
         <div className="flex min-h-screen flex-col items-center justify-center p-4">
+            <span
+                className="fixed top-6 left-6 cursor-pointer text-[#757575] font-semibold hover:text-[#429818] z-50"
+                onClick={() => navigate("/")}
+            >
+                Back to home
+            </span>
             <div className="relative w-full max-w-md px-6 py-12">
                 <div className="flex justify-center">
                     <img src={LogoWhite} alt="Logo" className="h-36" />
@@ -44,7 +53,7 @@ const SignIn = () => {
                         <div className="flex-grow border-t border-gray-300"></div>
                     </div>
                     <p>
-                        Continue as <a href="" className="text-[#429818] hover:text-[#386641] no-underline hover:underline hover:decoration-[0.5px] underline-offset-2 transition-all duration-150">Canteen staff</a>
+                        Continue as <a href="/staff-login" className="text-[#429818] hover:text-[#386641] no-underline hover:underline hover:decoration-[0.5px] underline-offset-2 transition-all duration-150">Canteen staff</a>
                     </p>
                 </div>
             </div>
