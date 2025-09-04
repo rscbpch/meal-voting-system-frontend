@@ -12,61 +12,66 @@ import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const AppRoutes = () => {
-  const location = useLocation();
-  const { user, loading } = useAuth();
+    const location = useLocation();
+    const { user, loading } = useAuth();
 
-  if (loading) {
-    return <div>Loading...</div>; // or a spinner
-  }
+    if (loading) {
+        return <div>Loading...</div>; // or a spinner
+    }
 
-  const role = user?.role;
+    const role = user?.role;
 
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <Routes location={location} key={location.pathname}>
-        {/* Homepage: redirect based on role */}
-        <Route
-          path="/"
-          element={
-            role === "staff" ? <Navigate to="/dashboard" replace /> : <Homepage />
-          }
-        />
+    return (
+        <AnimatePresence mode="wait" initial={false}>
+            <Routes location={location} key={location.pathname}>
+                {/* Homepage: redirect based on role */}
+                <Route
+                    path="/"
+                    element={
+                        role === "staff" ? (
+                            <Navigate to="/dashboard" replace />
+                        ) : (
+                            <Homepage />
+                        )
+                    }
+                />
 
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/staff-login" element={<StaffLogin />} />
-        <Route path="/auth/callback" element={<Callback />} />
-        <Route path="/setup-account" element={<SetupAccount />} />
+                <Route path="/sign-in" element={<SignIn />} />
+                <Route path="/staff-login" element={<StaffLogin />} />
+                <Route path="/auth/callback" element={<Callback />} />
+                <Route path="/setup-account" element={<SetupAccount />} />
 
-        {/* Private routes */}
-        <Route
-          path="/user/profile"
-          element={
-            <PrivateRoute allowedRoles={["voter"]}>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute allowedRoles={["staff"]}>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </AnimatePresence>
-  );
+                {/* Private routes */}
+                <Route
+                    path="/user/profile"
+                    element={
+                        <PrivateRoute allowedRoles={["voter"]}>
+                            <Profile />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard"
+                    element={
+                        <PrivateRoute allowedRoles={["staff"]}>
+                            <Dashboard />
+                        </PrivateRoute>
+                    }
+                />
+                
+            </Routes>
+        </AnimatePresence>
+    );
 };
 
 const App = () => {
-  return (
-    <AuthProvider>
-      <LanguageProvider>
-        <AppRoutes />
-      </LanguageProvider>
-    </AuthProvider>
-  );
+    return (
+        <AuthProvider>
+            <LanguageProvider>
+                <AppRoutes />
+            </LanguageProvider>
+        </AuthProvider>
+    );
 };
 
 export default App;

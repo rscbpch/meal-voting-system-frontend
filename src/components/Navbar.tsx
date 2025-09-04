@@ -26,7 +26,7 @@ const Navbar = () => {
     const { isEng, setIsEng } = useLanguage();
     const [hover, setHover] = useState(false);
     const { user, isAuthenticated, logout } = useAuth();
-    const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated);
+    // const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated);
     const buttonTextWidth = "w-7";
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -47,9 +47,10 @@ const Navbar = () => {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         logout();
-        setIsLoggedIn(false);
         setShowUserDropdown(false);
-        navigate("/");
+        await new Promise((res) => setTimeout(res, 300));
+        navigate("/")
+
     };
 
     const getInitials = (name?: string): string => {
@@ -88,10 +89,9 @@ const Navbar = () => {
                     Home
                 </Link>
                 <Link
-                    to="/shop"
+                    to="/menu"
                     className={`font-semibold transition-colors cursor-pointer ${
-                        location.pathname === "/shop" ||
-                        location.pathname.startsWith("/menu")
+                        location.pathname === "/menu"
                             ? "text-[#3E7B27]"
                             : "text-gray-700 hover:text-[#3E7B27]"
                     }`}
@@ -207,7 +207,7 @@ const Navbar = () => {
                     {/* <div className="flex items-center bg-[#DDF4E7] space-x-2"> */}
 
                     {/* display dropdown */}
-                    {isLoggedIn ? (
+                    {isAuthenticated ? (
                         <div
                             onMouseEnter={() => setShowUserDropdown(true)}
                             onMouseLeave={() => setShowUserDropdown(false)}

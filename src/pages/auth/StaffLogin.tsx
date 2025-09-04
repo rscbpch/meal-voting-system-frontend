@@ -9,7 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 
 const StaffLogin = () => {
     const navigate = useNavigate();
-    const { setUser } = useAuth();
+    const { login: loginToContext } = useAuth();
     const [formData, setFormData] = useState<StaffLoginData>({
         email: "",
         password: "",
@@ -38,8 +38,10 @@ const StaffLogin = () => {
         setError("");
 
         try {
-            const loggedInUser = await login(formData); // call authService
-            setUser(loggedInUser); 
+            const loggedInUser = await login(formData); // call API
+            const token = localStorage.getItem("token") || "";
+            // Update context to refresh UI immediately
+            loginToContext(loggedInUser, token, loggedInUser?.role);
             navigate("/dashboard"); // redirect after login
         } catch (err: any) {
             setError(err.response?.data?.message || "Login failed");

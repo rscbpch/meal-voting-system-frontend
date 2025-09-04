@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import LogoWhite from "../../assets/LogoWhite-removebg.svg";
 import API from "../../services/axios";
 import PageTransition from "../../components/PageTransition";
+import { useAuth } from "../../context/AuthContext";
 
 const SetupAccount = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [generation, setGeneration] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,7 @@ const SetupAccount = () => {
                 generation: parseInt(generation),
             });
 
-            // Fetch user profile to get role
+            // Fetch user profile to get role and update auth context immediately
             const response = await API.get("/user/profile");
             const user = response.data.data.user;
 
@@ -50,7 +52,11 @@ const SetupAccount = () => {
                 localStorage.setItem("userRole", user.role);
             }
 
-            // Redirect to home
+            const token = localStorage.getItem("token") || "";
+            try {
+                login(user, token, user?.role);
+            } catch {}
+
             navigate("/");
         } catch (err: any) {
             console.error("Setup error:", err);

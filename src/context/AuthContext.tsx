@@ -9,6 +9,7 @@ type AuthContextType = {
   error: string | null;
   setUser: (u: User | null) => void;
   isAuthenticated: boolean;
+  login: (userData: User, token: string, role?: string) => void;
   logout: () => void;
 };
 
@@ -20,32 +21,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const init = async () => {
       setLoading(true);
-      setError(null);
       try {
-        const profile = await getProfile();
-        setUser(profile);
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else if (token) {
+          const profile = await getProfile();
+          if (profile) {
+            setUser(profile);
+            localStorage.setItem("user", JSON.stringify(profile));
+          }
+        }
       } catch (err) {
         setError("Failed to fetch profile");
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
-    fetchProfile();
+
+    init();
   }, []);
+
+  const login = (userData: User, token: string, role?: string) => {
+    localStorage.setItem("token", token);
+    if (role) {
+      localStorage.setItem("userRole", role);
+    }
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData); // triggers Navbar update instantly
+  };
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("userRole"); // if you store role separately
-    setUser(null); // automatically sets isAuthenticated = false
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("user");
+    setUser(null);
   };
+  
 
   const isAuthenticated = !!user;
 
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, error, setUser, isAuthenticated, logout }}
+      value={{ user, loading, error, setUser, isAuthenticated, login, logout }}
     >
       {children}
     </AuthContext.Provider>
