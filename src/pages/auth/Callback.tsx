@@ -6,9 +6,11 @@ import {
 } from "../../services/authService";
 import LogoWhite from "../../assets/LogoWhite-removebg.svg";
 import PageTransition from "../../components/PageTransition";
+import { useAuth } from "../../context/AuthContext";
 
 const Callback = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [status, setStatus] = useState<string>(
         "Processing authentication..."
     );
@@ -39,6 +41,10 @@ const Callback = () => {
 
                     if (user) {
                         console.log("Login successful, user:", user);
+                        // Update AuthContext immediately so Navbar reacts without refresh
+                        try {
+                            login(user, token, user?.role);
+                        } catch {}
                         setStatus("Login successful! Redirecting...");
                         setTimeout(() => navigate("/"), 1000); // Small delay to show success
                     } else {
