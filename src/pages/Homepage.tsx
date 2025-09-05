@@ -2,10 +2,12 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import borito from "../assets/borito.png";
+import croissant from "../assets/croissant.png";
 import flatSandwich from "../assets/flat-sandwich.png";
 import fries from "../assets/fries.png";
 import hamburger from "../assets/hamburger.png";
 import pizza from "../assets/pizza.png";
+import salad from "../assets/salad.png";
 import sandwich from "../assets/sandwich.png";
 import steak from "../assets/steak.png";
 import tacobell from "../assets/tacobell.png";
@@ -33,30 +35,36 @@ const Homepage = () => {
                                 </button>
                             </div>
                         </div>
-                        <div>
-                            <img src={borito} className="hidden md:block absolute left-[8%] top-[12%] w-[90px] rotate-[-12deg] opacity-80 z-0" alt="borito" />
-                        </div>
-                        <div>
-                            <img src={flatSandwich} className="hidden md:block absolute left-[18%] top-[60%] w-[70px] rotate-[10deg] opacity-80 z-0" alt="flat sandwich" />
-                        </div>
-                        <div>
-                            <img src={fries} className="hidden md:block absolute left-[70%] top-[18%] w-[60px] rotate-[18deg] opacity-80 z-0" alt="fries" />
-                        </div>
-                        <div>
-                            <img src={hamburger} className="hidden md:block absolute left-[20%] bottom-[10%] w-[80px] rotate-[8deg] opacity-80 z-0" alt="hamburger" />
-                        </div>
-                        <div>
-                            <img src={pizza} className="hidden md:block absolute left-[60%] bottom-[14%] w-[90px] rotate-[-8deg] opacity-80 z-0" alt="pizza" />
-                        </div>
-                        <div>
-                            <img src={sandwich} className="hidden md:block absolute left-[90%] top-[10%] w-[60px] rotate-[24deg] opacity-80 z-0" alt="sandwich" />
-                        </div>
-                        <div>
-                            <img src={steak} className="hidden md:block absolute left-[80%] bottom-[10%] w-[70px] rotate-[-16deg] opacity-80 z-0" alt="steak" />
-                        </div>
-                        <div>
-                            <img src={tacobell} className="hidden md:block absolute left-[95%] top-[65%] w-[60px] rotate-[0deg] opacity-80 z-0" alt="tacobell" />
-                        </div>
+                    </div>
+                    <div className="hidden md:block absolute left-[9%] top-[15%] w-[90px] rotate-[-12deg] opacity-80 z-0">
+                        <img src={borito} alt="borito" />
+                    </div>
+                    <div className="hidden md:block absolute left-[9%] top-[15%] w-[90px] rotate-[-12deg] opacity-80 z-0">
+                        <img src={croissant} alt="croissant"/>
+                    </div>
+                    <div className="hidden md:block absolute left-[38%] top-[24%] w-[80px] rotate-[10deg] opacity-80 z-0">
+                        <img src={flatSandwich} alt="flat sandwich" />
+                    </div>
+                    <div className="hidden md:block absolute left-[4%] top-[50%] w-[70px] rotate-[18deg] opacity-80 z-0">
+                        <img src={fries} alt="fries" />
+                    </div>
+                    <div className="hidden md:block absolute left-[70%] top-[81%] w-[80px] rotate-[8deg] opacity-80 z-0">
+                        <img src={hamburger} alt="hamburger" />
+                    </div>
+                    <div className="hidden md:block absolute left-[22%] top-[65%] w-[90px] rotate-[-8deg] opacity-80 z-0">
+                        <img src={pizza} alt="pizza" />
+                    </div>
+                    <div className="hidden md:block absolute left-[68%] top-[20%] w-[70px] rotate-[-8deg] opacity-80 z-0">
+                        <img src={salad} alt="salad"/>
+                    </div>
+                    <div className="hidden md:block absolute left-[90%] top-[10%] w-[90px] rotate-[24deg] opacity-80 z-0">
+                        <img src={sandwich} alt="sandwich" />
+                    </div>
+                    <div className="hidden md:block absolute left-[88%] top-[60%] w-[70px] rotate-[-16deg] opacity-80 z-0">
+                        <img src={steak} alt="steak" />
+                    </div>
+                    <div className="hidden md:block absolute left-[75%] top-[35%] w-[60px] rotate-[0deg] opacity-80 z-0">
+                        <img src={tacobell} alt="tacobell" />
                     </div>
                 </div>
             </main>
