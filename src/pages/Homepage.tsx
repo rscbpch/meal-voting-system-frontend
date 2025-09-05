@@ -24,10 +24,10 @@ const Homepage = () => {
             <PageTransition>
                 <main className="bg-[#F6FFE8]">
                     <div className="bg-[#f7f7f7] md:min-h-[710px] h-[500px] p-4 md:p-8 relative overflow-hidden flex items-center justify-center">
-                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 relative z-50">
+                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 relative">
                             <div className="mx-auto max-w-[620px] text-center">
                                 <h1 className="title-font text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-none">Your Meal, Your Choice</h1>
-                                <p className="mt-6 text-xs sm:text-sm md:text-base lg:text-lg leading-none">
+                                <p className="mt-6 text-xs sm:text-sm md:text-base lg:text-lg leading-tight">
                                     Vote daily on your preferred meals and help the canteen prepare exactly what’s in demand; fresher, tastier, and waste-free.
                                 </p>
                                 <div className="mt-8 md:mt-10 flex items-center justify-center gap-x-6">

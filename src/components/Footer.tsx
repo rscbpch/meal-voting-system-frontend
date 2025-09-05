@@ -63,6 +63,7 @@ const Footer: React.FC<FooterProps> = () => {
                     </div>
                 </div>
             </div>
+        </div>
         </footer>
     );
 };
