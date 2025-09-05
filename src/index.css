@@ -66,3 +66,4 @@ body {
   .pop-loop {
     animation: popLoop 2.6s cubic-bezier(.2,.9,.2,1) infinite;
   }
+}
