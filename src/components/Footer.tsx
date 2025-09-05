@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React from "react";
 import { CiLocationOn } from "react-icons/ci";
 import { IoMailOutline } from "react-icons/io5";
 import { LuPhone } from "react-icons/lu";
@@ -6,7 +6,7 @@ import { LuPhone } from "react-icons/lu";
 
 interface FooterProps {}
 
-const Footer: FC<FooterProps> = () => {
+const Footer: React.FC<FooterProps> = () => {
   return (
     <footer className="bg-[#F5F5F5] text-gray-800">
         <div>
