@@ -88,7 +88,7 @@ const SignIn = () => {
                             type="button"
                             onClick={() =>
                                 (window.location.href =
-                                    "http://localhost:3000/auth/google")
+                                    `${import.meta.env.VITE_BACKEND_URL}/auth/google`)
                             }
                         >
                             <svg
@@ -123,7 +123,7 @@ const SignIn = () => {
                             type="button"
                             onClick={() =>
                                 (window.location.href =
-                                    "http://localhost:3000/auth/microsoft")
+                                    `${import.meta.env.VITE_BACKEND_URL}/auth/microsoft`)
                             }
                         >
                             <svg
