@@ -10,6 +10,7 @@ import Profile from "./pages/voter/Profile";
 import Dashboard from "./pages/staff/Dashboard";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import Feedback from "./pages/voter/Feedback";
 
 const AppRoutes = () => {
     const location = useLocation();
@@ -58,6 +59,8 @@ const AppRoutes = () => {
                         </PrivateRoute>
                     }
                 />
+                <Route path="/feedback" element={<Feedback />} />
+
                 
             </Routes>
         </AnimatePresence>

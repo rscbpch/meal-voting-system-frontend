@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || "http://localhost:3000") + "/api";
+export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || "http://localhost:3000") + "/api";
 
 const API = axios.create({
     baseURL: BACKEND_URL
@@ -40,3 +40,6 @@ API.interceptors.response.use(
 );
 
 export default API;
+
+// No-auth instance (no interceptors attached)
+export const API_NO_AUTH = axios.create({ baseURL: BACKEND_URL });
