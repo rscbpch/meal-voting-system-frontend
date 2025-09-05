@@ -24,7 +24,7 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { isEng, setIsEng } = useLanguage();
-    const [hover, setHover] = useState(false); // desktop
+    // const [hover, setHover] = useState(false);
     const [open, setOpen] = useState(false); // dropdown open state
     const [isDesktop, setIsDesktop] = useState(true); // track screen size
 
@@ -39,6 +39,7 @@ const Navbar = () => {
     const handleToggle = () => {
         if (isTouchDevice) {
             setOpen((prev) => !prev); // toggle on touch devices
+            setIsDesktop(false);
         }
     };
 

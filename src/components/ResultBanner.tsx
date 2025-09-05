@@ -7,7 +7,7 @@ interface BannerProps {
     imgSrc?: string; 
 }
 
-const Banner: React.FC<BannerProps> = ({ title, subtitle, description, imgSrc }) => {
+const Banner: React.FC<BannerProps> = ({ title, subtitle, description }) => {
     return (
         <div className="bg-[#F7F7F7] p-10 m-5 rounded">
             <h1 className="font-bold text-5xl">{title}</h1>
