@@ -24,7 +24,24 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { isEng, setIsEng } = useLanguage();
-    const [hover, setHover] = useState(false);
+    const [hover, setHover] = useState(false); // desktop
+    const [open, setOpen] = useState(false); // dropdown open state
+    const [isDesktop, setIsDesktop] = useState(true); // track screen size
+
+    // Detect if device supports touch
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
+    useEffect(() => {
+        setIsTouchDevice(
+            "ontouchstart" in window || navigator.maxTouchPoints > 0
+        );
+    }, []);
+
+    const handleToggle = () => {
+        if (isTouchDevice) {
+            setOpen((prev) => !prev); // toggle on touch devices
+        }
+    };
+
     const { user, isAuthenticated, logout } = useAuth();
     // const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated);
     const buttonTextWidth = "w-7";
@@ -49,8 +66,7 @@ const Navbar = () => {
         logout();
         setShowUserDropdown(false);
         await new Promise((res) => setTimeout(res, 300));
-        navigate("/")
-
+        navigate("/");
     };
 
     const getInitials = (name?: string): string => {
@@ -99,7 +115,7 @@ const Navbar = () => {
                     Menu
                 </Link>
                 <Link
-                    to="/about"
+                    to="/feedback"
                     className={`font-semibold transition-colors cursor-pointer ${
                         location.pathname === "/feedback"
                             ? "text-[#3E7B27]"
@@ -109,7 +125,7 @@ const Navbar = () => {
                     Feedback
                 </Link>
                 <Link
-                    to="/contact"
+                    to="/about-us"
                     className={`font-semibold transition-colors cursor-pointer ${
                         location.pathname === "/about-us"
                             ? "text-[#429818]"
@@ -120,7 +136,7 @@ const Navbar = () => {
                 </Link>
             </div>
             <div className="flex-1 flex items-center justify-end">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center lg:space-x-4 space-x-1 ">
                     {/* <button className="cursor-pointer bg-[#F0F0F0] p-2 rounded-full transition-colors group hover:bg-[#DDF4E7]"> */}
 
                     <div className="flex items-center space-x-3">
@@ -133,25 +149,20 @@ const Navbar = () => {
                                 className="transition-colors group-hover:stroke-[#386641]"
                             />
                         </button>
-                        {/* <div>
-                            <button className="p-2 hover:bg-[#DDF4E7] rounded-full transition-all group duration-300 ease-in-out transform hover:scale-110 cursor-pointer hidden lg:block">
+
+                        <div
+                            className="relative inline-block"
+                            onMouseEnter={() => isDesktop && setOpen(true)}
+                            onMouseLeave={() => isDesktop && setOpen(false)}
+                        >
+                            {/* Globe Button */}
+                            <button
+                                onClick={handleToggle}
+                                className="flex items-center gap-2 p-2 hover:bg-[#DDF4E7] rounded-2xl transition-all group duration-300 ease-in-out transform hover:scale-110 cursor-pointer"
+                            >
                                 <FiGlobe
                                     size={20}
                                     className="transition-colors group-hover:stroke-[#386641]"
-                                />
-                            </button>
-                            
-                        </div> */}
-                        <div
-                            className="relative inline-block"
-                            onMouseEnter={() => setHover(true)}
-                            onMouseLeave={() => setHover(false)}
-                        >
-                            {/* Globe Button */}
-                            <button className="flex items-center gap-2 p-2 hover:bg-[#DDF4E7] rounded-2xl transition-all group duration-300 ease-in-out transform hover:scale-110 cursor-pointer">
-                                <FiGlobe
-                                    size={20}
-                                    className="transition-colors group-hover:stroke-[#386641] "
                                 />
                                 <AnimatePresence mode="wait" initial={false}>
                                     <motion.span
@@ -171,37 +182,55 @@ const Navbar = () => {
                                 </AnimatePresence>
                             </button>
 
-                            {/* Dropdown on hover */}
-                            <div
-                                className={`absolute right-0 top-8 mt-1 w-36 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-20 transform transition-all duration-200 origin-top ${
-                                    hover
-                                        ? "opacity-100 scale-100 translate-y-0"
-                                        : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-                                }`}
-                            >
-                                <div className="flex flex-col divide-y divide-gray-100">
-                                    <button
-                                        onClick={() => setIsEng(true)}
-                                        className={`px-4 py-3 text-left w-full font-medium ${
-                                            isEng
-                                                ? "bg-[#EAF6E7] font-semibold text-[#3E7B27]"
-                                                : "hover:text-[#3E7B27]"
-                                        }`}
+                            {/* Dropdown */}
+                            <AnimatePresence>
+                                {open && (
+                                    <motion.div
+                                        initial={{
+                                            opacity: 0,
+                                            scale: 0.95,
+                                            y: -5,
+                                        }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{
+                                            opacity: 0,
+                                            scale: 0.95,
+                                            y: -5,
+                                        }}
+                                        transition={{ duration: 0.15 }}
+                                        className="absolute right-0 top-8 mt-1 w-36 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-20 origin-top"
                                     >
-                                        English
-                                    </button>
-                                    <button
-                                        onClick={() => setIsEng(false)}
-                                        className={`px-4 py-3 text-left w-full khmer-font-content ${
-                                            !isEng
-                                                ? "bg-[#F7F7F7] font-medium text-[#3E7B27]"
-                                                : "hover:text-[#3E7B27]"
-                                        }`}
-                                    >
-                                        ខ្មែរ
-                                    </button>
-                                </div>
-                            </div>
+                                        <div className="flex flex-col divide-y divide-gray-100">
+                                            <button
+                                                onClick={() => {
+                                                    setIsEng(true);
+                                                    setOpen(false);
+                                                }}
+                                                className={`px-4 py-3 text-left w-full font-medium ${
+                                                    isEng
+                                                        ? "bg-[#EAF6E7] font-semibold text-[#3E7B27]"
+                                                        : "hover:text-[#3E7B27]"
+                                                }`}
+                                            >
+                                                English
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setIsEng(false);
+                                                    setOpen(false);
+                                                }}
+                                                className={`px-4 py-3 text-left w-full khmer-font-content ${
+                                                    !isEng
+                                                        ? "bg-[#F7F7F7] font-medium text-[#3E7B27]"
+                                                        : "hover:text-[#3E7B27]"
+                                                }`}
+                                            >
+                                                ខ្មែរ
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                     {/* <div className="flex items-center bg-[#DDF4E7] space-x-2"> */}
