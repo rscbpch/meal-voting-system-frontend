@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Bayon&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Quicksand:wght@300..700&display=swap');
 @import "tailwindcss";
 
+
 body {
   font-family: 'Quicksand';
   color: #3A4038;
@@ -19,4 +20,45 @@ body {
 /* use this color for green text */
 .main-color {
   @apply text-[#429818];
+}
+
+@layer utilities {
+  @keyframes flip-top {
+    100% {
+      transform: rotateX(90deg);
+    }
+  }
+  @keyframes flip-bottom {
+    100% {
+      transform: rotateX(0deg);
+    }
+  }
+  .animate-flip-top {
+    animation: flip-top 0.5s ease-in forwards;
+    transform-origin: bottom;
+  }
+  .animate-flip-bottom {
+    animation: flip-bottom 0.5s ease-out 0.25s forwards;
+    transform-origin: top;
+    transform: rotateX(90deg);
+  }
+  @keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.75); }
+    60% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .pop-in {
+    animation: pop-in 350ms cubic-bezier(.2,.9,.2,1) forwards;
+  }
+  @keyframes popLoop {
+    0% { opacity: 0; transform: scale(0.8) translateY(8px); }
+    10% { opacity: 1; transform: scale(1.04) translateY(0); }
+    50% { opacity: 1; transform: scale(1) translateY(0); }
+    90% { opacity: 0; transform: scale(0.9) translateY(6px); }
+    100% { opacity: 0; transform: scale(0.8) translateY(8px); }
+  }
+
+  .pop-loop {
+    animation: popLoop 2.6s cubic-bezier(.2,.9,.2,1) infinite;
+  }
 }
