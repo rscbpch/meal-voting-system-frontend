@@ -1,8 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Bayon&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Quicksand:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&display=swap');
 @import "tailwindcss";
 
 body {
   font-family: 'Quicksand';
+  color: #3A4038;
 }
 
 /* use this font for titles */
@@ -20,7 +22,6 @@ body {
   @apply text-[#429818];
 }
 
-/* use this fro green texts with hover */
-.green-hover {
-  @apply cursor-pointer text-[#429818] hover:text-[#386641] font-semibold;
+.khmer-font-content {
+  font-family:  'Kantumruy Pro';
 }
