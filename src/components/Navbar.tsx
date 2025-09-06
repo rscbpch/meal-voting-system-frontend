@@ -362,10 +362,10 @@ const Navbar = () => {
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ duration: 0.5, ease: "easeOut" }}
-                        className="lg:hidden fixed top-0 right-0 h-full w-80 bg-gray-50 shadow-xl z-50"
+                        className="lg:hidden fixed top-0 right-0 h-full w-55 bg-gray-50 shadow-xl z-50"
                     >
                         {/* Menu content here */}
-                        <div className="lg:hidden fixed top-0 right-0 h-full w-80 bg-gray-50 shadow-xl z-50 transform transition-all duration-500 ease-out animate-slideInRightSlow">
+                        <div className="lg:hidden fixed top-0 right-0 h-full w-55 bg-gray-50 shadow-xl z-50 transform transition-all duration-500 ease-out animate-slideInRightSlow">
                             {/* Header */}
                             <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
                                 <h2 className="text-xl font-bold text-gray-600">

@@ -12,6 +12,7 @@ import Menu from "./pages/MenuPage";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Feedback from "./pages/voter/Feedback";
+import MenuManagement from "./pages/staff/MenuManagement";
 
 const AppRoutes = () => {
     const location = useLocation();
@@ -62,6 +63,15 @@ const AppRoutes = () => {
                     }
                 />
                 <Route path="/feedback" element={<Feedback />} />
+
+                <Route
+                    path="/menu-management"
+                    element={
+                        <PrivateRoute allowedRoles={["staff"]}>
+                            <MenuManagement />
+                        </PrivateRoute>
+                    }
+                />
 
                 
             </Routes>
