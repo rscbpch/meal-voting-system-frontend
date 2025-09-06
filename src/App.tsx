@@ -8,6 +8,7 @@ import Callback from "./pages/auth/Callback";
 import SetupAccount from "./pages/auth/SetupAccount";
 import Profile from "./pages/voter/Profile";
 import Dashboard from "./pages/staff/Dashboard";
+import Menu from "./pages/MenuPage";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Feedback from "./pages/voter/Feedback";
@@ -37,6 +38,7 @@ const AppRoutes = () => {
                     }
                 />
 
+                <Route path="/menu" element={<Menu />} />
                 <Route path="/sign-in" element={<SignIn />} />
                 <Route path="/staff-login" element={<StaffLogin />} />
                 <Route path="/auth/callback" element={<Callback />} />
