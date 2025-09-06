@@ -39,7 +39,7 @@ const Sidebar = () => {
     return (
         <div className="flex min-h-screen">
             {/* Sidebar */}
-            <aside className="w-64 h-screen fixed top-0 left-0 bg-white shadow-md flex flex-colw-64 bg-white shadow-md flex flex-col">
+            <aside className="w-64 h-screen fixed top-0 left-0 bg-white shadow-md flex flex-col">
                 {/* Header */}
                 <div>
                     <div className="relative">
