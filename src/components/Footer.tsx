@@ -4,9 +4,9 @@ import { IoMailOutline } from "react-icons/io5";
 import { LuPhone } from "react-icons/lu";
 
 
-interface FooterProps {}
+// interface FooterProps {}
 
-const Footer: FC<FooterProps> = () => {
+const Footer: FC = () => {
   return (
     <footer className="bg-[#F5F5F5] text-gray-800">
         <div>
