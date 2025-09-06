@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { div, title } from "motion/react-client";
 
 interface BannerItem {
   title: string;

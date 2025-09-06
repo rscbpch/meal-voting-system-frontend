@@ -1,5 +1,4 @@
-import { div } from "motion/react-client";
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface Card {
     name: string;
