@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CountdownTimer from "../components/CountdownTimer";
+import PageTransition from "../components/PageTransition";
+import { API_NO_AUTH } from "../services/axios"; 
 import food from "../assets/rounded-food.png";
 import borito from "../assets/borito.png";
 import croissant from "../assets/croissant.png";
@@ -13,10 +16,35 @@ import salad from "../assets/salad.png";
 import sandwich from "../assets/sandwich.png";
 import steak from "../assets/steak.png";
 import tacobell from "../assets/tacobell.png";
-import PageTransition from "../components/PageTransition";
 
 const Homepage = () => {
     const navigate = useNavigate();
+    const [status, setStatus] = useState<"open" | "pending" | "close" | "finalized">("pending");
+
+    useEffect(() => {
+        let mounted = true;
+        const fetchStatus = async () => {
+            try {
+                const res = await API_NO_AUTH.get("/results/today");
+                if (!mounted) return;
+                const data = res.data;
+                if (data && typeof data.status === "string") {
+                    const s = data.status as "open" | "pending" | "close" | "finalized";
+                    setStatus(s);
+                }
+            } catch (err) {
+                console.error("Failed to fetch todays's results:", err);
+            }
+        };
+
+        fetchStatus();
+        const pollId = window.setInterval(fetchStatus, 15000);
+
+        return () => {
+            mounted = false;
+            clearInterval(pollId);
+        };
+    }, []);
 
     return (
         <div>
@@ -90,9 +118,19 @@ const Homepage = () => {
                             </svg>
                         </div>
                     </div>
-                    <div>
-                        <CountdownTimer hours={23} minutes={59} seconds={59}/>
+                    
+                    {/* this div  */}
+                    <div className="flex flex-row justify-center mt-12 mb-12">
+                        <div>
+                            <p className="font-bold text-center mb-2">Vote close in</p>
+                            {/* <CountdownTimer hours={10} minutes={0} seconds={0} status="open"/> */}
+                            <CountdownTimer hours={10} minutes={0} seconds={0} status={status}/>
+                        </div>
                     </div>
+                    <section className="w-full mt-8">
+                        <p className="title-font font-semibold text-[32px] text-center">Today's food ranking</p>
+                        <p className="text-center">Waiting for vote poll to open</p>
+                    </section>
                 </main>
             </PageTransition>
             <Footer />
