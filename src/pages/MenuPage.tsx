@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import Card from "../components/Card";
 import Footer from "../components/Footer";
 import ResultBanner from "../components/ResultBanner";
