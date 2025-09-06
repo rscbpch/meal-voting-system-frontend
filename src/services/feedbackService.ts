@@ -26,7 +26,7 @@ export const fetchFeedbacks = async (
     limit = 10
 ): Promise<FeedbackListResponse> => {
     try {
-        const response = await API_NO_AUTH.get("/feedback", {
+        const response = await API_NO_AUTH.get("/system-feedback", {
             params: { offset, limit },
         });
         return response.data as FeedbackListResponse;
@@ -44,7 +44,7 @@ export const createFeedback = async (
     payload: CreateFeedbackPayload
 ): Promise<{ success: boolean }> => {
     try {
-        const response = await API_NO_AUTH.post("/feedback", payload, {
+        const response = await API_NO_AUTH.post("/system-feedback", payload, {
             headers: {
                 "Content-Type": "application/json",
                 "Cache-Control": "no-cache",
