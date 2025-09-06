@@ -6,7 +6,6 @@ import Navbar from "../components/Navbar";
 import Food from "../assets/Food.png"
 import LogoWhite from "../assets/LogoWhite.svg"
 import { useState } from "react";
-import { div } from "motion/react-client";
 
   const foods = [
   {
@@ -86,7 +85,7 @@ import { div } from "motion/react-client";
   ];
 const Menu = () => {
     const [votedCardId, setVotedCardId] = useState<number | null>(null);
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
     
     const handleVote = (id: number) => {
         if (votedCardId === null) {
