@@ -102,7 +102,6 @@ const Banner: React.FC<BannerProps> = ({ items, autoSlideInterval = 1800 }) => {
                         <ChevronDown size={28} />
                     </button>
                 </div> 
-    
             </div>
         </div>
     </div>
