@@ -147,7 +147,7 @@ const MenuManagement = () => {
             <main className="flex-1 ml-64 bg-[#F6FFE8] ">
                 <PageTransition>
                     {/* Main Title with Shadow */}
-                    <div className="bg-white shadow-sm p-6 mb-6">
+                    <div className="sticky top-0 z-50 bg-white shadow-sm p-6 mb-6">
                         <h1 className="text-2xl font-semibold text-[#3A4038]">
                             Menu Management
                         </h1>
