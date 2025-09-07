@@ -3,89 +3,32 @@ import Card from "../components/Card";
 import Footer from "../components/Footer";
 import ResultBanner from "../components/ResultBanner";
 import Navbar from "../components/Navbar";
-import Food from "../assets/Food.png"
-import LogoWhite from "../assets/LogoWhite.svg"
-import { useState } from "react";
-
-  const foods = [
-  {
-    name: "Pizza",
-    categoryId: 1,
-    description: "Cheesy and delicious!",
-    imgURL: Food,
-    initialVotes: 5,
-  },
-   {
-    name: "Pizza",
-    categoryId: 1,
-    description: "Nothing just white",
-    imgURL: LogoWhite,
-    initialVotes: 5,
-  },
-   {
-    name: "Pizza",
-    categoryId: 1,
-    description: "Cheesy and delicious! Cheesy and delicious! Cheesy and delicious!",
-    imgURL: Food,
-    initialVotes: 5,
-  },
-   {
-    name: "Pizza",
-    categoryId: 1,
-    description: "A savory dip made from fermented fish paste, minced pork, and coconut milk, served with fresh vegetables.",
-    imgURL: Food,
-    initialVotes: 5,
-  },
-  {
-    name: "Pizza",
-    categoryId: 1,
-    description: "A savory dip made from fermented fish paste, minced pork, and coconut milk, served with fresh vegetables.",
-    imgURL: Food,
-    initialVotes: 5,
-  },
-]
-    const items = [
-  {
-    title: "Canteen's Pick",
-    subtitle: "Food 1",
-    description:
-    "A savory dip made from fermented fish paste, minced pork, and coconut milk, served with fresh vegetables.",
-    imgSrc: Food,
-    totalVotes: 0,
-  },
-  {
-    title: "Canteen's Pick",
-    subtitle: "Food 2",
-    description:
-      "A classic fried rice dish with egg, vegetables, and a touch of soy sauce.",
-    imgSrc: Food,
-    totalVotes: 0,
-  },
-  {
-    title: "Canteen's Pick",
-    subtitle: "Food 3",
-    description: "White white white",
-    imgSrc: LogoWhite,
-    totalVotes: 0,
-  },
-   {
-    title: "Canteen's Pick",
-    subtitle: "Food 3",
-    description: "Grilled chicken served with lime and chili dip.",
-    imgSrc: Food,
-    totalVotes: 0,
-  },
-  {
-    title: "Canteen's Pick",
-    subtitle: "Food 3",
-    description: "Grilled chicken served with lime and chili dip.",
-    imgSrc: Food,
-    totalVotes: 0,
-  },
-  ];
+import { useEffect, useState } from "react";
+import { getDishes } from "../services/dishService";
+import type { Dish } from "../services/dishService";
+import { getTodayResult, type CandidateDish } from "../services/resultService";
 const Menu = () => {
+    const [foods, setFoods] = useState<Dish[]>([]);
+    const [candidate, setCandidate] = useState<CandidateDish[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [votedCardId, setVotedCardId] = useState<number | null>(null);
     // const navigate = useNavigate()
+    useEffect(() => {
+      getDishes()
+        .then((res) => setFoods(res.items))
+        .catch(() => setError("Failed to fetch dishes"));
+
+      getTodayResult() 
+        .then((res) => {
+          setCandidate(res.dishes);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Failed to fetch today's result");
+          setLoading(false);
+        });
+    }, []);
     
     const handleVote = (id: number) => {
         if (votedCardId === null) {
@@ -93,6 +36,19 @@ const Menu = () => {
 
         }
     };
+    const candidateCards = candidate.map(candidate => {
+        const dishInfo = foods.find(dish => dish.id === candidate.dishId);
+        return {
+          key: candidate.candidateDishId,
+          name: candidate.dish,
+          categoryId: Number(dishInfo ?.categoryId) ?? 0,
+          description : dishInfo ?.description ?? "",
+          imgURL: dishInfo ?.imageURL ?? "",
+          initialVotes: candidate.voteCount,
+          disabled: votedCardId != null,
+          onVote: () => handleVote(candidate.candidateDishId),
+        };
+    }) 
     return (
         <div>
             <div>
@@ -101,21 +57,29 @@ const Menu = () => {
                 </div>
                 <div>
                     <ResultBanner
-                        items={items}
+                        items={[]}
                     />
                 </div>
                 <div>
                     <h1 className="text-[48px] font-bold p-5 mb-10 ml-5">Menu</h1>
                 </div>
                 <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
-                    {foods.map((item, index) => (
+                    {/* {foods.map((item, index) => (
                         <Card
-                            key={index}
-                            {...item}
+                            key={item.id}
+                            name={item.name}
+                            categoryId={Number(item.categoryId)}
+                            description={item.description || ""}
+                            imgURL = {item.imageURL || ""}
                             initialVotes={0}
                             disabled = {votedCardId !== null}
                             onVote={() => handleVote(index)}
                         />
+                    ))} */}
+                    {loading && <div>Loading...</div>}
+                    {error && <div className="text-red-500">{error}</div>}
+                    {!loading && !error && candidateCards.map(cardProps => (
+                      <Card {...cardProps} />
                     ))}
                 </div>
                 <Footer/>
