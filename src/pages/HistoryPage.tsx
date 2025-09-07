@@ -1,10 +1,7 @@
-import React from "react";
 import LatestVote from "../components/LatestVote";
-const History () => {
+const History = () => {
     return (
-        <LatestVote
-
-        />
+        <LatestVote name={""} id={0} description={""} category={0} totalVote={0} votedAt={""} />
     )
 }   
 
