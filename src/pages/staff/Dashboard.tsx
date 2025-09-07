@@ -5,11 +5,15 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen flex">
             <Sidebar />
-            <PageTransition>
-                <main className="ml-64 flex-1 overflow-y-auto">
-                    <h1>hello</h1>
-                </main>
-            </PageTransition>
+            <main className="flex-1 ml-64 bg-[#F6FFE8]">
+                <PageTransition>
+                    <div className="sticky top-0 z-50 bg-white shadow-sm p-6 mb-6">
+                        <h1 className="text-2xl font-semibold text-[#3A4038]">
+                            Dashboard
+                        </h1>
+                    </div>
+                </PageTransition>
+            </main>
         </div>
     );
 };

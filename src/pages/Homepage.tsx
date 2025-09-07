@@ -16,6 +16,8 @@ import salad from "../assets/salad.png";
 import sandwich from "../assets/sandwich.png";
 import steak from "../assets/steak.png";
 import tacobell from "../assets/tacobell.png";
+import food1 from "../assets/small-food-1.png";
+import food2 from "../assets/small-food-2.png";
 
 const Homepage = () => {
     const navigate = useNavigate();
@@ -118,19 +120,75 @@ const Homepage = () => {
                             </svg>
                         </div>
                     </div>
-                    
-                    {/* this div  */}
-                    <div className="flex flex-row justify-center mt-12 mb-12">
+                    <div className="relative flex justify-center px-12 pt-12 pb-8 lg:text-[20px]">
+                        <div className="absolute inset-x-0 top-6 z-20 flex justify-center">
+                            {status === 'open' ? (
+                                <div>
+                                    <p className="font-bold text-center mb-2">Vote close in</p>
+                                    <CountdownTimer />
+                                </div>
+                            ) : status === 'pending' ? (
+                                <p className="text-center font-semibold">Voting is pending</p>
+                            ) : status === 'close' ? (
+                                <p className="text-center font-semibold">Voting has closed</p>
+                            ) : status === 'finalized' ? (
+                                <p className="text-center font-semibold">Results finalized</p>
+                            ) : (
+                                <p className="text-center font-semibold">Status unknown</p>
+                            )}
+                        </div>
                         <div>
-                            <p className="font-bold text-center mb-2">Vote close in</p>
-                            {/* <CountdownTimer hours={10} minutes={0} seconds={0} status="open"/> */}
-                            <CountdownTimer hours={10} minutes={0} seconds={0} status={status}/>
+                            {status === 'open' ? (
+                                <>
+                                    <div className="absolute left-[5%] top-[25%] md:left-[20%] md:top-[12%] w-[48px] md:w-[64px] lg:w-[72px] rotate-[-12deg] opacity-90 z-10 pointer-events-none">
+                                        <img src={food1} alt="food1" className="w-full h-auto" />
+                                    </div>
+                                    <div className="absolute right-[4%] bottom-[18%] md:right-[18%] md:bottom-[10%] w-[48px] md:w-[64px] lg:w-[72px] rotate-[-12deg] opacity-90 z-10 pointer-events-none">
+                                        <img src={food2} alt="food2" className="w-full h-auto" />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <style>
+                                        {`
+                                            @keyframes wave {
+                                                0%   { transform: translateY(0); opacity: 0.95; }
+                                                50%  { transform: translateY(-10px); opacity: 1; }
+                                                100% { transform: translateY(0); opacity: 0.95; }
+                                            }
+                                        `}
+                                    </style>
+
+                                    <div className="inset-0 flex justify-center mt-2 items-center pointer-events-none z-10">
+                                        <div className="flex items-end">
+                                            <img
+                                                src={food1}
+                                                alt="food1"
+                                                className="w-12 md:w-16 lg:w-20"
+                                                style={{ animation: 'wave 1.1s ease-in-out infinite', animationDelay: '0s' }}
+                                            />
+                                            <img
+                                                src={food2}
+                                                alt="food2"
+                                                className="w-14 md:w-18 lg:w-20"
+                                                style={{ animation: 'wave 1.1s ease-in-out infinite', animationDelay: '0.12s' }}
+                                            />
+                                            <img
+                                                src={food1}
+                                                alt="food1-2"
+                                                className="w-12 md:w-16 lg:w-20"
+                                                style={{ animation: 'wave 1.1s ease-in-out infinite', animationDelay: '0.24s' }}
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
-                    <section className="w-full mt-8">
+                    <div className="flex flex-col justify-center pb-12">
                         <p className="title-font font-semibold text-[32px] text-center">Today's food ranking</p>
-                        <p className="text-center">Waiting for vote poll to open</p>
-                    </section>
+                        <p className="text-center">under construction</p>
+                    </div>
                 </main>
             </PageTransition>
             <Footer />
