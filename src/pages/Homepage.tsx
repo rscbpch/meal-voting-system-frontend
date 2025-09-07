@@ -185,7 +185,7 @@ const Homepage = () => {
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-col justify-center pb-12">
+                    <div className="flex flex-col justify-center pb-8">
                         <p className="title-font font-semibold text-[32px] text-center">Today's food ranking</p>
                         <p className="text-center">under construction</p>
                     </div>
