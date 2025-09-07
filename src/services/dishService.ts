@@ -95,40 +95,40 @@ export const getCategories = async (): Promise<Category[]> => {
     }
 };
 
-
 export const createDish = async (form: CreateDishForm): Promise<Dish> => {
-  try {
-    const fd = new FormData();
+    try {
+        const fd = new FormData();
 
-    // Append all fields correctly
-    if (form.name) fd.append("name", form.name);
-    fd.append("name_kh", form.name_kh); // required
-    fd.append("categoryId", String(form.categoryId)); // required
-    if (form.ingredient) fd.append("ingredient", form.ingredient);
-    if (form.ingredient_kh) fd.append("ingredient_kh", form.ingredient_kh);
-    if (form.description) fd.append("description", form.description);
-    if (form.description_kh) fd.append("description_kh", form.description_kh);
+        if (form.name) fd.append("name", form.name);
+        fd.append("name_kh", form.name_kh);
+        fd.append("categoryId", String(Number(form.categoryId)));
+        if (form.ingredient) fd.append("ingredient", form.ingredient);
+        if (form.ingredient_kh) fd.append("ingredient_kh", form.ingredient_kh);
+        if (form.description) fd.append("description", form.description);
+        if (form.description_kh)
+            fd.append("description_kh", form.description_kh);
 
-    // File input must be a File object
-    fd.append("image", form.image);
+        if (form.image) {
+            fd.append("imageFile", form.image);
+        }
 
-    // Post request
-    const res = await API.post("/dishes", fd, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+        const res = await API.post("/dishes", fd, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
 
-    // Return dish data
-    return res.data?.dish || res.data?.data || res.data;
-  } catch (err: any) {
-    const msg =
-      err?.response?.data?.message ||
-      err?.response?.data?.error ||
-      err.message ||
-      "Failed to create dish";
-    throw new Error(msg);
-  }
+        console.log("Dish create response:", res.data);
+
+        return res.data?.dish || res.data?.data || res.data;
+    } catch (err: any) {
+        const msg =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            err.message ||
+            "Failed to create dish";
+        throw new Error(msg);
+    }
 };
 
 // Update a dish
