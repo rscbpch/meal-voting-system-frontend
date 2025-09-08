@@ -4,7 +4,7 @@ interface Card {
     name: string;
     categoryId: number;
     description: string;
-    imgURL: string;
+  imgURL?: string;
     initialVotes?: number;
     disabled?: boolean;
     onVote?: () => void;
@@ -42,7 +42,11 @@ const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, dis
     return (
       <div className="bg-white">
         <div className="relative border-0 rounded-lg shadow-md overflow-visible p-5 flex flex-col justify-between h-96">
-          <img src={imgURL} alt={name} className="absolute -top-15 left-1/2 transform -translate-x-1/2 w-50 h-50 object-cover rounded-full shadow-xl"/>
+          {imgURL ? (
+            <img src={imgURL} alt={name} className="absolute -top-15 left-1/2 transform -translate-x-1/2 w-50 h-50 object-cover rounded-full shadow-xl"/>
+          ) : (
+            <div className="absolute -top-15 left-1/2 transform -translate-x-1/2 w-50 h-50 bg-gray-100 rounded-full shadow-inner" />
+          )}
           <div>
             <div className="mt-32">
               <div className="flex justify-between items-center">
