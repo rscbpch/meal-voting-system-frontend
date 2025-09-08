@@ -57,24 +57,24 @@ const Menu = () => {
             setVotedCardId(id);
         }
     };
-    const cancelVote = () => {
-        setVotedCardId(null);
-    }
+    // const cancelVote = () => {
+    //     setVotedCardId(null);
+    // }
 
     // Show only today's candidate dishes in the menu
-    const candidateCards = candidate.map(candidate => {
-        const dishInfo = foods.find(dish => dish.id === candidate.dishId);
-        return {
-            key: candidate.candidateDishId,
-            name: candidate.dish,
-            categoryId: Number(dishInfo?.categoryId) ?? 0,
-            description: dishInfo?.description ?? "",
-            imgURL: dishInfo?.imageURL ?? "",
-            initialVotes: candidate.voteCount,
-            disabled: votedCardId != null,
-            onVote: () => handleVote(candidate.candidateDishId),
-        };
-    });
+    // const candidateCards = candidate.map(candidate => {
+    //     const dishInfo = foods.find(dish => dish.id === candidate.dishId);
+    //     return {
+    //         key: candidate.candidateDishId,
+    //         name: candidate.dish,
+    //         categoryId: Number(dishInfo?.categoryId) ?? 0,
+    //         description: dishInfo?.description ?? "",
+    //         imgURL: dishInfo?.imageURL ?? "",
+    //         initialVotes: candidate.voteCount,
+    //         disabled: votedCardId != null,
+    //         onVote: () => handleVote(candidate.candidateDishId),
+    //     };
+    // });
 
     return (
         <div>
