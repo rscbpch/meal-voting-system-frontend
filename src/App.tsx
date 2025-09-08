@@ -13,6 +13,7 @@ import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Feedback from "./pages/voter/Feedback";
 import MenuManagement from "./pages/staff/MenuManagement";
+import FoodForVoter from "./pages/staff/FoodForVoter";
 
 const AppRoutes = () => {
     const location = useLocation();
@@ -69,6 +70,14 @@ const AppRoutes = () => {
                     element={
                         <PrivateRoute allowedRoles={["staff"]}>
                             <MenuManagement />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/food"
+                    element={
+                        <PrivateRoute allowedRoles={["staff"]}>
+                            <FoodForVoter />
                         </PrivateRoute>
                     }
                 />

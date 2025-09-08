@@ -112,13 +112,13 @@ const IngredientInput = ({
                 {value.map((item, index) => (
                     <div
                         key={index}
-                        className={`${label === "Khmer Ingredients *" ? "khmer-font-content" : ""} flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-full`}
+                        className={`${label === "Khmer Ingredients *" ? "khmer-font-content" : ""} flex items-center gap-2 bg-[#E2F3D7] text-green-800 px-3 py-1 rounded-full`}
                     >
                         <span>{item}</span>
                         <button
                             type="button"
                             onClick={() => handleRemove(index)}
-                            className={`text-green-600 hover:text-red-500`}
+                            className={`text-[#429818] hover:text-[#F42828]`}
                         >
                             <FiX />
                         </button>
