@@ -35,22 +35,61 @@ const Menu = () => {
             });
 
         getUpcomingResults()
-            .then((res) => setUpcomingResults(res))
+            .then((res: any) => {
+                // backend may return an array or a single object. Normalize to an array of results.
+                console.log("getUpcomingResults raw:", res);
+
+                // prefer direct arrays
+                if (Array.isArray(res)) {
+                    setUpcomingResults(res);
+                    return;
+                }
+
+                // response might be wrapped: { data: [...]} or { items: [...] }
+                const wrapper = res?.data ?? res?.items ?? res?.upcoming ?? res?.results ?? res;
+
+                if (!wrapper) {
+                    setUpcomingResults([]);
+                    return;
+                }
+
+                if (Array.isArray(wrapper)) {
+                    setUpcomingResults(wrapper);
+                } else if (typeof wrapper === 'object') {
+                    // single result object -> wrap into array
+                    setUpcomingResults([wrapper]);
+                } else {
+                    setUpcomingResults([]);
+                }
+            })
             .catch(() => setUpcomingError("Failed to fetch upcoming results"));
     }, []);
 
-    const upcomingBannerItems =
-        upcomingResults.length > 0 && upcomingResults[0].dishes
-            ? upcomingResults[0].dishes.map(candidate => {
-                const dishInfo = foods.find(dish => dish.id === candidate.dishId);
-                return {
-                    title: candidate.dish,
-                    subtitle: `Upcoming`,
-                    description: dishInfo?.description ?? "",
-                    imgSrc: dishInfo?.imageURL ?? "",
-                };
-            })
-            : [];
+    const upcomingBannerItems = (() => {
+        if (!upcomingResults || upcomingResults.length === 0) return [];
+        const first = upcomingResults[0] as any;
+        // swagger shows `dish` array where each item has Dish { id, name }
+        const candidates: any[] = first?.dish ?? first?.dishes ?? first?.items ?? first?.data ?? [];
+        if (!Array.isArray(candidates) || candidates.length === 0) return [];
+    // prefer selected dishes (isSelected === true). If none are selected, show nothing.
+    const selected = candidates.filter((c: any) => c.isSelected === true);
+    if (!selected || selected.length === 0) return [];
+
+    return selected.map((candidate: any) => {
+            // candidate may be shape: { id, votePollId, dishId, isSelected, Dish: { id, name }, voteCount? }
+            const dishId = candidate.dishId ?? candidate.Dish?.id ?? candidate.dish?.id ?? null;
+            const dishName = candidate.Dish?.name ?? candidate.dish ?? candidate.name ?? "";
+            const dishInfo = foods.find((dish) => dish.id === dishId) as any;
+            const voteCount = candidate.voteCount ?? candidate.votes ?? 0;
+            return {
+                title: dishName,
+        subtitle: `Selected`,
+                description: dishInfo?.description ?? "",
+                imgSrc: dishInfo?.imageURL ?? dishInfo?.imageUrl ?? "",
+                voteCount: voteCount,
+            };
+    });
+    })();
 
     const handleVote = (id: number) => {
         if (votedCardId === null) {
@@ -102,7 +141,7 @@ const Menu = () => {
                                 name={candidate.dish}
                                 categoryId={Number(dishInfo?.categoryId) ?? 0}
                                 description={dishInfo?.description ?? ""}
-                                imgURL={dishInfo?.imageURL ?? ""}
+                                imgURL={dishInfo?.imageURL ?? undefined}
                                 initialVotes={candidate.voteCount}
                                 disabled={votedCardId !== null && votedCardId !== candidate.candidateDishId}
                                 onVote={() => handleVote(candidate.candidateDishId)}
