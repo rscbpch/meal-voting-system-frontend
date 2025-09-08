@@ -40,8 +40,8 @@ const Menu = () => {
     }, []);
 
     const upcomingBannerItems =
-        upcomingResults.length > 0 && upcomingResults[0].dishes
-            ? upcomingResults[0].dishes.map(candidate => {
+        upcomingResults.length > 0 && upcomingResults[0].dish
+            ? upcomingResults[0].dish.map(candidate => {
                 const dishInfo = foods.find(dish => dish.id === candidate.dishId);
                 return {
                     title: candidate.dish,
