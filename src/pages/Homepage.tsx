@@ -141,14 +141,14 @@ const Homepage = () => {
                     </div>
                     <div className="relative flex justify-center px-12 pt-12 pb-8 lg:text-[20px]">
                         <div className="absolute inset-x-0 top-6 z-20 flex justify-center">
-                            {status === 'open' ? (
+                            {status === 'close' ? (
                                 <div>
                                     <p className="font-bold text-center mb-2">Vote close in</p>
                                     <CountdownTimer />
                                 </div>
                             ) : status === 'pending' ? (
                                 <p className="text-center font-semibold">Voting is pending</p>
-                            ) : status === 'close' ? (
+                            ) : status === 'open' ? (
                                 <p className="text-center font-semibold">Voting has closed</p>
                             ) : status === 'finalized' ? (
                                 <p className="text-center font-semibold">Results finalized</p>
@@ -157,7 +157,7 @@ const Homepage = () => {
                             )}
                         </div>
                         <div>
-                            {status === 'open' ? (
+                            {status === 'close' ? (
                                 <>
                                     <div className="absolute left-[5%] top-[25%] md:left-[20%] md:top-[12%] w-[48px] md:w-[64px] lg:w-[72px] rotate-[-12deg] opacity-90 z-10 pointer-events-none">
                                         <img src={food1} alt="food1" className="w-full h-auto" />
