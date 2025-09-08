@@ -83,6 +83,7 @@ const ResultBanner: React.FC<BannerProps> = ({ items = [], autoSlideInterval = 1
                             const x = centerX + Math.cos(angle) * radius;
                             const y = centerY - Math.sin(angle) * radius;
                             const isCenter = i === index;
+                            if (!item.imgSrc) return null;
                             return (
                                 <motion.img
                                     key={i}

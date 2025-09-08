@@ -83,7 +83,7 @@ const Menu = () => {
             const voteCount = candidate.voteCount ?? candidate.votes ?? 0;
             return {
                 title: dishName,
-        subtitle: `Selected`,
+                subtitle: `Selected`,
                 description: dishInfo?.description ?? "",
                 imgSrc: dishInfo?.imageURL ?? dishInfo?.imageUrl ?? "",
                 voteCount: voteCount,
@@ -141,7 +141,7 @@ const Menu = () => {
                                 name={candidate.dish}
                                 categoryId={Number(dishInfo?.categoryId) ?? 0}
                                 description={dishInfo?.description ?? ""}
-                                imgURL={dishInfo?.imageURL ?? undefined}
+                                imgURL={dishInfo?.imageURL ?? ""}
                                 initialVotes={candidate.voteCount}
                                 disabled={votedCardId !== null && votedCardId !== candidate.candidateDishId}
                                 onVote={() => handleVote(candidate.candidateDishId)}
