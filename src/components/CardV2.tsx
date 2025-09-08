@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiEdit2, FiTrash2, FiHeart } from "react-icons/fi";
+import { FiHeart, FiTrash2 } from "react-icons/fi";
 
 interface Card {
     name: string;
@@ -20,6 +20,7 @@ interface Card {
     ranking?: number;
     totalWishlistCount?: number;
     currentVoteCount?: number;
+    isDeleting?: boolean;
 }
 
 const FoodCard = ({
@@ -41,6 +42,7 @@ const FoodCard = ({
     ranking,
     totalWishlistCount,
     currentVoteCount,
+    isDeleting = false,
 }: Card) => {
     const [votes, setVotes] = useState<number>(initialVotes);
 
@@ -102,9 +104,27 @@ const FoodCard = ({
                         <div className="mt-auto flex justify-between items-center">
                             {/* Left info */}
                             {isMenuManagement ? (
-                                <p className="text-sm text-gray-700">
-                                    {wishlistCount || 0}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                    <svg
+                                        width="20"
+                                        height="21"
+                                        viewBox="0 0 20 21"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M13.2872 3.83325C11.8564 3.83325 10.6209 4.69775 10 5.95875C9.3791 4.69775 8.1436 3.83325 6.7128 3.83325C4.6618 3.83325 3 5.60775 3 7.79175C3 9.97575 4.2719 11.9778 5.9155 13.6223C7.5591 15.2668 10 16.8333 10 16.8333C10 16.8333 12.3618 15.2928 14.0845 13.6223C15.922 11.8413 17 9.98225 17 7.79175C17 5.60125 15.3382 3.83325 13.2872 3.83325Z"
+                                            stroke="#AAD36C"
+                                            stroke-width="1.5"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        />
+                                    </svg>
+
+                                    <p className="text-sm text-gray-700">
+                                        {wishlistCount || 0}
+                                    </p>
+                                </div>
                             ) : isWishlist ? (
                                 <div className="text-sm text-gray-700 flex items-center">
                                     <div className="flex items-center gap-2 pr-3 border-r border-gray-300 h-4">
@@ -172,18 +192,42 @@ const FoodCard = ({
                             {isMenuManagement ? (
                                 <div className="flex items-center gap-2">
                                     <button
-                                        className="p-2 rounded-md hover:bg-gray-100 text-gray-600"
-                                        title="Edit"
                                         onClick={onEdit}
+                                        className="p-2 rounded-md hover:bg-gray-100 text-gray-600 group"
+                                        title="Edit"
                                     >
-                                        <FiEdit2 />
+                                        <svg
+                                            width="22"
+                                            height="23"
+                                            viewBox="0 0 22 23"
+                                            fill="none"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="stroke-gray-600 group-hover:stroke-blue-500 transition-colors duration-300"
+                                        >
+                                            <path
+                                                d="M13.75 5.83314L16.5 8.58314M11.9167 18.6665H19.25M4.58335 14.9998L3.66669 18.6665L7.33335 17.7498L17.9539 7.1293C18.2976 6.7855 18.4906 6.31927 18.4906 5.83314C18.4906 5.347 18.2976 4.88077 17.9539 4.53697L17.7962 4.3793C17.4524 4.03561 16.9862 3.84253 16.5 3.84253C16.0139 3.84253 15.5477 4.03561 15.2039 4.3793L4.58335 14.9998Z"
+                                                strokeWidth="1.5"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            />
+                                        </svg>
                                     </button>
                                     <button
-                                        className="p-2 rounded-md hover:bg-gray-100 text-gray-600"
-                                        title="Delete"
                                         onClick={onDelete}
+                                        disabled={isDeleting}
+                                        className={`p-2 rounded-md text-gray-600 hover:bg-gray-100 group transition-colors duration-300 ${
+                                            isDeleting ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
+                                        title={isDeleting ? "Deleting..." : "Delete"}
                                     >
-                                        <FiTrash2 />
+                                        {isDeleting ? (
+                                            <div className="w-5 h-5 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
+                                        ) : (
+                                            <FiTrash2
+                                                size={20}
+                                                className="transition-colors duration-300 group-hover:text-red-500"
+                                            />
+                                        )}
                                     </button>
                                 </div>
                             ) : isWishlist ? (
