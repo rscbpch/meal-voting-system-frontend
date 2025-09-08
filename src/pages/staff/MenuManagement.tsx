@@ -23,6 +23,7 @@ const MenuManagement = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [wishes, setWishes] = useState<WishData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [dishesLoading, setDishesLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [selectedCategoryObj, setSelectedCategoryObj] =
@@ -48,24 +49,38 @@ const MenuManagement = () => {
         setShowCategoryDropdown(false);
         setCurrentPage(1); // Reset to first page when filtering
     };
-    // Fetch categories and wishes on component mount (only once)
+    // Fetch categories when component mounts (like FoodForVoter)
     useEffect(() => {
-        const fetchInitialData = async () => {
+        const fetchCategories = async () => {
             try {
-                const [categoriesData, wishesData] = await Promise.all([
-                    getCategories(),
-                    getAllWishes()
-                ]);
+                setLoading(true);
+                const categoriesData = await getCategories();
                 setCategories(categoriesData);
-                setWishes(wishesData.dishes);
                 console.log("Categories loaded:", categoriesData);
-                console.log("Wishes loaded:", wishesData.dishes);
             } catch (error) {
-                console.error("Error fetching initial data:", error);
+                console.error("Error fetching categories:", error);
+            } finally {
+                setLoading(false);
             }
         };
-        fetchInitialData();
-    }, []); // Empty dependency array - only run once
+
+        fetchCategories();
+    }, []);
+
+    // Fetch wishes separately
+    useEffect(() => {
+        const fetchWishes = async () => {
+            try {
+                const wishesData = await getAllWishes();
+                setWishes(wishesData.dishes);
+                console.log("Wishes loaded:", wishesData.dishes);
+            } catch (error) {
+                console.error("Error fetching wishes:", error);
+            }
+        };
+
+        fetchWishes();
+    }, []);
 
     // Filter dishes based on search and category
     const filteredDishes = dishes.filter((dish) => {
@@ -179,7 +194,7 @@ const MenuManagement = () => {
 
     const fetchDishes = async (page: number) => {
         try {
-            setLoading(true);
+            setDishesLoading(true);
             const offset = (page - 1) * limit;
             const res = await getDishes({ limit, offset, sort: sortBy });
 
@@ -190,7 +205,7 @@ const MenuManagement = () => {
         } catch (err) {
             console.error(err);
         } finally {
-            setLoading(false);
+            setDishesLoading(false);
         }
     };
 
@@ -201,10 +216,10 @@ const MenuManagement = () => {
 
     // Trigger animation when dishes are loaded and not loading
     useEffect(() => {
-        if (!loading && dishes.length > 0) {
+        if (!dishesLoading && dishes.length > 0) {
             setAnimateCards(true);
         }
-    }, [loading, dishes]);
+    }, [dishesLoading, dishes]);
 
     return (
         <div className="flex min-h-screen ">
@@ -224,7 +239,7 @@ const MenuManagement = () => {
                         <h2 className="text-xl text-[#3A4038]">Food</h2>
                         <div className="bg-[#D4F0C1] bg-opacity-0 px-3 rounded-2xl">
                             {
-                                loading
+                                dishesLoading
                                     ? "..."
                                     : searchQuery || selectedCategory !== "all"
                                     ? filteredDishes.length // show filtered count
@@ -426,7 +441,7 @@ const MenuManagement = () => {
 
                     {/* Food Cards Grid */}
                     <div className="px-6 pb-10">
-                        {loading ? (
+                        {dishesLoading ? (
                             <div className="flex justify-center items-center py-12">
                                 <Loading className="m-10" />
                             </div>
@@ -440,12 +455,12 @@ const MenuManagement = () => {
                                     <div
                                         key={dish.id}
                                         className={
-                                            animateCards && !isSearching && !loading
+                                            animateCards && !isSearching && !dishesLoading
                                                 ? "animate-fade-in-up"
                                                 : "opacity-100"
                                         }
                                         style={{
-                                            animationDelay: animateCards && !isSearching && !loading
+                                            animationDelay: animateCards && !isSearching && !dishesLoading
                                                 ? `${index * 100}ms`
                                                 : "0ms",
                                             animationFillMode: "both",
