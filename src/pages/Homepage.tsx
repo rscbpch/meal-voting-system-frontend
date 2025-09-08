@@ -140,7 +140,7 @@ const Homepage = () => {
                         <div>
                             {status === 'open' ? (
                                 <>
-                                    <div className="absolute left-[7%] top-[29%] md:left-[20%] md:top-[14%] w-[48px] md:w-[64px] lg:w-[100px] rotate-[-12deg] opacity-90 z-30 pointer-events-none">
+                                    <div className="absolute left-[6%] top-[23%] md:left-[20%] md:top-[14%] w-[48px] md:w-[64px] lg:w-[100px] rotate-[-12deg] opacity-90 z-30 pointer-events-none">
                                         <img src={food1} alt="food1" className="w-full h-auto" />
                                     </div>
                                     <div className="absolute right-[6%] bottom-[18%] md:right-[20%] md:bottom-[10%] w-[48px] md:w-[64px] lg:w-[100px] rotate-[-12deg] opacity-90 z-30 pointer-events-none">
