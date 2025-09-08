@@ -83,7 +83,7 @@ const Menu = () => {
             const voteCount = candidate.voteCount ?? candidate.votes ?? 0;
             return {
                 title: dishName,
-        subtitle: `Selected`,
+                subtitle: `Selected`,
                 description: dishInfo?.description ?? "",
                 imgSrc: dishInfo?.imageURL ?? dishInfo?.imageUrl ?? "",
                 voteCount: voteCount,
