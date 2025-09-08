@@ -5,6 +5,7 @@ interface BannerItem {
     subtitle?: string;
     description?: string;
     imgSrc?: string;
+    voteCount?: number;
 }
 
 interface BannerProps {
@@ -32,6 +33,7 @@ const ResultBanner: React.FC<BannerProps> = ({ items = [] }) => {
                             <h2 className="text-2xl font-bold text-[#429818]">{item.title}</h2>
                             {item.subtitle && <p className="text-sm text-gray-700 mt-1">{item.subtitle}</p>}
                             {item.description && <p className="text-sm text-gray-600 mt-2">{item.description}</p>}
+                            <div className="text-sm text-gray-600 mt-2">Votes: {item.voteCount ?? 0}</div>
                         </div>
                         {item.imgSrc && (
                             // eslint-disable-next-line @next/next/no-img-element
