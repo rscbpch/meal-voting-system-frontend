@@ -146,14 +146,11 @@ const Homepage = () => {
                                     <p className="font-bold text-center mb-2">Vote close in</p>
                                     <CountdownTimer />
                                 </div>
-                            ) : status === 'pending' ? (
-                                <p className="text-center font-semibold">Voting is pending</p>
-                            ) : status === 'close' ? (
-                                <p className="text-center font-semibold">Voting has closed</p>
-                            ) : status === 'finalized' ? (
-                                <p className="text-center font-semibold">Results finalized</p>
                             ) : (
-                                <p className="text-center font-semibold">Status unknown</p>
+                                <div>
+                                    <p className="text-center font-semibold">Voting has closed.</p>
+                                    <p className="text-center text-[14px] md:text-[16px]">Vote will start again at 6am.</p>
+                                </div>
                             )}
                         </div>
                         <div>
@@ -204,7 +201,7 @@ const Homepage = () => {
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-col justify-center py-12">
+                    <div className={`flex flex-col justify-center ${status === 'open' ? 'py-12' : 'pt-0 pb-12'}`}>
                         <p className="title-font font-semibold text-[32px] text-center">Today's food ranking</p>
                         <p className="text-center">under construction</p>
                     </div>
