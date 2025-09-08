@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getTodayResult, type CandidateDish, type TodayResult } from "../services/resultService";
-import { getDishes, type Dish, type Category } from "../services/dishService";
+import { getTodayResult } from "../services/resultService";
+import { getDishes, getCategories, type Dish, type Category } from "../services/dishService";
 
 type GroupedData = {
     category: string;
@@ -27,22 +27,25 @@ const VotingChart: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const [result, dishRes] = await Promise.all([
+                const [result, dishRes, catRes] = await Promise.all([
                     getTodayResult(),
                     getDishes(),
+                    getCategories(),
                 ]);
                 if (!mounted) return;
                 setStatus(result.status);
                 const allDishes: Dish[] = dishRes.items;
-                // Map dishId to dish info
+                const allCategories: Category[] = catRes;
+                const catNameMap = new Map<string|number, string>();
+                allCategories.forEach(cat => catNameMap.set(cat.id, cat.name));
                 const dishMap = new Map<number|string, Dish>();
                 allDishes.forEach(d => dishMap.set(d.id, d));
-                // Group candidate dishes by category
                 const catMap = new Map<string|number, {category: string, foods: GroupedData["foods"]}>();
                 for (const c of result.dishes) {
                     const dish = dishMap.get(c.dishId);
                     const catId = dish?.categoryId ?? "uncategorized";
-                    const catName = dish?.categoryName || "Uncategorized";
+                    // Use category name from categories list if available
+                    const catName = catNameMap.get(catId) || dish?.categoryName || "Uncategorized";
                     if (!catMap.has(catId)) catMap.set(catId, {category: catName, foods: []});
                     catMap.get(catId)!.foods.push({
                         candidateDishId: c.candidateDishId,

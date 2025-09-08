@@ -62,7 +62,7 @@ const Homepage = () => {
             <Navbar />
             <PageTransition>
                 <main className="bg-[#F6FFE8]">
-                    <div className="bg-[#f7f7f7] md:min-h-[710px] h-[500px] p-4 md:p-8 relative overflow-hidden flex items-center justify-center">
+                    <div className="bg-[#f7f7f7] md:min-h-[760px] min-h-[520px] p-6 md:p-10 relative overflow-hidden flex items-center justify-center">
                         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 relative">
                             <div className="mx-auto max-w-[620px] text-center">
                                 <h1 className="title-font text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-none">Your Meal, Your Choice</h1>
@@ -89,34 +89,34 @@ const Homepage = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="md:block absolute right-[86%] top-[15%] w-[40px] md:w-[90px] rotate-[-12deg] opacity-80 z-1">
+                        <div className="md:block absolute right-[86%] top-[15%] w-[40px] md:w-[90px] rotate-[-12deg] opacity-80 z-10">
                             <img src={borito} alt="borito" />
                         </div>
-                        <div className="md:block absolute left-[49%] top-[7%] w-[24px] md:w-[50px] rotate-[-12deg] opacity-80 z-1">
+                        <div className="md:block absolute left-[49%] top-[7%] w-[24px] md:w-[50px] rotate-[-12deg] opacity-80 z-10">
                             <img src={croissant} alt="croissant"/>
                         </div>
-                        <div className="md:block absolute left-[32%] top-[24%] w-[32px] md:w-[70px] rotate-[10deg] opacity-80 z-1">
+                        <div className="md:block absolute left-[32%] top-[24%] w-[32px] md:w-[70px] rotate-[10deg] opacity-80 z-10">
                             <img src={flatSandwich} alt="flat sandwich" />
                         </div>
-                        <div className="md:block absolute right-[91%] top-[50%] w-[32px] md:w-[70px] rotate-[18deg] opacity-80 z-1">
+                        <div className="md:block absolute right-[91%] top-[50%] w-[32px] md:w-[70px] rotate-[18deg] opacity-80 z-10">
                             <img src={fries} alt="fries" />
                         </div>
-                        <div className="md:block absolute left-[74%] top-[78%] w-[36px] md:w-[80px] rotate-[8deg] opacity-80 z-1">
+                        <div className="md:block absolute left-[74%] top-[78%] w-[36px] md:w-[80px] rotate-[8deg] opacity-80 z-10">
                             <img src={hamburger} alt="hamburger" />
                         </div>
-                        <div className="md:block absolute left-[20%] top-[68%] w-[40px] md:w-[90px] rotate-[-8deg] opacity-80 z-1">
+                        <div className="md:block absolute left-[20%] top-[68%] w-[40px] md:w-[90px] rotate-[-8deg] opacity-80 z-10">
                             <img src={pizza} alt="pizza" />
                         </div>
-                        <div className="md:block absolute left-[70%] top-[26%] w-[32px] md:w-[70px] rotate-[-8deg] opacity-80 z-1">
+                        <div className="md:block absolute left-[70%] top-[26%] w-[32px] md:w-[70px] rotate-[-8deg] opacity-80 z-10">
                             <img src={salad} alt="salad"/>
                         </div>
-                        <div className="md:block absolute left-[90%] top-[10%] w-[40px] md:w-[90px] rotate-[24deg] opacity-80 z-1">
+                        <div className="md:block absolute left-[90%] top-[10%] w-[40px] md:w-[90px] rotate-[24deg] opacity-80 z-10">
                             <img src={sandwich} alt="sandwich" />
                         </div>
-                        <div className="block xl:hidden absolute left-[88%] top-[60%] w-[36px] md:w-[80px] rotate-[16deg] opacity-80 z-1">
+                        <div className="block xl:hidden absolute left-[88%] top-[60%] w-[36px] md:w-[80px] rotate-[16deg] opacity-80 z-10">
                             <img src={steak} alt="steak" />
                         </div>
-                        <div className="md:block absolute left-[42%] top-[85%] w-[24px] md:w-[60px] rotate-[-10deg] opacity-80 z-1">
+                        <div className="md:block absolute left-[42%] top-[85%] w-[24px] md:w-[60px] rotate-[-10deg] opacity-80 z-10">
                             <img src={tacobell} alt="tacobell" />
                         </div>
                         <div className="hidden xl:block absolute top-[-60px] right-[-50px] z-0 w-[470px] h-[520px]">
@@ -139,16 +139,16 @@ const Homepage = () => {
                             </svg>
                         </div>
                     </div>
-                    <div className="relative flex justify-center px-12 pt-12 pb-8 lg:text-[20px]">
+                    <div className="relative flex justify-center px-12 py-20 lg:text-[20px] mt-8">
                         <div className="absolute inset-x-0 top-6 z-20 flex justify-center">
-                            {status === 'close' ? (
+                            {status === 'open' ? (
                                 <div>
                                     <p className="font-bold text-center mb-2">Vote close in</p>
                                     <CountdownTimer />
                                 </div>
                             ) : status === 'pending' ? (
                                 <p className="text-center font-semibold">Voting is pending</p>
-                            ) : status === 'open' ? (
+                            ) : status === 'close' ? (
                                 <p className="text-center font-semibold">Voting has closed</p>
                             ) : status === 'finalized' ? (
                                 <p className="text-center font-semibold">Results finalized</p>
@@ -157,12 +157,12 @@ const Homepage = () => {
                             )}
                         </div>
                         <div>
-                            {status === 'close' ? (
+                            {status === 'open' ? (
                                 <>
-                                    <div className="absolute left-[5%] top-[25%] md:left-[20%] md:top-[12%] w-[48px] md:w-[64px] lg:w-[72px] rotate-[-12deg] opacity-90 z-10 pointer-events-none">
+                                    <div className="absolute left-[6%] top-[23%] md:left-[20%] md:top-[14%] w-[48px] md:w-[64px] lg:w-[100px] rotate-[-12deg] opacity-90 z-30 pointer-events-none">
                                         <img src={food1} alt="food1" className="w-full h-auto" />
                                     </div>
-                                    <div className="absolute right-[4%] bottom-[18%] md:right-[18%] md:bottom-[10%] w-[48px] md:w-[64px] lg:w-[72px] rotate-[-12deg] opacity-90 z-10 pointer-events-none">
+                                    <div className="absolute right-[6%] bottom-[18%] md:right-[20%] md:bottom-[10%] w-[48px] md:w-[64px] lg:w-[100px] rotate-[-12deg] opacity-90 z-30 pointer-events-none">
                                         <img src={food2} alt="food2" className="w-full h-auto" />
                                     </div>
                                 </>
@@ -204,7 +204,7 @@ const Homepage = () => {
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-col justify-center pb-8">
+                    <div className="flex flex-col justify-center py-12">
                         <p className="title-font font-semibold text-[32px] text-center">Today's food ranking</p>
                         <p className="text-center">under construction</p>
                     </div>
