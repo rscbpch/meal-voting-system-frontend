@@ -1,5 +1,7 @@
 import Sidebar from "../../components/SideBar";
 import PageTransition from "../../components/PageTransition";
+import TopFoods from "../../components/TopFoods";
+import AllFoodsRank from "../../components/AllFoodsRank";
 import VotingChart from "../../components/VotingChart";
 
 const Dashboard = () => {
@@ -14,8 +16,25 @@ const Dashboard = () => {
                         </h1>
                     </div>
 
-                    <div className="p-6">
+                    <div className="p-6 grid grid-cols-2 gap-6">
                         <VotingChart />
+                        <div>
+                            <TopFoods items={[
+                                { name: 'Food 1', votes: 600 },
+                                { name: 'Food 2', votes: 400 },
+                                { name: 'Food 3', votes: 80 },
+                                { name: 'Food 4', votes: 30 },
+                            ]} />
+                        </div>
+                        <div>
+                            <AllFoodsRank items={[
+                                { name: 'Food 1', votes: 600 },
+                                { name: 'Food 2', votes: 400 },
+                                { name: 'Food 3', votes: 80 },
+                                { name: 'Food 4', votes: 30 },
+                                { name: 'Food 5', votes: 20 },
+                            ]} />
+                        </div>
                     </div>
                 </PageTransition>
             </main>
