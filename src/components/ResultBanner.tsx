@@ -22,7 +22,6 @@ const ResultBanner: React.FC<BannerProps> = ({ items = [] }) => {
             </div>
         );
     }
-
     const first = items[0];
 
     return (
