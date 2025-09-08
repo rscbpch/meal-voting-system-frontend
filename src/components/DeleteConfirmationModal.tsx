@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { XMarkIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { useState, useEffect } from "react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { Dish } from "../services/dishService";
 import Loading from "./Loading";
 

@@ -1,4 +1,4 @@
-import Sidebar from "../../components/SideBar";
+// import Sidebar from "../../components/SideBar";
 
 
 const FoodForVoter = () => {
