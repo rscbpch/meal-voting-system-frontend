@@ -141,7 +141,7 @@ const Menu = () => {
                                 name={candidate.dish}
                                 categoryId={Number(dishInfo?.categoryId) ?? 0}
                                 description={dishInfo?.description ?? ""}
-                                imgURL={dishInfo?.imageURL ?? ""}
+                                imgURL={dishInfo?.imageURL ?? undefined}
                                 initialVotes={candidate.voteCount}
                                 disabled={votedCardId !== null && votedCardId !== candidate.candidateDishId}
                                 onVote={() => handleVote(candidate.candidateDishId)}

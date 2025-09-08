@@ -5,21 +5,25 @@ import CardV2 from "../../components/CardV2";
 import Pagination from "../../components/Pagination";
 import Loading from "../../components/Loading";
 import CreateDishModal from "../../features/dish/CreateDishModal";
+import EditDishModal from "../../features/dish/EditDishModal";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import {
     getDishes,
     getCategories,
+    deleteDish,
 } from "../../services/dishService";
-import type {
-    Dish,
-    Category,
-} from "../../services/dishService";
+import type { Dish, Category } from "../../services/dishService";
+import { getAllWishes, getWishCountForDish } from "../../services/wishService";
+import type { WishData } from "../../services/wishService";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 const MenuManagement = () => {
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [wishes, setWishes] = useState<WishData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [dishesLoading, setDishesLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [selectedCategoryObj, setSelectedCategoryObj] =
@@ -29,35 +33,54 @@ const MenuManagement = () => {
     >("recent");
     const [displayMode, setDisplayMode] = useState<"all" | "category">("all");
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [editingDish, setEditingDish] = useState<Dish | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingDish, setDeletingDish] = useState<Dish | null>(null);
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [deletingDishId, setDeletingDishId] = useState<number | null>(null);
+    const [animateCards, setAnimateCards] = useState(false);
 
     const handleCategorySelect = (category: Category) => {
         setSelectedCategory(category.id.toString());
-        setSelectedCategoryObj(category); // update the selected category
+        setSelectedCategoryObj(category);
         setDisplayMode("category");
-        setShowCategoryDropdown(false); // close dropdown
+        setShowCategoryDropdown(false);
+        setCurrentPage(1); // Reset to first page when filtering
     };
-    // Fetch dishes and categories on component mount
+    // Fetch categories when component mounts (like FoodForVoter)
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchCategories = async () => {
             try {
                 setLoading(true);
-                const [dishesData, categoriesData] = await Promise.all([
-                    getDishes({ sort: sortBy }),
-                    getCategories(),
-                ]);
-                setDishes(dishesData.items);
+                const categoriesData = await getCategories();
                 setCategories(categoriesData);
                 console.log("Categories loaded:", categoriesData);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Error fetching categories:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchData();
-    }, [sortBy]);
+
+        fetchCategories();
+    }, []);
+
+    // Fetch wishes separately
+    useEffect(() => {
+        const fetchWishes = async () => {
+            try {
+                const wishesData = await getAllWishes();
+                setWishes(wishesData.dishes);
+                console.log("Wishes loaded:", wishesData.dishes);
+            } catch (error) {
+                console.error("Error fetching wishes:", error);
+            }
+        };
+
+        fetchWishes();
+    }, []);
 
     // Filter dishes based on search and category
     const filteredDishes = dishes.filter((dish) => {
@@ -70,11 +93,37 @@ const MenuManagement = () => {
         return matchesSearch && matchesCategory;
     });
 
+    // Handle "All" category selection
+    const handleAllCategorySelect = () => {
+        setDisplayMode("all");
+        setSelectedCategory("all");
+        setSelectedCategoryObj(null);
+        setCurrentPage(1); // Reset to first page
+    };
+
     const handleDishCreated = async () => {
-        // Refresh dishes list after a new dish is created
+        // Simply refresh the current page without complex navigation
         try {
-            const dishesData = await getDishes({ sort: sortBy });
+            // Just refresh current page data
+            const offset = (currentPage - 1) * limit;
+            const dishesData = await getDishes({ limit, offset, sort: sortBy });
+            
             setDishes(dishesData.items);
+            setTotal(dishesData.total);
+        } catch (error) {
+            console.error("Error refreshing dishes:", error);
+        }
+    };
+
+    const handleDishUpdated = async () => {
+        // Refresh dishes list after a dish is updated
+        try {
+            // Just refresh current page data
+            const offset = (currentPage - 1) * limit;
+            const dishesData = await getDishes({ limit, offset, sort: sortBy });
+            
+            setDishes(dishesData.items);
+            setTotal(dishesData.total);
         } catch (error) {
             console.error("Error refreshing dishes:", error);
         }
@@ -82,24 +131,44 @@ const MenuManagement = () => {
 
     // Edit and Delete handlers for menu management
     const handleEditDish = (dishId: number) => {
-        console.log("Edit dish:", dishId);
-        // TODO: Implement edit functionality
-        // This could open an edit modal or navigate to an edit page
+        const dishToEdit = dishes.find((dish) => Number(dish.id) === dishId);
+        if (dishToEdit) {
+            setEditingDish(dishToEdit);
+            setShowEditForm(true);
+        }
     };
 
-    const handleDeleteDish = async (dishId: number) => {
-        if (window.confirm("Are you sure you want to delete this dish?")) {
-            try {
-                // TODO: Implement delete API call
-                console.log("Delete dish:", dishId);
-                // await deleteDish(dishId);
-                // Refresh dishes list
-                // const dishesData = await getDishes({ sort: sortBy });
-                // setDishes(dishesData.items);
-            } catch (error) {
-                console.error("Error deleting dish:", error);
-                alert("Failed to delete dish");
-            }
+    const handleDeleteDish = (dishId: number) => {
+        const dishToDelete = dishes.find((dish) => Number(dish.id) === dishId);
+        if (dishToDelete) {
+            setDeletingDish(dishToDelete);
+            setShowDeleteModal(true);
+        }
+    };
+
+    const confirmDeleteDish = async () => {
+        if (!deletingDish) return;
+
+        try {
+            setDeletingDishId(Number(deletingDish.id));
+            await deleteDish(deletingDish.id);
+
+            // Remove the deleted dish from the current list immediately (no transitions)
+            setDishes(prevDishes => 
+                prevDishes.filter(dish => Number(dish.id) !== Number(deletingDish.id))
+            );
+            
+            // Update total count
+            setTotal(prevTotal => prevTotal - 1);
+
+            // No alert - just close modal after successful deletion
+        } catch (error) {
+            console.error("Error deleting dish:", error);
+            // Re-throw error so modal can handle it
+            throw error;
+        } finally {
+            setDeletingDishId(null);
+            setDeletingDish(null);
         }
     };
 
@@ -110,6 +179,9 @@ const MenuManagement = () => {
     const limit = 12; // items per page
     // Determine if filter/search is applied
     const isFiltered = searchQuery.trim() !== "" || selectedCategory !== "all";
+    
+    // Check if we're currently searching (to disable animations)
+    const isSearching = searchQuery.trim() !== "";
 
     // Determine total items and total pages for pagination
     const paginationTotal = isFiltered ? filteredDishes.length : total;
@@ -122,9 +194,9 @@ const MenuManagement = () => {
 
     const fetchDishes = async (page: number) => {
         try {
-            setLoading(true);
+            setDishesLoading(true);
             const offset = (page - 1) * limit;
-            const res = await getDishes({ limit, offset });
+            const res = await getDishes({ limit, offset, sort: sortBy });
 
             if (res.success) {
                 setDishes(res.items);
@@ -133,18 +205,26 @@ const MenuManagement = () => {
         } catch (err) {
             console.error(err);
         } finally {
-            setLoading(false);
+            setDishesLoading(false);
         }
     };
 
+    // Fetch dishes when page changes or sort changes
     useEffect(() => {
         fetchDishes(currentPage);
-    }, [currentPage]);
+    }, [currentPage, sortBy]);
+
+    // Trigger animation when dishes are loaded and not loading
+    useEffect(() => {
+        if (!dishesLoading && dishes.length > 0) {
+            setAnimateCards(true);
+        }
+    }, [dishesLoading, dishes]);
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen ">
             <Sidebar />
-            <main className="flex-1 ml-64 bg-[#F6FFE8] ">
+            <main className="flex-1 ml-64 bg-[#F6FFE8] pb-20">
                 <PageTransition>
                     {/* Main Title with Shadow */}
                     <div className="sticky bg-white shadow-sm p-6 mb-6">
@@ -155,11 +235,11 @@ const MenuManagement = () => {
                     </div>
 
                     {/* Food Title with Count */}
-                    <div className="px-6 mb-6 flex items-center gap-4 font-semibold text-[#3A4038] text-xl">
-                        <h2>Food</h2>
-                        <div className="bg-[#A1DB7A] bg-opacity-0 pt-1 p-2 rounded-md">
+                    <div className="px-6 mb-6 flex items-center gap-4 font-semibold text-[#5A6058] text-lg">
+                        <h2 className="text-xl text-[#3A4038]">Food</h2>
+                        <div className="bg-[#D4F0C1] bg-opacity-0 px-3 rounded-2xl">
                             {
-                                loading
+                                dishesLoading
                                     ? "..."
                                     : searchQuery || selectedCategory !== "all"
                                     ? filteredDishes.length // show filtered count
@@ -169,17 +249,13 @@ const MenuManagement = () => {
                     </div>
 
                     {/* Toolbar */}
-                    <div className="p-6 mb-6 flex items-center justify-between pb-0 pt-0">
+                    <div className="p-6 mb-10 flex items-center justify-between pb-0 pt-0">
                         {/* Left side: All + Categories */}
 
                         <div className="flex items-center gap-4 relative text-md">
                             {/* All Button */}
                             <button
-                                onClick={() => {
-                                    setDisplayMode("all");
-                                    setSelectedCategory("all");
-                                    setSelectedCategoryObj(null);
-                                }}
+                                onClick={handleAllCategorySelect}
                                 className="px-2 py-2 relative text-gray-600 hover:text-[#3E7B27] transition-colors"
                             >
                                 All
@@ -284,7 +360,7 @@ const MenuManagement = () => {
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
                                     }
-                                    className="pl-10 pr-4 py-2 bg-white rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-transparent w-64"
+                                    className="pl-10 pr-4 py-2 bg-white rounded-lg shadow-sm focus:outline-none focus:border-[#429818]  focus:ring-1 focus:ring-[#429818]  w-64"
                                 />
                             </div>
 
@@ -339,10 +415,9 @@ const MenuManagement = () => {
                                             <button
                                                 onClick={() => {
                                                     setSearchQuery("");
-                                                    setSelectedCategory("all");
                                                     setSortBy("recent");
-                                                    setDisplayMode("all");
                                                     setShowSortDropdown(false);
+                                                    handleAllCategorySelect();
                                                 }}
                                                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                                             >
@@ -356,7 +431,7 @@ const MenuManagement = () => {
                             {/* Add New Food Button */}
                             <button
                                 onClick={() => setShowAddForm(true)}
-                                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                                className="flex items-center gap-2 bg-[#429818] text-white px-4 py-2 rounded-lg hover:bg-[#3E7B27] transition-colors font-medium"
                             >
                                 <PlusIcon className="h-5 w-5" />
                                 Add new food
@@ -365,43 +440,65 @@ const MenuManagement = () => {
                     </div>
 
                     {/* Food Cards Grid */}
-                    <div className="px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {loading ? (
-                            <div className="col-span-full flex justify-center items-center py-12">
+                    <div className="px-6 pb-10">
+                        {dishesLoading ? (
+                            <div className="flex justify-center items-center py-12">
                                 <Loading className="m-10" />
                             </div>
                         ) : displayedDishes.length === 0 ? (
-                            <div className="col-span-full text-center py-12 text-gray-500">
+                            <div className="text-center py-12 text-gray-500">
                                 No food items found
                             </div>
                         ) : (
-                            displayedDishes.map((dish) => (
-                                <CardV2
-                                    key={dish.id}
-                                    name={
-                                        dish.name || dish.name_kh || "Food item"
-                                    }
-                                    categoryName={
-                                        categories.find(
-                                            (c) => c.id === dish.categoryId
-                                        )?.name || "Uncategorized"
-                                    }
-                                    description={dish.description || ""}
-                                    imgURL={dish.imageURL || ""}
-                                    // isMenuManagement={true}
-                                    isWishlist={true}
-                                    onEdit={() =>
-                                        handleEditDish(Number(dish.id))
-                                    }
-                                    onDelete={() =>
-                                        handleDeleteDish(Number(dish.id))
-                                    }
-                                    averageRating={dish.rating || 0}
-                                    wishlistCount={
-                                        1
-                                    }
-                                />
-                            ))
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {displayedDishes.map((dish, index) => (
+                                    <div
+                                        key={dish.id}
+                                        className={
+                                            animateCards && !isSearching && !dishesLoading
+                                                ? "animate-fade-in-up"
+                                                : "opacity-100"
+                                        }
+                                        style={{
+                                            animationDelay: animateCards && !isSearching && !dishesLoading
+                                                ? `${index * 100}ms`
+                                                : "0ms",
+                                            animationFillMode: "both",
+                                        }}
+                                    >
+                                        <CardV2
+                                            name={
+                                                dish.name ||
+                                                dish.name_kh ||
+                                                "Food item"
+                                            }
+                                            categoryName={
+                                                categories.find(
+                                                    (c) =>
+                                                        c.id === dish.categoryId
+                                                )?.name || "Uncategorized"
+                                            }
+                                            description={dish.description || ""}
+                                            imgURL={dish.imageURL || ""}
+                                            isMenuManagement={true}
+                                            onEdit={() =>
+                                                handleEditDish(Number(dish.id))
+                                            }
+                                            onDelete={() =>
+                                                handleDeleteDish(
+                                                    Number(dish.id)
+                                                )
+                                            }
+                                            isDeleting={
+                                                deletingDishId ===
+                                                Number(dish.id)
+                                            }
+                                            averageRating={dish.rating || 0}
+                                            wishlistCount={getWishCountForDish(wishes, Number(dish.id))}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         )}
                     </div>
                     {/* Pagination */}
@@ -421,6 +518,30 @@ const MenuManagement = () => {
                         onClose={() => setShowAddForm(false)}
                         categories={categories}
                         onDishCreated={handleDishCreated}
+                    />
+
+                    {/* Edit Food Modal */}
+                    <EditDishModal
+                        isOpen={showEditForm}
+                        onClose={() => {
+                            setShowEditForm(false);
+                            setEditingDish(null);
+                        }}
+                        categories={categories}
+                        dish={editingDish}
+                        onDishUpdated={handleDishUpdated}
+                    />
+
+                    {/* Delete Confirmation Modal */}
+                    <DeleteConfirmationModal
+                        isOpen={showDeleteModal}
+                        onClose={() => {
+                            setShowDeleteModal(false);
+                            setDeletingDish(null);
+                        }}
+                        onConfirm={confirmDeleteDish}
+                        dish={deletingDish}
+                        isDeleting={deletingDishId === Number(deletingDish?.id)}
                     />
                 </PageTransition>
             </main>
