@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getTodayResult, type TodayResult } from "../services/resultService";
 
 interface FoodItem {
     name: string;
@@ -7,7 +8,7 @@ interface FoodItem {
 }
 
 interface Props {
-    items: FoodItem[];
+    items?: FoodItem[];
     title?: string;
 }
 
@@ -54,28 +55,72 @@ const Donut: React.FC<{ items: FoodItem[] }> = ({ items }) => {
 };
 
 const TopFoods: React.FC<Props> = ({ items, title = "Top 4 Food" }) => {
-    // Ensure we only display top 4
-    const sorted = [...items].sort((a, b) => b.votes - a.votes).slice(0, 4);
+    const [data, setData] = useState<FoodItem[] | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        // If caller provided explicit items, use them and skip fetching
+        if (items && items.length > 0) {
+            setData(items.slice(0, 4));
+            return;
+        }
+
+        let mounted = true;
+        setLoading(true);
+        getTodayResult()
+            .then((res: TodayResult | any) => {
+                const dishes = res?.dishes ?? [];
+                if (!Array.isArray(dishes)) {
+                    if (mounted) setData([]);
+                    return;
+                }
+
+                const arr: FoodItem[] = dishes.map((d: any, idx: number) => ({
+                    name: d.dish ?? d.Dish?.name ?? `Dish ${d.dishId ?? d.id ?? idx}`,
+                    votes: Number(d.voteCount ?? d.votes ?? 0) || 0,
+                    color: defaultColors[idx % defaultColors.length]
+                }));
+
+                arr.sort((a, b) => b.votes - a.votes);
+                if (mounted) setData(arr.slice(0, 4));
+            })
+            .catch((e) => {
+                console.error("TopFoods getTodayResult error", e);
+                if (mounted) setError("Failed to load top foods");
+            })
+            .finally(() => {
+                if (mounted) setLoading(false);
+            });
+
+        return () => { mounted = false; };
+    }, [items]);
+
+    const display = data ?? [];
 
     return (
         <div className="bg-white rounded-lg p-6 shadow-sm">
             <h3 className="text-lg font-semibold mb-4">{title}</h3>
-            <div className="flex gap-6 items-center">
-                <Donut items={sorted} />
-                <div className="flex-1">
-                    <ul className="space-y-3">
-                        {sorted.map((s, idx) => (
-                            <li key={s.name} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <span style={{ width: 12, height: 12, background: s.color ?? defaultColors[idx % defaultColors.length], borderRadius: 6, display: 'inline-block' }} />
-                                    <span className="text-sm">{s.name}</span>
-                                </div>
-                                <div className="text-sm font-semibold">{s.votes} votes</div>
-                            </li>
-                        ))}
-                    </ul>
+            {loading && <div className="text-sm text-gray-500">Loading...</div>}
+            {error && <div className="text-sm text-red-500">{error}</div>}
+            {!loading && !error && (
+                <div className="flex gap-6 items-center">
+                    <Donut items={display} />
+                    <div className="flex-1">
+                        <ul className="space-y-3">
+                            {display.map((s, idx) => (
+                                <li key={`${s.name}-${idx}`} className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <span style={{ width: 12, height: 12, background: s.color ?? defaultColors[idx % defaultColors.length], borderRadius: 6, display: 'inline-block' }} />
+                                        <span className="text-sm">{s.name}</span>
+                                    </div>
+                                    <div className="text-sm font-semibold">{s.votes} votes</div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
