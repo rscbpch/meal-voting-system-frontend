@@ -18,7 +18,7 @@ export interface UpcomingResult {
     mealDate: string;
     voteDate: string;
     status: string;
-    dishes: CandidateDish[];
+    dish: CandidateDish[];
 }
 
 export const getTodayResult = async (): Promise<TodayResult> => {
