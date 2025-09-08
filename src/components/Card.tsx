@@ -24,16 +24,17 @@ const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, dis
     //     }
     // };
     const handleClick = () => {
+      if (disabled && !hasVoted) return;
       if (!hasVoted) {
-        setVotes(votes + 1);
+        setVotes(prev => prev + 1);
         setHasVoted(true);
-        if (onVote) onVote();
+        onVote && onVote();
       } else {
         const confirmCancel = window.confirm("Are you sure you want to cancel your vote?");
         if (confirmCancel) {
-          setVotes(votes - 1);
+          setVotes(prev => prev -1);
           setHasVoted(false);
-          if (onCancelVote) onCancelVote();
+          onCancelVote && onCancelVote();
         }
       }
       }
@@ -64,13 +65,17 @@ const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, dis
                 <p className="flex items-center">Votes: {votes}</p>
                 <button 
                   onClick={handleClick} 
-                  disabled={disabled}
+                  disabled={disabled && !hasVoted}
                   className= {`rounded p-2 transition-colors ${
-                    hasVoted ? "bg-gray-200 text-white"
-                    : "bg-[#429818] text-white hover:bg-[#2a5b11]"
+                    hasVoted 
+                    ? "bg-gray-300 text-white cursor-not-allowed"
+                    : disabled
+                      ? "bg-gray-300 text-white cursor-not-allowed"
+                      : "bg-[#429818] text-white hover:bg-[#2a5b11]"
 
                   }`}
                 >
+                    {hasVoted ? "Voted" : "Vote Now"}
                 </button> 
               </div>
             </div>

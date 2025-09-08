@@ -16,6 +16,8 @@ const Menu = () => {
     const [error, setError] = useState<string | null>(null);
     const [votedCardId, setVotedCardId] = useState<number | null>(null);
     const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
+    const [todayError, setTodayError] = useState<string | null>(null);
+    const [upcomingError, setUpcomingError] = useState<string | null>(null);
 
     useEffect(() => {
         getDishes()
@@ -28,13 +30,13 @@ const Menu = () => {
                 setLoading(false);
             })
             .catch(() => {
-                setError("Failed to fetch today's result");
+                setTodayError("Failed to fetch today's result");
                 setLoading(false);
             });
 
         getUpcomingResults()
             .then((res) => setUpcomingResults(res))
-            .catch(() => setError("Failed to fetch upcoming results"));
+            .catch(() => setUpcomingError("Failed to fetch upcoming results"));
     }, []);
 
     const upcomingBannerItems =
@@ -55,21 +57,24 @@ const Menu = () => {
             setVotedCardId(id);
         }
     };
+    // const cancelVote = () => {
+    //     setVotedCardId(null);
+    // }
 
     // Show only today's candidate dishes in the menu
-    const candidateCards = candidate.map(candidate => {
-        const dishInfo = foods.find(dish => dish.id === candidate.dishId);
-        return {
-            key: candidate.candidateDishId,
-            name: candidate.dish,
-            categoryId: Number(dishInfo?.categoryId) ?? 0,
-            description: dishInfo?.description ?? "",
-            imgURL: dishInfo?.imageURL ?? "",
-            initialVotes: candidate.voteCount,
-            disabled: votedCardId != null,
-            onVote: () => handleVote(candidate.candidateDishId),
-        };
-    });
+    // const candidateCards = candidate.map(candidate => {
+    //     const dishInfo = foods.find(dish => dish.id === candidate.dishId);
+    //     return {
+    //         key: candidate.candidateDishId,
+    //         name: candidate.dish,
+    //         categoryId: Number(dishInfo?.categoryId) ?? 0,
+    //         description: dishInfo?.description ?? "",
+    //         imgURL: dishInfo?.imageURL ?? "",
+    //         initialVotes: candidate.voteCount,
+    //         disabled: votedCardId != null,
+    //         onVote: () => handleVote(candidate.candidateDishId),
+    //     };
+    // });
 
     return (
         <div>
@@ -87,9 +92,24 @@ const Menu = () => {
                 <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
                     {loading && <div>Loading...</div>}
                     {error && <div className="text-red-500">{error}</div>}
-                    {!loading && !error && candidateCards.map(cardProps => (
-                        <Card {...cardProps} />
-                    ))}
+                    {todayError && <div className="text-red-500">{todayError}</div>}
+                    {upcomingError && <div className="text-red-500">{upcomingError}</div>}
+                    {!loading && !error && candidate.map(candidate => {
+                        const dishInfo = foods.find(dish => dish.id === candidate.dishId);
+                        return (
+                            <Card
+                                key={candidate.candidateDishId}
+                                name={candidate.dish}
+                                categoryId={Number(dishInfo?.categoryId) ?? 0}
+                                description={dishInfo?.description ?? ""}
+                                imgURL={dishInfo?.imageURL ?? ""}
+                                initialVotes={candidate.voteCount}
+                                disabled={votedCardId !== null && votedCardId !== candidate.candidateDishId}
+                                onVote={() => handleVote(candidate.candidateDishId)}
+                                onCancelVote={() => setVotedCardId(null)}
+                            />
+                        );
+                    })}
                 </div>
                 <Footer/>
             </div>
