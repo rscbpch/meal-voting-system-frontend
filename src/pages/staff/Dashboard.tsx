@@ -1,5 +1,6 @@
 import Sidebar from "../../components/SideBar";
 import PageTransition from "../../components/PageTransition";
+import VotingChart from "../../components/VotingChart";
 
 const Dashboard = () => {
     return (
@@ -11,6 +12,10 @@ const Dashboard = () => {
                         <h1 className="text-2xl font-semibold text-[#3A4038]">
                             Dashboard
                         </h1>
+                    </div>
+
+                    <div className="p-6">
+                        <VotingChart />
                     </div>
                 </PageTransition>
             </main>

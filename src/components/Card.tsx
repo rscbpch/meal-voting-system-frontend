@@ -8,19 +8,35 @@ interface Card {
     initialVotes?: number;
     disabled?: boolean;
     onVote?: () => void;
+    onCancelVote?: () => void;
 }
 
-const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, disabled = false, onVote }: Card) => {
+const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, disabled = false, onVote, onCancelVote }: Card) => {
     const [votes, setVotes] = useState<number>(initialVotes);
+    const [hasVoted, setHasVoted] = useState<boolean>(false);
 
 
-    const handleVote = () => {
-        if (!disabled && onVote) {
-          setVotes(votes + 1);
-          onVote();
+    // const handleVote = () => {
+    //     if (!disabled && onVote) {
+    //       setVotes(votes + 1);
+    //       onVote();
           
+    //     }
+    // };
+    const handleClick = () => {
+      if (!hasVoted) {
+        setVotes(votes + 1);
+        setHasVoted(true);
+        if (onVote) onVote();
+      } else {
+        const confirmCancel = window.confirm("Are you sure you want to cancel your vote?");
+        if (confirmCancel) {
+          setVotes(votes - 1);
+          setHasVoted(false);
+          if (onCancelVote) onCancelVote();
         }
-    };
+      }
+      }
 
     return (
       <div className="bg-white">
@@ -29,7 +45,16 @@ const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, dis
           <div>
             <div className="mt-32">
               <div className="flex justify-between items-center">
-                <h1 className="font-bold text-[32px]">{name}</h1>
+                <div className="relative max-w-[200px] group">
+                  <h1 
+                    className="font-bold text-[32px] truncate cursor-pointer" 
+                    title={name}
+                    >{name}
+                  </h1>
+                  <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-max max-w-xs bg-black text-white text-sm rounded-lg px-3 py-1 shadow-lg z-10">
+                    {name}
+                  </div>
+                </div>
                 <p className="bg-[#F4F4F4] p-2 rounded text-[#919191]">cat {categoryId}</p>
               </div>
               <div className="h-24 text-[14px] overflow-y-auto text-[#949494] mt-4">
@@ -38,11 +63,15 @@ const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, dis
               <div className="flex justify-between items-center mt-4">
                 <p className="flex items-center">Votes: {votes}</p>
                 <button 
-                  onClick={handleVote} 
+                  onClick={handleClick} 
                   disabled={disabled}
-                  className=" bg-[#429818] text-white rounded hover:bg-[#2a5b11] p-2">
-                  {disabled ? "Voted" : "Vote Now"}
-                </button>
+                  className= {`rounded p-2 transition-colors ${
+                    hasVoted ? "bg-gray-200 text-white"
+                    : "bg-[#429818] text-white hover:bg-[#2a5b11]"
+
+                  }`}
+                >
+                </button> 
               </div>
             </div>
           </div>
