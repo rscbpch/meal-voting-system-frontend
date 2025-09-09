@@ -134,17 +134,28 @@ const Menu = () => {
                     {todayError && <div className="text-red-500">{todayError}</div>}
                     {upcomingError && <div className="text-red-500">{upcomingError}</div>}
                     {!loading && !error && candidate.map(candidate => {
-                        const dishInfo = foods.find(dish => dish.id === candidate.dishId);
+                        // const dishInfo = foods.find(dish => dish.id === candidate.dishId);
                         return (
-                            <Card
-                                key={candidate.candidateDishId}
-                                name={candidate.dish}
-                                categoryId={Number(dishInfo?.categoryId) ?? 0}
-                                description={dishInfo?.description ?? ""}
-                                imgURL={dishInfo?.imageURL ?? ""}
+                            // <Card
+                            //     key={candidate.candidateDishId}
+                            //     name={candidate.dish}
+                            //     categoryId={Number(dishInfo?.categoryId) ?? 0}
+                            //     description={dishInfo?.description ?? ""}
+                            //     imgURL={dishInfo?.imageURL ?? ""}
+                            //     initialVotes={candidate.voteCount}
+                            //     disabled={votedCardId !== null && votedCardId !== candidate.candidateDishId}
+                            //     onVote={() => handleVote(candidate.candidateDishId)}
+                            //     onCancelVote={() => setVotedCardId(null)}
+                            // />
+                            <Card 
+                                key={candidate.dishId}
+                                name={candidate.name}
+                                categoryId={Number(candidate.categoryId) ?? 0}
+                                description={candidate.description ?? ""}
+                                imgURL={candidate.imageURL ?? ""}
                                 initialVotes={candidate.voteCount}
-                                disabled={votedCardId !== null && votedCardId !== candidate.candidateDishId}
-                                onVote={() => handleVote(candidate.candidateDishId)}
+                                disabled={votedCardId !== null && votedCardId !== candidate.dishId}
+                                onVote={() => handleVote(candidate.dishId)}
                                 onCancelVote={() => setVotedCardId(null)}
                             />
                         );
