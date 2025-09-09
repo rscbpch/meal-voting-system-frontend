@@ -50,10 +50,6 @@ export const getUpcomingResults = async (): Promise<UpcomingResult[]> => {
     return res.data;
 };
 
-/**
- * Return the dish with the highest voteCount from the active today's result.
- * Returns null when there is no open/available poll or no dishes.
- */
 export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
     const res = await getTodayResult();
     const dishes = res?.dishes ?? [];
@@ -71,3 +67,11 @@ export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
     }
     return top ?? null;
 };
+
+export const voteForDish = async (candidateDishId: number) => {
+    return API.post("/votes", { candidateDishId });
+};
+
+export const cancelVote = async (candidateDishId: number) => {
+    return API.put("/votes", { candidateDishId });
+}

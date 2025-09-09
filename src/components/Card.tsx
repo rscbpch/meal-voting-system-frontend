@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Card {
     name: string;
@@ -23,6 +23,9 @@ const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, dis
           
     //     }
     // };
+    useEffect(() => {
+      setVotes(initialVotes);
+    }, [initialVotes]);
     const handleClick = () => {
       if (disabled && !hasVoted) return;
       if (!hasVoted) {
