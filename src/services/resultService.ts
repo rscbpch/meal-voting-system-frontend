@@ -75,3 +75,22 @@ export const voteForDish = async (candidateDishId: number) => {
 export const cancelVote = async (candidateDishId: number) => {
     return API.put("/votes", { candidateDishId });
 }
+
+/**
+ * Return top 3 dishes for today's vote poll, sorted by voteCount desc.
+ * Each item contains { name, description, imageURL, voteCount }.
+ */
+export const getTopThreeToday = async (): Promise<Array<{name: string; description?: string; imageURL?: string | null; voteCount: number;}>> => {
+    const res = await getTodayResult();
+    const dishes = Array.isArray(res?.dishes) ? res.dishes.slice() : [];
+    if (dishes.length === 0) return [];
+
+    dishes.sort((a, b) => (Number(b.voteCount ?? 0) - Number(a.voteCount ?? 0)));
+
+    return dishes.slice(0, 3).map(d => ({
+        name: d.name ?? d.dish ?? `Dish ${d.dishId ?? ''}`,
+        description: d.description ?? undefined,
+        imageURL: d.imageURL ?? null,
+        voteCount: Number(d.voteCount ?? 0),
+    }));
+};
