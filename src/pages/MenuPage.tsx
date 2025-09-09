@@ -181,7 +181,7 @@ const Menu = () => {
                                 initialVotes={candidate.voteCount}
                                 disabled={votedCardId !== null && votedCardId !== candidate.dishId}
                                 onVote={() => handleVote(candidate.dishId)}
-                                onCancelVote={() => setVotedCardId(null)}
+                                onCancelVote={() => handleCancelVote(candidate.dishId)}
                             />
                         );
                     })}
