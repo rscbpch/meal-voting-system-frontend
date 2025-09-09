@@ -1,9 +1,15 @@
 import API from "./axios";
 
 export interface CandidateDish {
+    dish: string | undefined;
     candidateDishId: number;
     dishId: number;
-    dish: string;
+    name: string;
+    name_kh?: string;
+    description?: string;
+    description_kh?: string;
+    imageURL?: string;
+    categoryId?: number;
     voteCount: number;
 }
 export interface TodayResult {
