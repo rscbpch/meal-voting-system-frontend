@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { getDishes } from "../services/dishService";
 import type { Dish } from "../services/dishService";
-import { getTodayResult, type CandidateDish } from "../services/resultService";
+import { getTodayResult, voteForDish, cancelVote, type CandidateDish } from "../services/resultService";
 import { getUpcomingResults, type UpcomingResult } from "../services/resultService";
 
 const Menu = () => {
@@ -71,9 +71,9 @@ const Menu = () => {
         // swagger shows `dish` array where each item has Dish { id, name }
         const candidates: any[] = first?.dish ?? first?.dishes ?? first?.items ?? first?.data ?? [];
         if (!Array.isArray(candidates) || candidates.length === 0) return [];
-    // prefer selected dishes (isSelected === true). If none are selected, show nothing.
-    const selected = candidates.filter((c: any) => c.isSelected === true);
-    if (!selected || selected.length === 0) return [];
+        // prefer selected dishes (isSelected === true). If none are selected, show nothing.
+        const selected = candidates.filter((c: any) => c.isSelected === true);
+        if (!selected || selected.length === 0) return [];
 
     return selected.map((candidate: any) => {
             // candidate may be shape: { id, votePollId, dishId, isSelected, Dish: { id, name }, voteCount? }
@@ -91,14 +91,38 @@ const Menu = () => {
     });
     })();
 
-    const handleVote = (id: number) => {
+    const handleVote = async (candidateId: number) => {
         if (votedCardId === null) {
-            setVotedCardId(id);
+            try {
+                await voteForDish(candidateId);
+                setCandidate(prev => 
+                    prev.map(c => {
+                        const id = (c as any).candidatedDishId ?? c.dishId;
+                        if (id === candidateId) return { ...c, voteCount: (c.voteCount ?? 0) + 1};
+                        return c;
+                    })
+                );
+                setVotedCardId(candidateId);
+            } catch (error) {
+                console.error("Failed to vote for dish:", error);
+            }
         }
     };
-    // const cancelVote = () => {
-    //     setVotedCardId(null);
-    // }
+    const handleCancelVote = async (candidateId: number) => {
+        try {
+        await cancelVote(candidateId);
+        setCandidate(prev =>
+            prev.map(c => {
+            const id = (c as any).candidateDishId ?? c.dishId;
+            if (id === candidateId) return { ...c, voteCount: Math.max(0, (c.voteCount ?? 1) - 1) };
+            return c;
+            })
+        );
+        setVotedCardId(null);
+        } catch (err) {
+        console.error("cancel vote failed", err);
+        }
+    };
 
     // Show only today's candidate dishes in the menu
     // const candidateCards = candidate.map(candidate => {
