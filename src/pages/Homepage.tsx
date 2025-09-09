@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getProfile } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -22,6 +23,7 @@ import food2 from "../assets/small-food-2.png";
 const Homepage = () => {
     const navigate = useNavigate();
     const [status, setStatus] = useState<"open" | "pending" | "close" | "finalized">("pending");
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
     useEffect(() => {
         let mounted = true;
@@ -38,10 +40,17 @@ const Homepage = () => {
                 console.error("Failed to fetch todays's results:", err);
             }
         };
-
+        const checkAuth = async () => {
+            try {
+                const user = await getProfile();
+                setIsLoggedIn(!!user);
+            } catch {
+                setIsLoggedIn(false);
+            }
+        };
         fetchStatus();
+        checkAuth();
         const pollId = window.setInterval(fetchStatus, 15000);
-
         return () => {
             mounted = false;
             clearInterval(pollId);
@@ -61,12 +70,22 @@ const Homepage = () => {
                                     Vote daily on your preferred meals and help the canteen prepare exactly what’s in demand; fresher, tastier, and waste-free.
                                 </p>
                                 <div className="mt-8 md:mt-10 flex items-center justify-center gap-x-6">
-                                    <button 
-                                        onClick={() => navigate('/menu')}
-                                        className="cursor-pointer px-5 sm:px-6 py-2 rounded-[10px] font-semibold bg-[#429818] text-white hover:bg-[#3E7B27] transition-colors"
-                                    >
-                                        Vote Now
-                                    </button>
+                                    {isLoggedIn === false ? (
+                                        <button
+                                            onClick={() => navigate('/sign-in')}
+                                            className="cursor-pointer px-5 sm:px-6 py-2 rounded-[10px] font-semibold bg-[#429818] text-white hover:bg-[#3E7B27] transition-colors"
+                                        >
+                                            Sign in to vote
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => navigate('/menu')}
+                                            className="cursor-pointer px-5 sm:px-6 py-2 rounded-[10px] font-semibold bg-[#429818] text-white hover:bg-[#3E7B27] transition-colors"
+                                            disabled={isLoggedIn === null}
+                                        >
+                                            Vote Now
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -127,14 +146,11 @@ const Homepage = () => {
                                     <p className="font-bold text-center mb-2">Vote close in</p>
                                     <CountdownTimer />
                                 </div>
-                            ) : status === 'pending' ? (
-                                <p className="text-center font-semibold">Voting is pending</p>
-                            ) : status === 'close' ? (
-                                <p className="text-center font-semibold">Voting has closed</p>
-                            ) : status === 'finalized' ? (
-                                <p className="text-center font-semibold">Results finalized</p>
                             ) : (
-                                <p className="text-center font-semibold">Status unknown</p>
+                                <div>
+                                    <p className="text-center font-semibold">Voting has closed.</p>
+                                    <p className="text-center text-[14px] md:text-[16px]">Vote will start again at 6am.</p>
+                                </div>
                             )}
                         </div>
                         <div>
@@ -185,7 +201,7 @@ const Homepage = () => {
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-col justify-center py-12">
+                    <div className={`flex flex-col justify-center ${status === 'open' ? 'py-12' : 'pt-0 pb-12'}`}>
                         <p className="title-font font-semibold text-[32px] text-center">Today's food ranking</p>
                         <p className="text-center">under construction</p>
                     </div>

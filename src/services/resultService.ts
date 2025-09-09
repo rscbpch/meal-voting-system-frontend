@@ -17,12 +17,25 @@ export interface TodayResult {
     status: string;
     dishes: CandidateDish[];
 }
+export interface UpcomingDish {
+    id: number;
+    votePollId: number;
+    dishId: number;
+    isSelected: boolean;
+    Dish: {
+        id: number;
+        name: string;
+    };
+    // some backends may include a vote count; make optional
+    voteCount?: number;
+}
+
 export interface UpcomingResult {
     votePollId: number;
     mealDate: string;
     voteDate: string;
     status: string;
-    dish: CandidateDish[];
+    dish: UpcomingDish[];
 }
 
 export const getTodayResult = async (): Promise<TodayResult> => {

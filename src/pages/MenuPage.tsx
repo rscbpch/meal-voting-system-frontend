@@ -136,6 +136,7 @@ const Menu = () => {
                     {!loading && !error && candidate.map(candidate => {
                         // const dishInfo = foods.find(dish => dish.id === candidate.dishId);
                         return (
+
                             // <Card
                             //     key={candidate.candidateDishId}
                             //     name={candidate.dish}
