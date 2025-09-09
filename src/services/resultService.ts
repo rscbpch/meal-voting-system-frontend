@@ -49,3 +49,25 @@ export const getUpcomingResults = async (): Promise<UpcomingResult[]> => {
     const res = await API.get<UpcomingResult[]>("/results/upcoming");
     return res.data;
 };
+
+/**
+ * Return the dish with the highest voteCount from the active today's result.
+ * Returns null when there is no open/available poll or no dishes.
+ */
+export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
+    const res = await getTodayResult();
+    const dishes = res?.dishes ?? [];
+    if (!Array.isArray(dishes) || dishes.length === 0) return null;
+
+    let top = dishes[0];
+    let topVotes = Number(top.voteCount ?? 0);
+    for (let i = 1; i < dishes.length; i++) {
+        const d = dishes[i];
+        const v = Number(d.voteCount ?? 0);
+        if (v > topVotes) {
+            top = d;
+            topVotes = v;
+        }
+    }
+    return top ?? null;
+};
