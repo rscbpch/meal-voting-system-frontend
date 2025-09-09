@@ -33,7 +33,8 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
                 }
 
                 const rows: FoodRow[] = dishes.map((d: any) => ({
-                    name: d.dish ?? d.Dish?.name ?? `Dish ${d.dishId ?? d.id ?? ''}`,
+                    // prefer explicit `name` field from backend; fall back to legacy fields
+                    name: d.name ?? d.dish ?? d.Dish?.name ?? `Dish ${d.dishId ?? d.id ?? ''}`,
                     votes: Number(d.voteCount ?? d.votes ?? 0) || 0,
                 }));
 

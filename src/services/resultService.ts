@@ -50,6 +50,24 @@ export const getUpcomingResults = async (): Promise<UpcomingResult[]> => {
     return res.data;
 };
 
+export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
+    const res = await getTodayResult();
+    const dishes = res?.dishes ?? [];
+    if (!Array.isArray(dishes) || dishes.length === 0) return null;
+
+    let top = dishes[0];
+    let topVotes = Number(top.voteCount ?? 0);
+    for (let i = 1; i < dishes.length; i++) {
+        const d = dishes[i];
+        const v = Number(d.voteCount ?? 0);
+        if (v > topVotes) {
+            top = d;
+            topVotes = v;
+        }
+    }
+    return top ?? null;
+};
+
 export const voteForDish = async (candidateDishId: number) => {
     return API.post("/votes", { candidateDishId });
 };
