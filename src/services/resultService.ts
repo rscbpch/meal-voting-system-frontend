@@ -1,6 +1,8 @@
 import API from "./axios";
 
 export interface CandidateDish {
+    dish: string | undefined;
+    candidateDishId: number;
     dishId: number;
     name: string;
     name_kh?: string;
