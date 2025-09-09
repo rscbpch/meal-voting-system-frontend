@@ -49,3 +49,11 @@ export const getUpcomingResults = async (): Promise<UpcomingResult[]> => {
     const res = await API.get<UpcomingResult[]>("/results/upcoming");
     return res.data;
 };
+
+export const voteForDish = async (candidateDishId: number) => {
+    return API.post("/votes", { candidateDishId });
+};
+
+export const cancelVote = async (candidateDishId: number) => {
+    return API.put("/votes", { candidateDishId });
+}
