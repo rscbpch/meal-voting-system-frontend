@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getTodayResult, type TodayResult } from "../services/resultService";
+import { getTodayPoll } from "../services/votepollService";
 
 interface FoodItem {
     name: string;
@@ -68,8 +68,8 @@ const TopFoods: React.FC<Props> = ({ items, title = "Top 4 Food" }) => {
 
         let mounted = true;
         setLoading(true);
-        getTodayResult()
-            .then((res: TodayResult | any) => {
+        getTodayPoll()
+            .then((res: any) => {
                 const dishes = res?.dishes ?? [];
                 if (!Array.isArray(dishes)) {
                     if (mounted) setData([]);
