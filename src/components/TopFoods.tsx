@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getTodayPoll } from "../services/votepollService";
+import { getTodayPoll } from "../services/staffBoardVotepollService";
 
 interface FoodItem {
     name: string;

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getHighestVotedPollDish } from "../services/votepollService";
-import { getTodayPoll } from "../services/votepollService";
+import { getHighestVotedPollDish, getTodayPoll } from "../services/staffBoardVotepollService";
 
 type GroupedData = {
     category: string;

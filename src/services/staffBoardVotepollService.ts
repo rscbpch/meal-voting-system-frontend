@@ -1,4 +1,3 @@
-
 import API from "./axios";
 
 export interface PollDish {
