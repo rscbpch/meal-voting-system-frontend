@@ -14,12 +14,19 @@ const Menu = () => {
     const [candidate, setCandidate] = useState<CandidateDish[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [votedCardId, setVotedCardId] = useState<number | null>(null);
     const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
     const [todayError, setTodayError] = useState<string | null>(null);
     const [upcomingError, setUpcomingError] = useState<string | null>(null);
-
+    const [votedCardId, setVotedCardId] = useState<number | null>(() => {
+        const stored = localStorage.getItem("votedCardId");
+        return stored ? Number(stored) : null;
+    });
     useEffect(() => {
+        if (votedCardId !== null) {
+            localStorage.setItem("votedCardId", String(votedCardId));
+        } else {
+            localStorage.removeItem("votedCardId");
+        }
         getDishes()
             .then((res) => setFoods(res.items))
             .catch(() => setError("Failed to fetch dishes"));
@@ -63,7 +70,7 @@ const Menu = () => {
                 }
             })
             .catch(() => setUpcomingError("Failed to fetch upcoming results"));
-    }, []);
+    }, [votedCardId]);
 
     const upcomingBannerItems = (() => {
         if (!upcomingResults || upcomingResults.length === 0) return [];
@@ -92,12 +99,12 @@ const Menu = () => {
     })();
 
     const handleVote = async (candidateId: number) => {
-        if (votedCardId === null) {
+        if (votedCardId !== null) return; {
             try {
                 await voteForDish(candidateId);
                 setCandidate(prev => 
                     prev.map(c => {
-                        const id = (c as any).candidatedDishId ?? c.dishId;
+                        const id = (c as any).candidateDishId ?? c.dishId;
                         if (id === candidateId) return { ...c, voteCount: (c.voteCount ?? 0) + 1};
                         return c;
                     })
