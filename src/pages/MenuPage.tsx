@@ -99,6 +99,7 @@ const Menu = () => {
     })();
 
     const handleVote = async (dishId: number) => {
+        console.log("Voting for dish:", dishId);
         if (votedCardId !== null) return; {
             try {
                 await voteForDish(dishId);
@@ -116,7 +117,6 @@ const Menu = () => {
         }
     };
     const handleCancelVote = async (dishId: number) => {
-        console.log("Voting for dish:", dishId);
         try {
         await cancelVote(dishId);
         setCandidate(prev =>
