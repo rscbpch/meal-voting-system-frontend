@@ -4,16 +4,27 @@ interface Card {
     name: string;
     categoryId: number;
     description: string;
-  imgURL?: string;
+    imgURL?: string;
     initialVotes?: number;
     disabled?: boolean;
+    hasVoted?: boolean;
     onVote?: () => void;
     onCancelVote?: () => void;
 }
 
-const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, disabled = false, onVote, onCancelVote }: Card) => {
+const FoodCard = ({ 
+    name, 
+    categoryId, 
+    description, 
+    imgURL, 
+    initialVotes = 0, 
+    disabled = false, 
+    hasVoted = false,
+    onVote, 
+    onCancelVote 
+  }: Card) => {
     const [votes, setVotes] = useState<number>(initialVotes);
-    const [hasVoted, setHasVoted] = useState<boolean>(false);
+    // const [hasVoted, setHasVoted] = useState<boolean>(false);
 
 
     // const handleVote = () => {
@@ -30,13 +41,13 @@ const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, dis
       if (disabled && !hasVoted) return;
       if (!hasVoted) {
         setVotes(prev => prev + 1);
-        setHasVoted(true);
+        // setHasVoted(true);
         onVote && onVote();
       } else {
         const confirmCancel = window.confirm("Are you sure you want to cancel your vote?");
         if (confirmCancel) {
           setVotes(prev => prev -1);
-          setHasVoted(false);
+          // setHasVoted(false);
           onCancelVote && onCancelVote();
         }
       }
@@ -92,4 +103,3 @@ const FoodCard = ({ name, categoryId, description, imgURL, initialVotes = 0, dis
   );
 }
 export default FoodCard;
-
