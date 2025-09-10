@@ -87,6 +87,8 @@ export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
     return top ?? null;
 };
 
-export const cancelVote = async (dishId: number) => {
+export const updateVoteForDish = async (dishId: number) => {
     return API.put("/votes", { dishId });
-};
+}
+
+

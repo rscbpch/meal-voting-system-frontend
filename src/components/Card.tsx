@@ -87,10 +87,7 @@ const FoodCard = ({
                   className= {`rounded p-2 transition-colors ${
                     hasVoted 
                     ? "bg-gray-300 text-white cursor-not-allowed"
-                    : disabled
-                      ? "bg-gray-300 text-white cursor-not-allowed"
-                      : "bg-[#429818] text-white hover:bg-[#2a5b11]"
-
+                    : "bg-[#429818] text-white hover:bg-[#2a5b11]"
                   }`}
                 >
                     {hasVoted ? "Voted" : "Vote Now"}
