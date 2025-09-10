@@ -62,7 +62,7 @@ const Homepage = () => {
         <div>
             <Navbar />
             <PageTransition>
-                <main className="bg-[#F6FFE8]">
+                <main className="bg-[#F6FFE8]"> 
                     <div className="bg-[#f7f7f7] md:min-h-[760px] min-h-[520px] p-6 md:p-10 relative overflow-hidden flex items-center justify-center">
                         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 relative">
                             <div className="mx-auto max-w-[620px] text-center">

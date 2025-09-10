@@ -21,9 +21,11 @@ export interface WishListResponse {
     };
 }
 
-export const getAllWishes = async (): Promise<WishListResponse> => {
+
+// Fetch all wishes from the correct API endpoint
+export const fetchAllWishes = async (): Promise<WishListResponse> => {
     try {
-        const res = await API.get("/wishies/all");
+        const res = await API.get("/wishes/all");
         return res.data;
     } catch (err: any) {
         const msg =
@@ -33,6 +35,23 @@ export const getAllWishes = async (): Promise<WishListResponse> => {
             "Failed to fetch wishes";
         throw new Error(msg);
     }
+};
+
+// Get total wishes for each dish as a map { dishId: totalWishes }
+export const getTotalWishesMap = (wishes: WishData[]): Record<number, number> => {
+    const map: Record<number, number> = {};
+    wishes.forEach(wish => {
+        map[wish.dishId] = wish.totalWishes;
+    });
+    return map;
+};
+
+// Get top 3 dishes with the most wishes
+export const getTopWishedDishes = (wishes: WishData[]): WishData[] => {
+    return wishes
+        .slice()
+        .sort((a, b) => b.totalWishes - a.totalWishes)
+        .slice(0, 3);
 };
 
 // Helper function to get wish count for a specific dish
