@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getTodayResult, getHighestVotedDish } from "../services/resultService";
+import { getHighestVotedPollDish } from "../services/votepollService";
+import { getTodayPoll } from "../services/votepollService";
 
 type GroupedData = {
     category: string;
@@ -27,7 +28,7 @@ const VotingChart: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const result = await getTodayResult();
+                const result = await getTodayPoll();
                 if (!mounted) return;
                 setStatus(result.status);
 
@@ -47,7 +48,7 @@ const VotingChart: React.FC = () => {
                 setGrouped(Array.from(catMap, ([categoryId, {category, foods}]) => ({categoryId, category, foods})));
                 // fetch highest voted dish separately (service helper)
                 try {
-                    const top = await getHighestVotedDish();
+                    const top = await getHighestVotedPollDish();
                     if (mounted) setHighestVote(top ? Number(top.voteCount ?? 0) : 0);
                 } catch (e) {
                     // non-fatal: leave highestVote as null so we fallback to grouped-derived max
@@ -167,3 +168,4 @@ const VotingChart: React.FC = () => {
 };
 
 export default VotingChart;
+
