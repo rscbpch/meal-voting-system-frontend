@@ -13,7 +13,7 @@ import {
     deleteDish,
 } from "../../services/dishService";
 import type { Dish, Category } from "../../services/dishService";
-import { getAllWishes, getWishCountForDish } from "../../services/wishService";
+import { fetchAllWishes, getWishCountForDish } from "../../services/wishService";
 import type { WishData } from "../../services/wishService";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
@@ -69,17 +69,16 @@ const MenuManagement = () => {
 
     // Fetch wishes separately
     useEffect(() => {
-        const fetchWishes = async () => {
+        const fetchWishesData = async () => {
             try {
-                const wishesData = await getAllWishes();
+                const wishesData = await fetchAllWishes();
                 setWishes(wishesData.dishes);
                 console.log("Wishes loaded:", wishesData.dishes);
             } catch (error) {
                 console.error("Error fetching wishes:", error);
             }
         };
-
-        fetchWishes();
+        fetchWishesData();
     }, []);
 
     // Filter dishes based on search only (category filtering is now done on backend)

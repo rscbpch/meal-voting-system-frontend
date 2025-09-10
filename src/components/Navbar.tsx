@@ -142,7 +142,7 @@ const Navbar = () => {
 
                     <div className="flex items-center space-x-3">
                         <button
-                            onClick={() => console.log(user?.displayName)}
+                            onClick={() => navigate("/wishlist")}
                             className="p-2 hover:bg-[#DDF4E7] rounded-full transition-all group duration-300 ease-in-out transform hover:scale-110 cursor-pointer hidden lg:block"
                         >
                             <FiHeart
