@@ -186,7 +186,8 @@ const Menu = () => {
                                 description={candidate.description ?? ""}
                                 imgURL={candidate.imageURL ?? ""}
                                 initialVotes={candidate.voteCount}
-                                disabled={votedCardId !== null && votedCardId !== candidate.dishId}
+                                hasVoted={votedCardId === candidate.dishId}
+                                disabled={votedCardId !== null}
                                 onVote={() => handleVote(candidate.dishId)}
                                 onCancelVote={() => handleCancelVote(candidate.dishId)}
                             />
