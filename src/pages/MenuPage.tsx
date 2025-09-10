@@ -99,7 +99,7 @@ const Menu = () => {
     })();
 
     const handleVote = async (dishId: number) => {
-        if (votedCardId !== null) return; {
+        if (votedCardId !== null) return; 
             try {
                 console.log("Voting for dish:", dishId);
                 await voteForDish(dishId);
@@ -114,7 +114,6 @@ const Menu = () => {
             } catch (error) {
                 console.error("Failed to vote for dish:", error);
             }
-        }
     };
     const handleCancelVote = async (dishId: number) => {
         try {
