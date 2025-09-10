@@ -49,10 +49,6 @@ export const getUpcomingResults = async (): Promise<UpcomingResult[]> => {
     const res = await API.get<UpcomingResult[]>("/results/upcoming");
     return res.data;
 };
-
-export const voteForDish = async (dishId: number) => {
-    return API.post("/votes", { dishId });
-}
 export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
     const res = await getTodayResult();
     const dishes = res?.dishes ?? [];
@@ -71,6 +67,10 @@ export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
     return top ?? null;
 };
 
-export const cancelVote = async (dishId: number) => {
+export const updateVoteForDish = async (dishId: number) => {
     return API.put("/votes", { dishId });
+}
+
+export const voteForDish = async (dishId: number) => {
+    return API.post("/votes", { dishId });
 }

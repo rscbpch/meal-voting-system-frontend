@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { getDishes } from "../services/dishService";
 import type { Dish } from "../services/dishService";
-import { getTodayResult, voteForDish, cancelVote, type CandidateDish } from "../services/resultService";
+import { getTodayResult, voteForDish, updateVoteForDish, type CandidateDish } from "../services/resultService";
 import { getUpcomingResults, type UpcomingResult } from "../services/resultService";
 
 const Menu = () => {
@@ -17,15 +17,16 @@ const Menu = () => {
     const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
     const [todayError, setTodayError] = useState<string | null>(null);
     const [upcomingError, setUpcomingError] = useState<string | null>(null);
-    const [votedCardId, setVotedCardId] = useState<number | null>(() => {
-        const stored = localStorage.getItem("votedCardId");
+    const [votedDishId, setVotedDishId] = useState<number | null>(() => {
+        const stored = localStorage.getItem("votedDishId");
         return stored ? Number(stored) : null;
     });
+    // const [votedDishId, setVotedDishId] = useState<number | null>(null);
     useEffect(() => {
-        if (votedCardId !== null) {
-            localStorage.setItem("votedCardId", String(votedCardId));
+        if (votedDishId !== null) {
+            localStorage.setItem("votedDishId", String(votedDishId));
         } else {
-            localStorage.removeItem("votedCardId");
+            localStorage.removeItem("votedDishId");
         }
         getDishes()
             .then((res) => setFoods(res.items))
@@ -70,7 +71,7 @@ const Menu = () => {
                 }
             })
             .catch(() => setUpcomingError("Failed to fetch upcoming results"));
-    }, [votedCardId]);
+    }, [votedDishId]);
 
     const upcomingBannerItems = (() => {
         if (!upcomingResults || upcomingResults.length === 0) return [];
@@ -99,53 +100,17 @@ const Menu = () => {
     })();
 
     const handleVote = async (dishId: number) => {
-        if (votedCardId !== null) return; 
-            try {
-                console.log("Voting for dish:", dishId);
-                await voteForDish(dishId);
-                setCandidate(prev => 
-                    prev.map(c => {
-                        const id = (c as any).candidateDishId ?? c.dishId;
-                        if (id === dishId) return { ...c, voteCount: (c.voteCount ?? 0) + 1};
-                        return c;
-                    })
-                );
-                setVotedCardId(dishId);
-            } catch (error) {
-                console.error("Failed to vote for dish:", error);
-            }
-    };
-    const handleCancelVote = async (dishId: number) => {
         try {
-        await cancelVote(dishId);
-        setCandidate(prev =>
-            prev.map(c => {
-            const id = (c as any).candidateDishId ?? c.dishId;
-            if (id === dishId) return { ...c, voteCount: Math.max(0, (c.voteCount ?? 1) - 1) };
-            return c;
-            })
-        );
-        setVotedCardId(null);
-        } catch (err) {
-        console.error("cancel vote failed", err);
-        }
+            if (votedDishId === null) {
+                await voteForDish(dishId);
+        } else {
+                await updateVoteForDish(dishId);
+            }
+            setVotedDishId(dishId);
+    } catch (error: any) {
+        alert(error?.response?.data?.message || "Failed to vote for dish");
+    }
     };
-
-    // Show only today's candidate dishes in the menu
-    // const candidateCards = candidate.map(candidate => {
-    //     const dishInfo = foods.find(dish => dish.id === candidate.dishId);
-    //     return {
-    //         key: candidate.candidateDishId,
-    //         name: candidate.dish,
-    //         categoryId: Number(dishInfo?.categoryId) ?? 0,
-    //         description: dishInfo?.description ?? "",
-    //         imgURL: dishInfo?.imageURL ?? "",
-    //         initialVotes: candidate.voteCount,
-    //         disabled: votedCardId != null,
-    //         onVote: () => handleVote(candidate.candidateDishId),
-    //     };
-    // });
-
     return (
         <div>
             <div>
@@ -186,10 +151,10 @@ const Menu = () => {
                                 description={candidate.description ?? ""}
                                 imgURL={candidate.imageURL ?? ""}
                                 initialVotes={candidate.voteCount}
-                                hasVoted={votedCardId === candidate.dishId}
-                                disabled={votedCardId !== null}
+                                hasVoted={votedDishId === candidate.dishId}
+                                disabled={false}
                                 onVote={() => handleVote(candidate.dishId)}
-                                onCancelVote={() => handleCancelVote(candidate.dishId)}
+                                // onCancelVote={() => handleCancelVote(candidate.dishId)}
                             />
                         );
                     })}
@@ -197,7 +162,7 @@ const Menu = () => {
                 <Footer/>
             </div>
         </div>
-    );
-};
+        );
+    };
 
 export default Menu;
