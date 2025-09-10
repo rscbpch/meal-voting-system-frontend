@@ -1,4 +1,4 @@
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Card from "../components/Card";
 import Footer from "../components/Footer";
 import ResultBanner from "../components/ResultBanner";
@@ -11,6 +11,8 @@ import { getUpcomingResults, type UpcomingResult } from "../services/resultServi
 import { useMemo } from "react";
 
 const Menu = () => {
+    const navigate = useNavigate();
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [foods, setFoods] = useState<Dish[]>([]);
     const [candidate, setCandidate] = useState<CandidateDish[]>([]);
     const [loading, setLoading] = useState(true);
@@ -22,23 +24,21 @@ const Menu = () => {
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
     // const [votedDishId, setVotedDishId] = useState<number | null>(null);
     useEffect(() => {
-        // if (votedDishId !== null) {
-        //     localStorage.setItem("votedDishId", String(votedDishId));
-        // } else {
-        //     localStorage.removeItem("votedDishId");
-        // }
+        const token = localStorage.getItem("token");
+        setIsLoggedIn(!!token);
+
         getDishes()
             .then((res) => setFoods(res.items))
             .catch(() => setError("Failed to fetch dishes"));
 
-        getTodayResult() 
+        getTodayResult()
             .then((res) => {
                 setCandidate(res.dishes);
                 setVotePollId(res.votePollId);
 
                 const storedPollId = localStorage.getItem("votePollId");
                 const storedDishId = localStorage.getItem("votedDishId");
-                if (storedPollId && storedDishId && Number(storedPollId) === res.votePollId && storedDishId) {
+                if (storedPollId && storedDishId && Number(storedPollId) === res.votePollId) {
                     setVotedDishId(Number(storedDishId));
                 } else {
                     setVotedDishId(null);
@@ -54,33 +54,24 @@ const Menu = () => {
 
         getUpcomingResults()
             .then((res: any) => {
-                // backend may return an array or a single object. Normalize to an array of results.
-                console.log("getUpcomingResults raw:", res);
-
-                // prefer direct arrays
                 if (Array.isArray(res)) {
                     setUpcomingResults(res);
                     return;
                 }
-
-                // response might be wrapped: { data: [...]} or { items: [...] }
                 const wrapper = res?.data ?? res?.items ?? res?.upcoming ?? res?.results ?? res;
-
-                if (!wrapper) {
-                    setUpcomingResults([]);
-                    return;
-                }
-
-                if (Array.isArray(wrapper)) {
-                    setUpcomingResults(wrapper);
-                } else if (typeof wrapper === 'object') {
-                    // single result object -> wrap into array
-                    setUpcomingResults([wrapper]);
-                } else {
-                    setUpcomingResults([]);
-                }
+                if (!wrapper) return setUpcomingResults([]);
+                if (Array.isArray(wrapper)) setUpcomingResults(wrapper);
+                else if (typeof wrapper === "object") setUpcomingResults([wrapper]);
+                else setUpcomingResults([]);
             })
             .catch(() => setUpcomingError("Failed to fetch upcoming results"));
+    }, []); 
+    useEffect(() => {
+        if (votedDishId !== null) {
+            localStorage.setItem("votedDishId", String(votedDishId));
+        } else {
+            localStorage.removeItem("votedDishId");
+        }
     }, [votedDishId]);
 
     const upcomingBannerItems = useMemo(() => {
@@ -109,6 +100,10 @@ const Menu = () => {
     },[upcomingResults, foods]);
 
     const handleVote = async (dishId: number) => {
+        if (!isLoggedIn) {
+            navigate('/sign-in');
+            return;
+        }
         try {
             if (votedDishId === null) {
                 await voteForDish(dishId);
@@ -161,6 +156,28 @@ const Menu = () => {
                 <div>
                     <h1 className="text-[48px] font-bold p-5 mb-10 ml-5">Menu</h1>
                 </div>
+                    <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
+                        {loading && <div>Loading...</div>}
+                        {!loading && !error && candidate.map(candidate => (
+                            <Card 
+                                key={candidate.dishId}
+                                name={candidate.name}
+                                categoryId={Number(candidate.categoryId) ?? 0}
+                                description={candidate.description ?? ""}
+                                imgURL={candidate.imageURL ?? ""}
+                                initialVotes={candidate.voteCount}
+                                hasVoted={votedDishId === candidate.dishId}
+                                disabled={false} // show button for everyone
+                                onVote={() => {
+                                    if (!isLoggedIn) {
+                                        navigate("/sign-in");
+                                        return;
+                                    }
+                                    handleVote(candidate.dishId);
+                                }}
+                            />
+                        ))}
+                    </div>
                 <div>
                     {(error || todayError || upcomingError) && (
                         <div className="flex justify-center items-center w-full my-8">
@@ -169,43 +186,35 @@ const Menu = () => {
                             {upcomingError && <div className="text-red-500">{upcomingError}</div>}
                         </div>
                     )}
-                    <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
-                        {loading && <div>Loading...</div>}
-                        {!loading && !error && candidate.map(candidate => {
-                            // const dishInfo = foods.find(dish => dish.id === candidate.dishId);
-                            return (
 
-                                // <Card
-                                //     key={candidate.candidateDishId}
-                                //     name={candidate.dish}
-                                //     categoryId={Number(dishInfo?.categoryId) ?? 0}
-                                //     description={dishInfo?.description ?? ""}
-                                //     imgURL={dishInfo?.imageURL ?? ""}
-                                //     initialVotes={candidate.voteCount}
-                                //     disabled={votedCardId !== null && votedCardId !== candidate.candidateDishId}
-                                //     onVote={() => handleVote(candidate.candidateDishId)}
-                                //     onCancelVote={() => setVotedCardId(null)}
-                                // />
-                                <Card 
-                                    key={candidate.dishId}
-                                    name={candidate.name}
-                                    categoryId={Number(candidate.categoryId) ?? 0}
-                                    description={candidate.description ?? ""}
-                                    imgURL={candidate.imageURL ?? ""}
-                                    initialVotes={candidate.voteCount}
-                                    hasVoted={votedDishId === candidate.dishId}
-                                    disabled={false}
-                                    onVote={() => handleVote(candidate.dishId)}
-                                    // onCancelVote={() => handleCancelVote(candidate.dishId)}
-                                />
-                            );
-                        })}
-                    </div>
+                    {/* Only show menu and voting if logged in */}
+                    {/* {isLoggedIn && (
+                        <>
+                            <div>
+                                <h1 className="text-[48px] font-bold p-5 mb-10 ml-5">Menu</h1>
+                            </div>
+                            <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
+                                {loading && <div>Loading...</div>}
+                                {!loading && !error && candidate.map(candidate => (
+                                    <Card 
+                                        key={candidate.dishId}
+                                        name={candidate.name}
+                                        categoryId={Number(candidate.categoryId) ?? 0}
+                                        description={candidate.description ?? ""}
+                                        imgURL={candidate.imageURL ?? ""}
+                                        initialVotes={candidate.voteCount}
+                                        hasVoted={votedDishId === candidate.dishId}
+                                        disabled={!isLoggedIn}
+                                        onVote={() => handleVote(candidate.dishId)}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    )} */}
                 </div>
                 <Footer/>
             </div>
         </div>
-        );
-    };
-
+    );
+}
 export default Menu;
