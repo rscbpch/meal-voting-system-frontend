@@ -116,12 +116,21 @@ const Menu = () => {
                 await updateVoteForDish(dishId);
             }
             setVotedDishId(dishId);
+            const res = await getTodayResult();
+            setCandidate(res.dishes);
+            
             localStorage.setItem("votedDishId", String(dishId));
             if (votePollId !== null) {
                 localStorage.setItem("votePollId", String(votePollId));
             }
     } catch (error: any) {
-        alert(error?.response?.data?.message || "Failed to vote for dish");
+        if (error?.response?.status === 400) {
+            setVotedDishId(null);
+            localStorage.removeItem("votedDishId");
+            alert("Your vote has been reset. Please vote again.");
+        } else {
+            alert(error?.response?.data?.message || "Failed to vote for dish");
+        }
     }
     };
     return (

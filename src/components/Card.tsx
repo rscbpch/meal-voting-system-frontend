@@ -9,7 +9,6 @@ interface Card {
     disabled?: boolean;
     hasVoted?: boolean;
     onVote?: () => void;
-    onCancelVote?: () => void;
 }
 
 const FoodCard = ({ 
@@ -21,38 +20,17 @@ const FoodCard = ({
     disabled = false, 
     hasVoted = false,
     onVote, 
-    onCancelVote 
   }: Card) => {
-    const [votes, setVotes] = useState<number>(initialVotes);
-    // const [hasVoted, setHasVoted] = useState<boolean>(false);
-
-
-    // const handleVote = () => {
-    //     if (!disabled && onVote) {
-    //       setVotes(votes + 1);
-    //       onVote();
-          
-    //     }
-    // };
-    useEffect(() => {
-      setVotes(initialVotes);
-    }, [initialVotes]);
+    // const [votes, setVotes] = useState<number>(initialVotes);
+    // useEffect(() => {
+    //   setVotes(initialVotes);
+    // }, [initialVotes]);
     const handleClick = () => {
       if (disabled && !hasVoted) return;
       if (!hasVoted) {
-        setVotes(prev => prev + 1);
-        // setHasVoted(true);
         onVote && onVote();
-      } else {
-        const confirmCancel = window.confirm("Are you sure you want to cancel your vote?");
-        if (confirmCancel) {
-          setVotes(prev => prev -1);
-          // setHasVoted(false);
-          onCancelVote && onCancelVote();
-        }
-      }
-      }
-
+      } 
+    };
     return (
       <div className="bg-white">
         <div className="relative border-0 rounded-lg shadow-md overflow-visible p-5 flex flex-col justify-between h-96">
@@ -80,7 +58,7 @@ const FoodCard = ({
                 {description}
               </div>
               <div className="flex justify-between items-center mt-4">
-                <p className="flex items-center">Votes: {votes}</p>
+                <p className="flex items-center">Votes: {initialVotes}</p>
                 <button 
                   onClick={handleClick} 
                   disabled={disabled && !hasVoted}
