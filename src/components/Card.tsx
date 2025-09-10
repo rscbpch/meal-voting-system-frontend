@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 interface Card {
     name: string;
     categoryId: number;
