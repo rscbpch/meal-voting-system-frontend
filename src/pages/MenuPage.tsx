@@ -99,9 +99,9 @@ const Menu = () => {
     })();
 
     const handleVote = async (dishId: number) => {
-        console.log("Voting for dish:", dishId);
         if (votedCardId !== null) return; {
             try {
+                console.log("Voting for dish:", dishId);
                 await voteForDish(dishId);
                 setCandidate(prev => 
                     prev.map(c => {
