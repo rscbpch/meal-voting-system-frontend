@@ -48,10 +48,10 @@ export const getUpcomingResults = async (): Promise<UpcomingResult[]> => {
     return res.data;
 };
 
-export const voteForDish = async (candidateDishId: number) => {
-    return API.post("/votes", { candidateDishId });
+export const voteForDish = async (dishId: number) => {
+    return API.post("/votes", { dishId });
 };
 
-export const cancelVote = async (candidateDishId: number) => {
-    return API.put("/votes", { candidateDishId });
+export const cancelVote = async (dishId: number) => {
+    return API.put("/votes", { dishId });
 }
