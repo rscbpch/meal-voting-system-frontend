@@ -77,7 +77,8 @@ const TopFoods: React.FC<Props> = ({ items, title = "Top 4 Food" }) => {
                 }
 
                 const arr: FoodItem[] = dishes.map((d: any, idx: number) => ({
-                    name: d.dish ?? d.Dish?.name ?? `Dish ${d.dishId ?? d.id ?? idx}`,
+                    // prefer explicit `name` from backend, then legacy fields
+                    name: d.name ?? d.dish ?? d.Dish?.name ?? `Dish ${d.dishId ?? d.id ?? idx}`,
                     votes: Number(d.voteCount ?? d.votes ?? 0) || 0,
                     color: defaultColors[idx % defaultColors.length]
                 }));
