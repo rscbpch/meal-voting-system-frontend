@@ -5,7 +5,7 @@ import {
     ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import { FiX, FiPlus } from "react-icons/fi";
-import { updateDish } from "../../services/dishService";
+import { updateDish, checkDishNames } from "../../services/dishService";
 import type { Dish, Category, UpdateDishForm } from "../../services/dishService";
 import Loading from "../../components/Loading";
 
@@ -164,6 +164,14 @@ const EditDishModal = ({
     const [categoryOpen, setCategoryOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    // Safeguard function to ensure image state is preserved
+    const preserveImageState = () => {
+        // If we have no image preview but we have a dish with an image, restore it
+        if (!imagePreview && dish?.imageURL) {
+            setImagePreview(dish.imageURL);
+        }
+    };
+
     // Initialize form with dish data when modal opens
     useEffect(() => {
         if (isOpen && dish) {
@@ -178,6 +186,7 @@ const EditDishModal = ({
                 description: dish.description || "",
                 description_kh: dish.description_kh || "",
             });
+            // Always set the existing image as preview when modal opens
             setImagePreview(dish.imageURL || null);
             setSelectedImage(null); // Reset selected image
             setErrors({});
@@ -242,7 +251,22 @@ const EditDishModal = ({
         // Check for validation errors (language format errors)
         const hasValidationErrors = Object.values(errors).some((err) => err && err !== "");
         
-        return hasRequiredFields && hasIngredients && !hasValidationErrors;
+        // For editing, we don't require a new image - we can keep the existing one
+        // Check if we have either a new selected image or the existing image preview
+        const hasImage = selectedImage || imagePreview;
+        
+        // Debug logging
+        console.log('Form validation:', {
+            hasRequiredFields,
+            hasIngredients,
+            hasValidationErrors,
+            hasImage,
+            selectedImage: !!selectedImage,
+            imagePreview: !!imagePreview,
+            dishImageURL: dish?.imageURL
+        });
+        
+        return hasRequiredFields && hasIngredients && !hasValidationErrors && hasImage;
     };
 
     const handleUpdateDish = async (e: React.FormEvent) => {
@@ -253,16 +277,27 @@ const EditDishModal = ({
         // Set loading state
         setIsSubmitting(true);
 
-        // Clear previous form errors
-        setErrors({});
+        // Clear previous form errors (but preserve image state)
+        // Don't clear all errors at once to avoid affecting image state
+        setErrors((prev) => {
+            const newErrors = { ...prev };
+            // Only clear the form error, keep everything else intact
+            if (newErrors.form) {
+                newErrors.form = "";
+            }
+            return newErrors;
+        });
+        
+        // Ensure image state is preserved
+        preserveImageState();
 
-        // 1️⃣ Check required fields
+        // 1, Check required fields
         const requiredFields = [];
         if (!editDishForm.name_kh?.trim()) requiredFields.push("Khmer name");
         if (!editDishForm.name?.trim()) requiredFields.push("English name");
         if (!editDishForm.categoryId || editDishForm.categoryId === 0) requiredFields.push("category");
 
-        // 2️⃣ Check ingredients requirements
+        // 2, Check ingredients requirements
         const ingredientErrors = [];
         if (!editDishForm.ingredient_kh_array || editDishForm.ingredient_kh_array.length === 0) {
             ingredientErrors.push("at least 1 Khmer ingredient");
@@ -271,10 +306,10 @@ const EditDishModal = ({
             ingredientErrors.push("at least 1 English ingredient");
         }
 
-        // 3️⃣ Check for validation errors in current inputs
+        // 3, Check for validation errors in current inputs
         const currentErrors = Object.values(errors).some((err) => err && err !== "");
 
-        // 4️⃣ Show appropriate error messages
+        // 4, Show appropriate error messages
         if (requiredFields.length > 0 || ingredientErrors.length > 0 || currentErrors) {
             let errorMessage = "";
             
@@ -298,6 +333,39 @@ const EditDishModal = ({
             return;
         }
 
+        // Check for duplicate names before submitting
+        try {
+            const nameCheck = await checkDishNames(
+                editDishForm.name || "",
+                editDishForm.name_kh || "",
+                dish.id
+            );
+
+            if (nameCheck.nameExists || nameCheck.nameKhExists) {
+                let duplicateMessage = "A dish with this name already exists: ";
+                const duplicates = [];
+                if (nameCheck.nameExists) duplicates.push("English name");
+                if (nameCheck.nameKhExists) duplicates.push("Khmer name");
+                duplicateMessage += duplicates.join(" and ") + ". Please choose different names.";
+                
+                // Set only the form error, preserve image state
+                setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    newErrors.form = duplicateMessage;
+                    return newErrors;
+                });
+                
+                // Ensure image state is preserved
+                preserveImageState();
+                
+                setIsSubmitting(false);
+                return;
+            }
+        } catch (error) {
+            console.error("Error checking duplicate names:", error);
+            // Continue with submission if we can't check (server will catch duplicates)
+        }
+
         // 5️⃣ Merge arrays to strings
         const formData: UpdateDishForm = {
             ...editDishForm,
@@ -312,9 +380,28 @@ const EditDishModal = ({
             onDishUpdated();
             setIsSubmitting(false);
             handleClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error updating dish:", error);
-            setErrors((prev) => ({ ...prev, form: "Failed to update dish" }));
+            
+            // Handle specific error cases
+            let errorMessage = "Failed to update dish";
+            
+            if (error.message && error.message.includes("already exists")) {
+                errorMessage = "A dish with this name or Khmer name already exists. Please choose a different name.";
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            // Set only the form error, preserve image state
+            setErrors((prev) => {
+                const newErrors = { ...prev };
+                newErrors.form = errorMessage;
+                return newErrors;
+            });
+            
+            // Ensure image state is preserved
+            preserveImageState();
+            
             setIsSubmitting(false);
         }
     };
@@ -355,6 +442,17 @@ const EditDishModal = ({
                 ...prev,
                 [field]: value,
             }));
+
+            // Clear form error when user starts typing in name fields
+            if (field === "name" || field === "name_kh") {
+                setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    if (newErrors.form) {
+                        newErrors.form = "";
+                    }
+                    return newErrors;
+                });
+            }
 
             // Show warning for invalid characters but allow typing
             if (lang === "khmer" && value && !isKhmer(value)) {
@@ -508,6 +606,15 @@ const EditDishModal = ({
                                         </div>
                                     </div>
 
+                                    {/* Form Error Display */}
+                                    {errors.form && (
+                                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                            <p className="text-sm text-red-600 font-medium">
+                                                {errors.form}
+                                            </p>
+                                        </div>
+                                    )}
+
                                     {/* Dropdown */}
                                     <div className="relative" ref={dropdownRef}>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -626,12 +733,20 @@ const EditDishModal = ({
                                         value={
                                             editDishForm.ingredient_kh_array || []
                                         }
-                                        onChange={(arr) =>
+                                        onChange={(arr) => {
                                             setEditDishForm({
                                                 ...editDishForm,
                                                 ingredient_kh_array: arr,
-                                            })
-                                        }
+                                            });
+                                            // Clear form error when ingredients change
+                                            setErrors((prev) => {
+                                                const newErrors = { ...prev };
+                                                if (newErrors.form) {
+                                                    newErrors.form = "";
+                                                }
+                                                return newErrors;
+                                            });
+                                        }}
                                         lang="khmer"
                                     />
 
@@ -639,23 +754,22 @@ const EditDishModal = ({
                                         label="English Ingredients *"
                                         placeholder="Enter ingredient and press Enter"
                                         value={editDishForm.ingredient_array || []}
-                                        onChange={(arr) =>
+                                        onChange={(arr) => {
                                             setEditDishForm({
                                                 ...editDishForm,
                                                 ingredient_array: arr,
-                                            })
-                                        }
+                                            });
+                                            // Clear form error when ingredients change
+                                            setErrors((prev) => {
+                                                const newErrors = { ...prev };
+                                                if (newErrors.form) {
+                                                    newErrors.form = "";
+                                                }
+                                                return newErrors;
+                                            });
+                                        }}
                                         lang="english"
                                     />
-
-                                    {/* Form Error Display */}
-                                    {errors.form && (
-                                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                            <p className="text-sm text-red-600 font-medium">
-                                                {errors.form}
-                                            </p>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         </form>
@@ -667,7 +781,7 @@ const EditDishModal = ({
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="px-6 py-2 bg-[#EEEEEE] text-[#999999] rounded-lg hover:bg-gray-200 hover:text-gray-500 transition-colors font-medium"
+                        className="px-6 py-2 bg-[#EEEEEE] text-[#888888] rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-colors font-medium"
                     >
                         Cancel
                     </button>
@@ -677,7 +791,7 @@ const EditDishModal = ({
                         disabled={!isFormValid() || isSubmitting}
                         className={`px-6 py-2 rounded-lg transition-colors font-medium ${
                             isFormValid() && !isSubmitting
-                                ? "bg-green-600 text-white hover:bg-green-700 cursor-pointer"
+                                ? "bg-[#429818] text-white hover:bg-[#3E7B27] cursor-pointer"
                                 : isSubmitting
                                 ? "bg-[#429818] text-white cursor-not-allowed"
                                 : "bg-[#A3CFA0] text-white cursor-not-allowed"

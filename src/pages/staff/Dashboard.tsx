@@ -2,7 +2,7 @@ import Sidebar from "../../components/SideBar";
 import PageTransition from "../../components/PageTransition";
 import TopFoods from "../../components/TopFoods";
 import AllFoodsRank from "../../components/AllFoodsRank";
-// import VotingChart from "../../components/VotingChart";
+import VotingChart from "../../components/VotingChart";
 
 const Dashboard = () => {
     return (
@@ -17,9 +17,9 @@ const Dashboard = () => {
                     </div>
 
                     <div className="p-6 space-y-6">
-                        {/* <div>
+                        <div>
                             <VotingChart />
-                        </div> */}
+                        </div>
 
                         <div className="grid grid-cols-2 gap-6">
                             <div>

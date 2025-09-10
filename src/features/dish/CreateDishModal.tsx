@@ -5,7 +5,7 @@ import {
     ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import { FiX, FiPlus } from "react-icons/fi";
-import { createDish } from "../../services/dishService";
+import { createDish, checkDishNames } from "../../services/dishService";
 import type { CreateDishForm, Category } from "../../services/dishService";
 import Loading from "../../components/Loading";
 
@@ -230,9 +230,12 @@ const CreateDishModal = ({
         ingredientErrors.push("at least 1 English ingredient");
     }
 
-    const currentErrors = Object.values(errors).some((err) => err && err !== "");
+    // Check for validation errors (language format errors) but exclude form errors
+    const hasValidationErrors = Object.entries(errors).some(([key, err]) => 
+        key !== 'form' && err && err !== ""
+    );
 
-    if (requiredFields.length > 0 || ingredientErrors.length > 0 || currentErrors) {
+    if (requiredFields.length > 0 || ingredientErrors.length > 0 || hasValidationErrors) {
         let errorMessage = "";
         
         if (requiredFields.length > 0) {
@@ -243,7 +246,7 @@ const CreateDishModal = ({
             errorMessage += `Please add ${ingredientErrors.join(" and ")}. `;
         }
         
-        if (currentErrors) {
+        if (hasValidationErrors) {
             errorMessage += "Please fix the input format errors.";
         }
 
@@ -251,7 +254,33 @@ const CreateDishModal = ({
             ...prev,
             form: errorMessage.trim(),
         }));
+        setIsSubmitting(false);
+        // Don't reset form data on validation error - keep everything filled for user to fix
         return;
+    }
+
+    // Check for duplicate names before submitting
+    try {
+        const nameCheck = await checkDishNames(
+            newDishForm.name || "",
+            newDishForm.name_kh || ""
+        );
+
+        if (nameCheck.nameExists || nameCheck.nameKhExists) {
+            let duplicateMessage = "A dish with this name already exists: ";
+            const duplicates = [];
+            if (nameCheck.nameExists) duplicates.push("English name");
+            if (nameCheck.nameKhExists) duplicates.push("Khmer name");
+            duplicateMessage += duplicates.join(" and ") + ". Please choose different names.";
+            
+            setErrors((prev) => ({ ...prev, form: duplicateMessage }));
+            setIsSubmitting(false);
+            // Don't reset form data on duplicate name error - keep everything filled for user to change name
+            return;
+        }
+    } catch (error) {
+        console.error("Error checking duplicate names:", error);
+        // Continue with submission if we can't check (server will catch duplicates)
     }
 
     const formData: CreateDishForm = {
@@ -267,10 +296,21 @@ const CreateDishModal = ({
         onDishCreated();
         setIsSubmitting(false);
         handleClose();
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating dish:", error);
-        setErrors((prev) => ({ ...prev, form: "Failed to create dish" }));
+        
+        // Handle specific error cases
+        let errorMessage = "Failed to create dish";
+        
+        if (error.message && error.message.includes("already exists")) {
+            errorMessage = "A dish with this name or Khmer name already exists. Please choose a different name.";
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        setErrors((prev) => ({ ...prev, form: errorMessage }));
         setIsSubmitting(false);
+        // Don't reset form data on error - keep everything filled for user to retry
     }
 };
 
@@ -280,14 +320,18 @@ const CreateDishModal = ({
         const hasRequiredFields = selectedImage && 
             newDishForm.name_kh?.trim() && 
             newDishForm.name?.trim() && 
-            newDishForm.categoryId && newDishForm.categoryId !== 0;
+            newDishForm.categoryId && newDishForm.categoryId !== 0 &&
+            newDishForm.description_kh?.trim() &&
+            newDishForm.description?.trim();
         
         // Check ingredients
         const hasIngredients = (newDishForm.ingredient_kh_array?.length || 0) > 0 && 
             (newDishForm.ingredient_array?.length || 0) > 0;
         
-        // Check for validation errors (language format errors)
-        const hasValidationErrors = Object.values(errors).some((err) => err && err !== "");
+        // Check for validation errors (language format errors) but exclude form errors
+        const hasValidationErrors = Object.entries(errors).some(([key, err]) => 
+            key !== 'form' && err && err !== ""
+        );
         
         return hasRequiredFields && hasIngredients && !hasValidationErrors;
     };
@@ -297,6 +341,7 @@ const CreateDishModal = ({
         setIsOpening(false);
         // Wait for animation to complete before closing
         setTimeout(() => {
+            // Reset form data only when actually closing the modal
             setNewDishForm({
                 name: "",
                 name_kh: "",
@@ -329,16 +374,28 @@ const CreateDishModal = ({
                 [field]: value,
             }));
 
+            // Clear form error when user starts typing in name fields
+            if (field === "name" || field === "name_kh") {
+                setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    // Clear form error when user starts typing
+                    if (newErrors.form) {
+                        newErrors.form = "";
+                    }
+                    return newErrors;
+                });
+            }
+
             // Show warning for invalid characters but allow typing
             if (lang === "khmer" && value && !isKhmer(value)) {
                 setErrors((prev) => ({
                     ...prev,
-                    [field]: "⚠️ Please use Khmer characters only",
+                    [field]: "Please use Khmer characters only",
                 }));
             } else if (lang === "english" && value && !isEnglish(value)) {
                 setErrors((prev) => ({
                     ...prev,
-                    [field]: "⚠️ Please use English characters only",
+                    [field]: "Please use English characters only",
                 }));
             } else {
                 // Clear error if input is valid
@@ -417,7 +474,6 @@ const CreateDishModal = ({
                                         type="file"
                                         accept="image/*"
                                         onChange={handleImageChange}
-                                        required
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                     />
                                 </div>
@@ -481,6 +537,15 @@ const CreateDishModal = ({
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Form Error Display */}
+                                {errors.form && (
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <p className="text-sm text-red-600 font-medium">
+                                            {errors.form}
+                                        </p>
+                                    </div>
+                                )}
 
                                 {/* Dropdown */}
                                 <div className="relative" ref={dropdownRef}>
@@ -600,12 +665,20 @@ const CreateDishModal = ({
                                     value={
                                         newDishForm.ingredient_kh_array || []
                                     }
-                                    onChange={(arr) =>
+                                    onChange={(arr) => {
                                         setNewDishForm({
                                             ...newDishForm,
                                             ingredient_kh_array: arr,
-                                        })
-                                    }
+                                        });
+                                        // Clear form error when ingredients change
+                                        setErrors((prev) => {
+                                            const newErrors = { ...prev };
+                                            if (newErrors.form) {
+                                                newErrors.form = "";
+                                            }
+                                            return newErrors;
+                                        });
+                                    }}
                                     lang="khmer"
                                 />
 
@@ -613,23 +686,22 @@ const CreateDishModal = ({
                                     label="English Ingredients *"
                                     placeholder="Enter ingredient and press Enter"
                                     value={newDishForm.ingredient_array || []}
-                                    onChange={(arr) =>
+                                    onChange={(arr) => {
                                         setNewDishForm({
                                             ...newDishForm,
                                             ingredient_array: arr,
-                                        })
-                                    }
+                                        });
+                                        // Clear form error when ingredients change
+                                        setErrors((prev) => {
+                                            const newErrors = { ...prev };
+                                            if (newErrors.form) {
+                                                newErrors.form = "";
+                                            }
+                                            return newErrors;
+                                        });
+                                    }}
                                     lang="english"
                                 />
-
-                                {/* Form Error Display */}
-                                {errors.form && (
-                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                        <p className="text-sm text-red-600 font-medium">
-                                            {errors.form}
-                                        </p>
-                                    </div>
-                                )}
                             </div>
                         </div>
                         </form>
@@ -651,7 +723,7 @@ const CreateDishModal = ({
                         disabled={!isFormValid() || isSubmitting}
                         className={`px-6 py-2 rounded-lg transition-colors font-medium ${
                             isFormValid() && !isSubmitting
-                                ? "bg-green-600 text-white hover:bg-green-700 cursor-pointer"
+                                ? "bg-[#429818] text-white hover:bg-[#3E7B27] cursor-pointer"
                                 : isSubmitting
                                 ? "bg-[#429818] text-white cursor-not-allowed"
                                 : "bg-[#A3CFA0] text-white cursor-not-allowed"

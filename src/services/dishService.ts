@@ -65,8 +65,9 @@ export const getDishes = async (
               })
             : await API.get(`/dishes`, { params: { limit, offset } });
 
-        const items: Dish[] = res.data?.items || [];
-        const total: number = res.data?.total || 0;
+        // Handle different response structures
+        const items: Dish[] = res.data?.items || res.data?.data || [];
+        const total: number = res.data?.total || items.length;
         const nextOffset: number | null = res.data?.nextOffset ?? null;
 
         return { success: true, items, total, nextOffset };
@@ -77,6 +78,41 @@ export const getDishes = async (
             err.message ||
             "Failed to fetch dishes";
         throw new Error(msg);
+    }
+};
+
+// Check if dish names already exist
+export const checkDishNames = async (
+    name: string,
+    name_kh: string,
+    excludeId?: number | string
+): Promise<{ nameExists: boolean; nameKhExists: boolean; existingDish?: Dish }> => {
+    try {
+        // Get all dishes to check for duplicates
+        const response = await getDishes({ limit: 1000 }); // Get a large number to check all dishes
+        const dishes = response.items;
+        
+        const nameExists = dishes.some(dish => 
+            dish.name?.toLowerCase() === name.toLowerCase() && 
+            dish.id !== excludeId
+        );
+        
+        const nameKhExists = dishes.some(dish => 
+            dish.name_kh?.toLowerCase() === name_kh.toLowerCase() && 
+            dish.id !== excludeId
+        );
+        
+        const existingDish = dishes.find(dish => 
+            (dish.name?.toLowerCase() === name.toLowerCase() || 
+             dish.name_kh?.toLowerCase() === name_kh.toLowerCase()) && 
+            dish.id !== excludeId
+        );
+        
+        return { nameExists, nameKhExists, existingDish };
+    } catch (err: any) {
+        console.error("Error checking dish names:", err);
+        // If we can't check, return false to allow submission (server will catch duplicates)
+        return { nameExists: false, nameKhExists: false };
     }
 };
 // Fetch categories
@@ -122,6 +158,17 @@ export const createDish = async (form: CreateDishForm): Promise<Dish> => {
 
         return res.data?.dish || res.data?.data || res.data;
     } catch (err: any) {
+        console.error("Create dish error:", err);
+        
+        // Handle specific error cases
+        if (err?.response?.status === 409) {
+            // Duplicate name error
+            const errorMsg = err?.response?.data?.error || 
+                           err?.response?.data?.message || 
+                           "A dish with this name or Khmer name already exists. Please choose a different name.";
+            throw new Error(errorMsg);
+        }
+        
         const msg =
             err?.response?.data?.message ||
             err?.response?.data?.error ||
@@ -158,6 +205,17 @@ export const updateDish = async (
         });
         return { message: res.data?.message || "Dish updated successfully" };
     } catch (err: any) {
+        console.error("Update dish error:", err);
+        
+        // Handle specific error cases
+        if (err?.response?.status === 409) {
+            // Duplicate name error
+            const errorMsg = err?.response?.data?.error || 
+                           err?.response?.data?.message || 
+                           "A dish with this name or Khmer name already exists. Please choose a different name.";
+            throw new Error(errorMsg);
+        }
+        
         const msg =
             err?.response?.data?.message ||
             err?.response?.data?.error ||
