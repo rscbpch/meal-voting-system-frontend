@@ -124,10 +124,25 @@ const Menu = () => {
                 localStorage.setItem("votePollId", String(votePollId));
             }
     } catch (error: any) {
-        if (error?.response?.status === 400) {
+        if (
+            error?.response?.data?.message &&
+            error.response.data.message.includes("No existing vote found")
+        ) {
             setVotedDishId(null);
             localStorage.removeItem("votedDishId");
-            alert("Your vote has been reset. Please vote again.");
+            try {
+                await voteForDish(dishId);
+                setVotedDishId(dishId);
+                const res = await getTodayResult();
+                setCandidate(res.dishes);
+                localStorage.setItem("votedDishId", String(dishId));
+                if (votePollId !== null) {
+                    localStorage.setItem("votePollId", String(votePollId));
+                }
+                alert("Your vote has been reset. Please vote again.");
+            } catch (err: any) {
+                alert(err?.response?.data?.message || "Failed to vote for dish");
+            }
         } else {
             alert(error?.response?.data?.message || "Failed to vote for dish");
         }
