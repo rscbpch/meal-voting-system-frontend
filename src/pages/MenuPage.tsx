@@ -8,6 +8,7 @@ import { getDishes } from "../services/dishService";
 import type { Dish } from "../services/dishService";
 import { getTodayResult, voteForDish, updateVoteForDish, type CandidateDish } from "../services/resultService";
 import { getUpcomingResults, type UpcomingResult } from "../services/resultService";
+import { useMemo } from "react";
 
 const Menu = () => {
     const [foods, setFoods] = useState<Dish[]>([]);
@@ -82,13 +83,12 @@ const Menu = () => {
             .catch(() => setUpcomingError("Failed to fetch upcoming results"));
     }, [votedDishId]);
 
-    const upcomingBannerItems = (() => {
+    const upcomingBannerItems = useMemo(() => {
         if (!upcomingResults || upcomingResults.length === 0) return [];
+        if (!foods || foods.length === 0) return [];
         const first = upcomingResults[0] as any;
-        // swagger shows `dish` array where each item has Dish { id, name }
         const candidates: any[] = first?.dish ?? first?.dishes ?? first?.items ?? first?.data ?? [];
         if (!Array.isArray(candidates) || candidates.length === 0) return [];
-        // prefer selected dishes (isSelected === true). If none are selected, show nothing.
         const selected = candidates.filter((c: any) => c.isSelected === true);
         if (!selected || selected.length === 0) return [];
 
@@ -96,17 +96,17 @@ const Menu = () => {
             // candidate may be shape: { id, votePollId, dishId, isSelected, Dish: { id, name }, voteCount? }
             const dishId = candidate.dishId ?? candidate.Dish?.id ?? candidate.dish?.id ?? null;
             const dishName = candidate.Dish?.name ?? candidate.dish ?? candidate.name ?? "";
-            const dishInfo = foods.find((dish) => dish.id === dishId) as any;
+            const dishInfo = foods.find((dish) => dish.id == dishId) as any;
             const voteCount = candidate.voteCount ?? candidate.votes ?? 0;
             return {
                 title: dishName,
                 subtitle: `Selected`,
                 description: dishInfo?.description ?? "",
-                imgSrc: dishInfo?.imageURL ?? dishInfo?.imageUrl ?? "",
+                imgSrc: dishInfo?.imageURL ?? dishInfo?.imageUrl ?? candidate.Dish?.imageURL ?? "",
                 voteCount: voteCount,
             };
-    });
-    })();
+        });
+    },[upcomingResults, foods]);
 
     const handleVote = async (dishId: number) => {
         try {
