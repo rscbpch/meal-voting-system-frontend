@@ -98,30 +98,31 @@ const Menu = () => {
     });
     })();
 
-    const handleVote = async (candidateId: number) => {
+    const handleVote = async (dishId: number) => {
         if (votedCardId !== null) return; {
             try {
-                await voteForDish(candidateId);
+                await voteForDish(dishId);
                 setCandidate(prev => 
                     prev.map(c => {
                         const id = (c as any).candidateDishId ?? c.dishId;
-                        if (id === candidateId) return { ...c, voteCount: (c.voteCount ?? 0) + 1};
+                        if (id === dishId) return { ...c, voteCount: (c.voteCount ?? 0) + 1};
                         return c;
                     })
                 );
-                setVotedCardId(candidateId);
+                setVotedCardId(dishId);
             } catch (error) {
                 console.error("Failed to vote for dish:", error);
             }
         }
     };
-    const handleCancelVote = async (candidateId: number) => {
+    const handleCancelVote = async (dishId: number) => {
+        console.log("Voting for dish:", dishId);
         try {
-        await cancelVote(candidateId);
+        await cancelVote(dishId);
         setCandidate(prev =>
             prev.map(c => {
             const id = (c as any).candidateDishId ?? c.dishId;
-            if (id === candidateId) return { ...c, voteCount: Math.max(0, (c.voteCount ?? 1) - 1) };
+            if (id === dishId) return { ...c, voteCount: Math.max(0, (c.voteCount ?? 1) - 1) };
             return c;
             })
         );
