@@ -49,6 +49,26 @@ export const getUpcomingResults = async (): Promise<UpcomingResult[]> => {
     const res = await API.get<UpcomingResult[]>("/results/upcoming");
     return res.data;
 };
+
+export const getTopThreeToday = async (): Promise<Array<{name: string; description?: string; imageURL?: string | null; voteCount: number;}>> => {
+    const res = await getTodayResult();
+    const dishes = Array.isArray(res?.dishes) ? res.dishes.slice() : [];
+    if (dishes.length === 0) return [];
+
+    dishes.sort((a, b) => (Number(b.voteCount ?? 0) - Number(a.voteCount ?? 0)));
+
+    return dishes.slice(0, 3).map(d => ({
+        name: d.name ?? d.dish ?? `Dish ${d.dishId ?? ''}`,
+        description: d.description ?? undefined,
+        imageURL: d.imageURL ?? null,
+        voteCount: Number(d.voteCount ?? 0),
+    }));
+};
+
+export const voteForDish = async (dishId: number) => {
+    return API.post("/votes", { dishId });
+};
+
 export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
     const res = await getTodayResult();
     const dishes = res?.dishes ?? [];
@@ -71,7 +91,4 @@ export const updateVoteForDish = async (dishId: number) => {
     return API.put("/votes", { dishId });
 }
 
-export const voteForDish = async (dishId: number) => {
-    return API.post("/votes", { dishId });
-}
 

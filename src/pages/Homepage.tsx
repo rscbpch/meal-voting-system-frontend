@@ -3,6 +3,7 @@ import { getProfile } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import RankingPodium from "../components/RankingPodium";
 import CountdownTimer from "../components/CountdownTimer";
 import PageTransition from "../components/PageTransition";
 import { API_NO_AUTH } from "../services/axios"; 
@@ -202,8 +203,10 @@ const Homepage = () => {
                         </div>
                     </div>
                     <div className={`flex flex-col justify-center ${status === 'open' ? 'py-12' : 'pt-0 pb-12'}`}>
-                        <p className="title-font font-semibold text-[32px] text-center">Today's food ranking</p>
-                        <p className="text-center">under construction</p>
+                        <p className="title-font font-semibold text-[32px] text-center">Today's top vote</p>
+                        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 mt-6">
+                            <RankingPodium />
+                        </div>
                     </div>
                 </main>
             </PageTransition>
