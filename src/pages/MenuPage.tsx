@@ -14,12 +14,19 @@ const Menu = () => {
     const [candidate, setCandidate] = useState<CandidateDish[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [votedCardId, setVotedCardId] = useState<number | null>(null);
     const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
     const [todayError, setTodayError] = useState<string | null>(null);
     const [upcomingError, setUpcomingError] = useState<string | null>(null);
-
+    const [votedCardId, setVotedCardId] = useState<number | null>(() => {
+        const stored = localStorage.getItem("votedCardId");
+        return stored ? Number(stored) : null;
+    });
     useEffect(() => {
+        if (votedCardId !== null) {
+            localStorage.setItem("votedCardId", String(votedCardId));
+        } else {
+            localStorage.removeItem("votedCardId");
+        }
         getDishes()
             .then((res) => setFoods(res.items))
             .catch(() => setError("Failed to fetch dishes"));
@@ -63,7 +70,7 @@ const Menu = () => {
                 }
             })
             .catch(() => setUpcomingError("Failed to fetch upcoming results"));
-    }, []);
+    }, [votedCardId]);
 
     const upcomingBannerItems = (() => {
         if (!upcomingResults || upcomingResults.length === 0) return [];
@@ -91,30 +98,30 @@ const Menu = () => {
     });
     })();
 
-    const handleVote = async (candidateId: number) => {
-        if (votedCardId === null) {
+    const handleVote = async (dishId: number) => {
+        if (votedCardId !== null) return; 
             try {
-                await voteForDish(candidateId);
+                console.log("Voting for dish:", dishId);
+                await voteForDish(dishId);
                 setCandidate(prev => 
                     prev.map(c => {
-                        const id = (c as any).candidatedDishId ?? c.dishId;
-                        if (id === candidateId) return { ...c, voteCount: (c.voteCount ?? 0) + 1};
+                        const id = (c as any).candidateDishId ?? c.dishId;
+                        if (id === dishId) return { ...c, voteCount: (c.voteCount ?? 0) + 1};
                         return c;
                     })
                 );
-                setVotedCardId(candidateId);
+                setVotedCardId(dishId);
             } catch (error) {
                 console.error("Failed to vote for dish:", error);
             }
-        }
     };
-    const handleCancelVote = async (candidateId: number) => {
+    const handleCancelVote = async (dishId: number) => {
         try {
-        await cancelVote(candidateId);
+        await cancelVote(dishId);
         setCandidate(prev =>
             prev.map(c => {
             const id = (c as any).candidateDishId ?? c.dishId;
-            if (id === candidateId) return { ...c, voteCount: Math.max(0, (c.voteCount ?? 1) - 1) };
+            if (id === dishId) return { ...c, voteCount: Math.max(0, (c.voteCount ?? 1) - 1) };
             return c;
             })
         );

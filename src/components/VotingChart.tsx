@@ -168,3 +168,4 @@ const VotingChart: React.FC = () => {
 };
 
 export default VotingChart;
+
