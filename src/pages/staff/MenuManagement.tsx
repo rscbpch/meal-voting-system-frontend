@@ -82,15 +82,12 @@ const MenuManagement = () => {
         fetchWishes();
     }, []);
 
-    // Filter dishes based on search and category
+    // Filter dishes based on search only (category filtering is now done on backend)
     const filteredDishes = dishes.filter((dish) => {
         const matchesSearch =
             dish.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             dish.name_kh?.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory =
-            selectedCategory === "all" ||
-            dish.categoryId?.toString() === selectedCategory;
-        return matchesSearch && matchesCategory;
+        return matchesSearch;
     });
 
     // Handle "All" category selection
@@ -106,7 +103,13 @@ const MenuManagement = () => {
         try {
             // Just refresh current page data
             const offset = (currentPage - 1) * limit;
-            const dishesData = await getDishes({ limit, offset, sort: sortBy });
+            const categoryId = selectedCategory !== "all" ? selectedCategory : undefined;
+            const dishesData = await getDishes({ 
+                limit, 
+                offset, 
+                sort: sortBy,
+                categoryId: categoryId
+            });
             
             setDishes(dishesData.items);
             setTotal(dishesData.total);
@@ -120,7 +123,13 @@ const MenuManagement = () => {
         try {
             // Just refresh current page data
             const offset = (currentPage - 1) * limit;
-            const dishesData = await getDishes({ limit, offset, sort: sortBy });
+            const categoryId = selectedCategory !== "all" ? selectedCategory : undefined;
+            const dishesData = await getDishes({ 
+                limit, 
+                offset, 
+                sort: sortBy,
+                categoryId: categoryId
+            });
             
             setDishes(dishesData.items);
             setTotal(dishesData.total);
@@ -177,18 +186,19 @@ const MenuManagement = () => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const limit = 12; // items per page
-    // Determine if filter/search is applied
-    const isFiltered = searchQuery.trim() !== "" || selectedCategory !== "all";
+    // Determine if search filter is applied (category filtering is now done on backend)
+    const isSearchFiltered = searchQuery.trim() !== "";
     
     // Check if we're currently searching (to disable animations)
     const isSearching = searchQuery.trim() !== "";
 
     // Determine total items and total pages for pagination
-    const paginationTotal = isFiltered ? filteredDishes.length : total;
+    // For search: use filtered results length, for category: use backend total
+    const paginationTotal = isSearchFiltered ? filteredDishes.length : total;
     const paginationTotalPages = Math.ceil(paginationTotal / limit);
 
     // Determine the dishes to display on the current page
-    const displayedDishes = isFiltered
+    const displayedDishes = isSearchFiltered
         ? filteredDishes.slice((currentPage - 1) * limit, currentPage * limit)
         : dishes;
 
@@ -196,7 +206,16 @@ const MenuManagement = () => {
         try {
             setDishesLoading(true);
             const offset = (page - 1) * limit;
-            const res = await getDishes({ limit, offset, sort: sortBy });
+            
+            // Determine if we should filter by category
+            const categoryId = selectedCategory !== "all" ? selectedCategory : undefined;
+            
+            const res = await getDishes({ 
+                limit, 
+                offset, 
+                sort: sortBy,
+                categoryId: categoryId
+            });
 
             if (res.success) {
                 setDishes(res.items);
@@ -209,10 +228,10 @@ const MenuManagement = () => {
         }
     };
 
-    // Fetch dishes when page changes or sort changes
+    // Fetch dishes when page changes, sort changes, or category changes
     useEffect(() => {
         fetchDishes(currentPage);
-    }, [currentPage, sortBy]);
+    }, [currentPage, sortBy, selectedCategory]);
 
     // Trigger animation when dishes are loaded and not loading
     useEffect(() => {
@@ -241,9 +260,9 @@ const MenuManagement = () => {
                             {
                                 dishesLoading
                                     ? "..."
-                                    : searchQuery || selectedCategory !== "all"
-                                    ? filteredDishes.length // show filtered count
-                                    : total // show total from backend
+                                    : isSearchFiltered
+                                    ? filteredDishes.length // show search filtered count
+                                    : total // show total from backend (includes category filtering)
                             }
                         </div>
                     </div>
