@@ -74,3 +74,4 @@ export const updateVoteForDish = async (dishId: number) => {
 export const voteForDish = async (dishId: number) => {
     return API.post("/votes", { dishId });
 }
+
