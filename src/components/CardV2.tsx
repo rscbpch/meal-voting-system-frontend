@@ -15,11 +15,12 @@ interface Card {
     onEdit?: () => void;
     onDelete?: () => void;
     onToggleWishlist?: () => void;
+    averageRating?: number;
+    wishlistCount?: number;
+    totalWishes?: number;
     onViewDetails?: () => void;
     averageFoodRating?: number;
-    totalWishes?: number;
     ranking?: number;
-    totalWishlistCount?: number;
     currentVoteCount?: number;
     isDeleting?: boolean;
 }
@@ -42,9 +43,9 @@ const FoodCard = ({
     averageFoodRating,
     totalWishes,
     ranking,
-    totalWishlistCount,
     currentVoteCount,
     isDeleting = false,
+    wishlistCount, // <-- Added this line
 }: Card) => {
     const [votes, setVotes] = useState<number>(initialVotes);
 
@@ -162,10 +163,7 @@ const FoodCard = ({
 
                                     <div className="text-[#A2A2A2] px-3">
                                         <p>
-                                            {totalWishlistCount || 0}{" "}
-                                            {totalWishlistCount === 1
-                                                ? "like"
-                                                : "likes"}
+                                            {wishlistCount || 0} {wishlistCount === 1 ? "like" : "likes"}
                                         </p>
                                     </div>
                                 </div>
