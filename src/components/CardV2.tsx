@@ -16,7 +16,7 @@ interface Card {
     isVote?: boolean;
     onEdit?: () => void;
     onDelete?: () => void;
-    onToggleWishlist?: () => void;
+    onWishChange?: () => void;
     averageRating?: number;
     wishlistCount?: number;
     totalWishes?: number;
@@ -30,6 +30,7 @@ interface Card {
 const FoodCard = ({
     name,
     categoryName,
+    dishId,
     description,
     imgURL,
     initialVotes = 0,
@@ -41,14 +42,14 @@ const FoodCard = ({
     onEdit,
     onDelete,
     onViewDetails,
+    onWishChange,
     averageFoodRating,
     totalWishes,
     ranking,
     currentVoteCount,
     isDeleting = false,
     wishlistCount, 
-    dishId,
-}: Card) => {
+}: Card ) => {
     const [votes, setVotes] = useState<number>(initialVotes);
     const [favorite, setFavorite] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -90,7 +91,7 @@ const FoodCard = ({
                 }
                 await updateUserWish(Number(cardDishId));
                 setFavorite(true);
-                window.location.reload();
+                onWishChange?.(); // notify parent to update wishes
                 setLoading(false);
                 return;
             }
@@ -113,7 +114,7 @@ const FoodCard = ({
                 }
                 await updateUserWish(Number(cardDishId));
                 setFavorite(true);
-                window.location.reload();
+                onWishChange?.();
             }
         } catch (err: any) {
             alert(err.message || "Failed to update wish.");
