@@ -40,7 +40,6 @@ const FoodCard = ({
     isVote = false,
     onEdit,
     onDelete,
-    onToggleWishlist,
     onViewDetails,
     averageFoodRating,
     totalWishes,
