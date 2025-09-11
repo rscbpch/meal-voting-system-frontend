@@ -100,7 +100,7 @@ const Wishlist = () => {
                                                 description={dish.description || ""}
                                                 imgURL={dish.imageURL || "https://via.placeholder.com/150"}
                                                 isWishlist={true}
-                                                wishlistCount={wishCount}
+                                                totalWishlistCount={wishCount}
                                             />
                                         );
                                     })}
