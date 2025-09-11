@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { getDishes } from "../services/dishService";
 import type { Dish } from "../services/dishService";
-import { getTodayResult, voteForDish, updateVoteForDish, type CandidateDish } from "../services/resultService";
+import { getTodayResult, voteForDish, updateVoteForDish, type CandidateDish, getTodayVote } from "../services/resultService";
 import { getUpcomingResults, type UpcomingResult } from "../services/resultService";
 import { useMemo } from "react";
 
@@ -36,16 +36,18 @@ const Menu = () => {
                 setCandidate(res.dishes);
                 setVotePollId(res.votePollId);
 
-                const storedPollId = localStorage.getItem("votePollId");
-                const storedDishId = localStorage.getItem("votedDishId");
-                if (storedPollId && storedDishId && Number(storedPollId) === res.votePollId) {
-                    setVotedDishId(Number(storedDishId));
-                } else {
-                    setVotedDishId(null);
-                    localStorage.removeItem("votedDishId");
-                    localStorage.setItem("votePollId", String(res.votePollId));
-                }
-                setLoading(false);
+                getTodayVote().then((vote) => {
+                    if (vote && vote.votePollId === res.votePollId) {
+                        setVotedDishId(vote.dishId);
+                        localStorage.setItem("votedDishId", String(vote.dishId));
+                        localStorage.setItem("votePollId", String(vote.votePollId));
+                    } else {
+                        setVotedDishId(null);
+                        localStorage.removeItem("votedDishId");
+                        localStorage.setItem("votePollId", String(res.votePollId));
+                    }
+                    setLoading(false);
+                });
             })
             .catch(() => {
                 setTodayError("Failed to fetch today's result");
