@@ -103,6 +103,7 @@ const Wishlist = () => {
                                             <CardV2
                                                 key={dish.id}
                                                 name={dish.name}
+                                                dishId={Number(dish.id)}
                                                 categoryName={categoryName}
                                                 description={dish.description || ""}
                                                 imgURL={dish.imageURL || "https://via.placeholder.com/150"}
