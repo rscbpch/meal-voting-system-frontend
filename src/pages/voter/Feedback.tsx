@@ -4,6 +4,7 @@ import FeedbackItem from "../../components/FeedbackItem";
 import Navbar from "../../components/Navbar";
 import { MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Footer from "../../components/Footer";
 import {
     createFeedback,
     fetchFeedbacks,
@@ -91,6 +92,9 @@ const Feedback = () => {
             setLoading(false);
         }
     };
+    useEffect(() => {
+        window.scrollTo(0, 0);
+      }, []);
 
     useEffect(() => {
         load(0);
@@ -133,11 +137,11 @@ const Feedback = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-[#F6FFE8] flex flex-col">
             <Navbar />
 
             <PageTransition className="overflow-visible">
-                <div className="max-w-6xl mx-auto pt-12 pb-10 px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="max-w-6xl mx-auto pt-12 pb-20 px-4 grid grid-cols-1 md:grid-cols-2 gap-10 ">
                     {/* Desktop sticky form */}
                     <div className="hidden md:block">
                         <div className="sticky top-[72px]">
@@ -359,6 +363,7 @@ const Feedback = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            <Footer/>
         </div>
     );
 };

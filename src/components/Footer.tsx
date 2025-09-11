@@ -1,81 +1,102 @@
-import { FaFacebookF, FaInstagramSquare, FaTiktok } from "react-icons/fa";
-import { FiMail, FiPhone, } from "react-icons/fi";
-import { GrLocation } from "react-icons/gr";
+import { Link } from 'react-router-dom';
+import { FiMail, FiPhone, FiMapPin, FiFacebook, FiInstagram } from 'react-icons/fi';
+import { FaTiktok } from 'react-icons/fa';
 
-const Footer = () => {
-    return (
-        <footer className="w-full bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 text-[12px] md:text-sm">
-                <div className="md:hidden text-center">
-                    <p className="text-2xl font-extrabold text-[#429818] mb-2"><span className="khmer-font">បាយ</span>-Canteen</p>
-                    <nav className="flex flex-wrap justify-center items-center gap-x-2 gap-y-1 text-[12px] leading-none mb-6 text-[#949494]">
-                        <a href="/" className="px-1">Home</a>
-                        <span className="text-gray-300">|</span>
-                        <a href="/menu" className="px-1">Today's menu</a>
-                        <span className="text-gray-300">|</span>
-                        <a href="/feedback" className="px-1">Feedback</a>
-                        <span className="text-gray-300">|</span>
-                        <a href="/about-us" className="px-1">About us</a>
-                        <span className="text-gray-300">|</span>
-                        <a href="mailto:mealvoting@gmail.com" className="px-1">mealvoting@gmail.com</a>
-                        <span className="text-gray-300">|</span>
-                        <a href="tel:+85512345678" className="px-1">+855 12 345 678</a>
-                    </nav>
-                    <div className="text-[16px] flex justify-center gap-3 mb-3 text-[#797979]">
-                        <a href="#" aria-label="facebook" className="hover:text-gray-600"><FaFacebookF /></a>
-                        <a href="#" aria-label="instagram" className="hover:text-gray-600"><FaInstagramSquare /></a>
-                        <a href="#" aria-label="tiktok" className="hover:text-gray-600"><FaTiktok /></a>
-                    </div>
-                </div>
-
-                <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-start">
-                    <div className="md:col-span-2">
-                        <p className="text-2xl font-extrabold text-[#429818] mb-2"><span className="khmer-font">បាយ</span>-Canteen</p>
-                        <p className="w-full lg:max-w-md">Vote daily on your preferred meals and help the canteen prepare exactly what’s in demand; fresher, tastier, and waste-free.</p>
-                        <div className="mt-4 flex items-center gap-3 text-[#747474]">
-                            <a href="#" aria-label="facebook" className="hover:text-gray-700"><FaFacebookF /></a>
-                            <a href="#" aria-label="instagram" className="hover:text-gray-700"><FaInstagramSquare /></a>
-                            <a href="#" aria-label="tiktok" className="hover:text-gray-700"><FaTiktok /></a>
-                        </div>
-                    </div>
-                    <div>
-                        <p className="text-lg font-semibold mb-4">Quick Link</p>
-                        <ul className="space-y-1">
-                            <li><a href="/" className="hover:text-gray-900 hover:underline transition">Home</a></li>
-                            <li><a href="/menu" className="hover:text-gray-900 hover:underline transition">Today's menu</a></li>
-                            <li><a href="/feedback" className="hover:text-gray-900 hover:underline transition">Feedback</a></li>
-                            <li><a href="about-us" className="hover:text-gray-900 hover:underline transition">About us</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <p className="text-lg font-semibold mb-4">Contact info</p>
-                        <ul className="space-y-3">
-                            <li className="flex items-center gap-3">
-                                <FiMail />
-                                <a href="mailto:mealvoting@gmail.com" className="hover:text-gray-900 hover:underline transition">mealvoting@gmail.com</a>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <FiPhone />
-                                <a href="tel:+85512345678" className="hover:text-gray-900 hover:underline transition">+855 12 345 678</a>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <GrLocation />
-                                <span>Phnom Penh, Cambodia</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <hr className="my-6 border-t border-gray-200 hidden md:block" />
-                <div className="flex flex-col leading-none text-[10px] md:flex-row md:text-sm items-center justify-between text-[#949494] gap-1">
-                    <div className="text-center md:text-left">© 2025 <span className="khmer-font">បាយ</span>-Canteen. All rights reserved</div>
-                    <div className="flex gap-6">
-                        <a href="#" className="hover:text-gray-700 hover:underline transition">Privacy Policy</a>
-                        <a href="#" className="hover:text-gray-700 hover:underline transition">Terms of Service</a>
-                    </div>
-                </div>
+function Footer() {
+  return (
+    <footer className="bg-white text-gray-700 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Company Info */}
+          <div className="col-span-1 md:col-span-2">
+            <h3 className="text-2xl font-bold text-[#429818] mb-4">
+              <span className="khmer-font">បាយ</span>-Canteen
+            </h3>
+            <p className="text-[#747474] mb-6 max-w-md">
+              Vote daily on your preferred meals and help the canteen prepare exactly what’s in demand —
+              fresher, tastier, and waste-free.
+            </p>
+            <div className="flex space-x-4">
+              <a href="#" className="text-[#747474] hover:text-gray-700 transition-colors">
+                <FiFacebook size={20} />
+              </a>
+              <a href="#" className="text-[#747474] hover:text-gray-700 transition-colors">
+                <FiInstagram size={20} />
+              </a>
+              <a href="#" className="text-[#747474] hover:text-gray-700 transition-colors">
+                <FaTiktok size={20} />
+              </a>
             </div>
-        </footer>
-    );
-};
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/" className="text-[#747474] hover:text-[#429818] transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/menu" className="text-[#747474] hover:text-[#429818] transition-colors">
+                  Today's Menu
+                </Link>
+              </li>
+              <li>
+                <Link to="/feedback" className="text-[#747474] hover:text-[#429818] transition-colors">
+                  Feedback
+                </Link>
+              </li>
+              <li>
+                <Link to="/about-us" className="text-[#747474] hover:text-[#429818] transition-colors">
+                  About Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <FiMail className="text-[#429818]" size={16} />
+                <a href="mailto:mealvoting@gmail.com" className="text-[#747474] hover:text-[#429818] transition-colors">
+                  mealvoting@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center space-x-3">
+                <FiPhone className="text-[#429818]" size={16} />
+                <a href="tel:+85512345678" className="text-[#747474] hover:text-[#429818] transition-colors">
+                  +855 12 345 678
+                </a>
+              </div>
+              <div className="flex items-center space-x-3">
+                <FiMapPin className="text-[#429818]" size={16} />
+                <span className="text-[#747474]">Phnom Penh, Cambodia</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-[#949494] text-sm">
+            &copy; {new Date().getFullYear()} <span className="khmer-font">បាយ</span>-Canteen. All rights reserved.
+          </p>
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <Link to="/privacy" className="text-[#949494] hover:text-[#429818] text-sm transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-[#949494] hover:text-[#429818] text-sm transition-colors">
+              Terms of Service
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
 export default Footer;
