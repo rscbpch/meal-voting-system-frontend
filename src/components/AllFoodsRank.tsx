@@ -162,7 +162,7 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
                     onClick={handleFinalizeSubmit}
                 >
                     {finalized ? "Poll Finalized" : "Submit Selected"}
-                </button>
+                </button> 
             </div>
         </div>
     );
