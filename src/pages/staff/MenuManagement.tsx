@@ -7,21 +7,19 @@ import Loading from "../../components/Loading";
 import CreateDishModal from "../../features/dish/CreateDishModal";
 import EditDishModal from "../../features/dish/EditDishModal";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import FoodDetailsPopup from "../../components/FoodDetailsPopup";
 import {
     getDishes,
     getCategories,
     deleteDish,
 } from "../../services/dishService";
 import type { Dish, Category } from "../../services/dishService";
-import { fetchAllWishes, getWishCountForDish } from "../../services/wishService";
-import type { WishData } from "../../services/wishService";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 const MenuManagement = () => {
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
-    const [wishes, setWishes] = useState<WishData[]>([]);
     const [loading, setLoading] = useState(true);
     const [dishesLoading, setDishesLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -41,6 +39,8 @@ const MenuManagement = () => {
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [deletingDishId, setDeletingDishId] = useState<number | null>(null);
     const [animateCards, setAnimateCards] = useState(false);
+    const [showDetailsPopup, setShowDetailsPopup] = useState(false);
+    const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
 
     const handleCategorySelect = (category: Category) => {
         setSelectedCategory(category.id.toString());
@@ -67,19 +67,6 @@ const MenuManagement = () => {
         fetchCategories();
     }, []);
 
-    // Fetch wishes separately
-    useEffect(() => {
-        const fetchWishesData = async () => {
-            try {
-                const wishesData = await fetchAllWishes();
-                setWishes(wishesData.dishes);
-                console.log("Wishes loaded:", wishesData.dishes);
-            } catch (error) {
-                console.error("Error fetching wishes:", error);
-            }
-        };
-        fetchWishesData();
-    }, []);
 
     // Filter dishes based on search only (category filtering is now done on backend)
     const filteredDishes = dishes.filter((dish) => {
@@ -154,6 +141,14 @@ const MenuManagement = () => {
         }
     };
 
+    const handleViewDetails = (dishId: number) => {
+        const dishToView = dishes.find((dish) => Number(dish.id) === dishId);
+        if (dishToView) {
+            setSelectedDish(dishToView);
+            setShowDetailsPopup(true);
+        }
+    };
+
     const confirmDeleteDish = async () => {
         if (!deletingDish) return;
 
@@ -167,7 +162,22 @@ const MenuManagement = () => {
             );
             
             // Update total count
-            setTotal(prevTotal => prevTotal - 1);
+            const newTotal = total - 1;
+            setTotal(newTotal);
+
+            // Check if current page becomes empty after deletion
+            const newTotalPages = Math.ceil(newTotal / limit);
+            if (currentPage > newTotalPages && newTotalPages > 0) {
+                // If current page is now beyond the total pages, go to the last page
+                setCurrentPage(newTotalPages);
+            } else if (newTotal === 0) {
+                // If no items left, stay on page 1
+                setCurrentPage(1);
+            } else {
+                // If we're still on a valid page, refresh the current page data
+                // This ensures we get fresh data from the server
+                fetchDishes(currentPage);
+            }
 
             // No alert - just close modal after successful deletion
         } catch (error) {
@@ -507,12 +517,15 @@ const MenuManagement = () => {
                                                     Number(dish.id)
                                                 )
                                             }
+                                            onViewDetails={() =>
+                                                handleViewDetails(Number(dish.id))
+                                            }
                                             isDeleting={
                                                 deletingDishId ===
                                                 Number(dish.id)
                                             }
-                                            averageRating={dish.rating || 0}
-                                            wishlistCount={getWishCountForDish(wishes, Number(dish.id))}
+                                            averageFoodRating={dish.averageFoodRating || 0}
+                                            totalWishes={dish.totalWishes || 0}
                                         />
                                     </div>
                                 ))}
@@ -560,6 +573,18 @@ const MenuManagement = () => {
                         onConfirm={confirmDeleteDish}
                         dish={deletingDish}
                         isDeleting={deletingDishId === Number(deletingDish?.id)}
+                    />
+
+                    {/* Food Details Popup */}
+                    <FoodDetailsPopup
+                        isOpen={showDetailsPopup}
+                        onClose={() => {
+                            setShowDetailsPopup(false);
+                            setSelectedDish(null);
+                        }}
+                        dish={selectedDish}
+                        isVoter={false} // Staff members are not voters
+                        totalWishes={selectedDish?.totalWishes}
                     />
                 </PageTransition>
             </main>

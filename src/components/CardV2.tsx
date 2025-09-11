@@ -16,7 +16,9 @@ interface Card {
     onDelete?: () => void;
     onToggleWishlist?: () => void;
     averageRating?: number;
-    wishlistCount?: number; // wish count for this dish
+    wishlistCount?: number;
+    onViewDetails?: () => void;
+    averageFoodRating?: number;
     ranking?: number;
     currentVoteCount?: number;
     isDeleting?: boolean;
@@ -36,8 +38,9 @@ const FoodCard = ({
     onEdit,
     onDelete,
     onToggleWishlist,
-    averageRating,
-    wishlistCount,
+    onViewDetails,
+    averageFoodRating,
+    totalWishes,
     ranking,
     currentVoteCount,
     isDeleting = false,
@@ -63,7 +66,10 @@ const FoodCard = ({
 
     return (
         <div className="flex items-end h-100 w-69">
-            <div className="flex  bg-white rounded-lg shadow-md overflow-visible w-full">
+            <div 
+                className={`flex bg-white rounded-lg shadow-md overflow-visible w-full ${onViewDetails ? 'cursor-pointer hover:shadow-lg transition-shadow duration-300' : ''}`}
+                onClick={onViewDetails}
+            >
                 {/* Inner container */}
                 <div className="relative flex flex-col p-4 pt-34 gap-4 w-full">
                     {/* Floating Image */}
@@ -81,11 +87,11 @@ const FoodCard = ({
                                         {name}
                                     </h1>
                                     {isMenuManagement &&
-                                        averageRating !== undefined && (
+                                        averageFoodRating !== undefined && (
                                             <div className="flex items-center gap-1">
                                                 <Star />
                                                 <span className="text-sm text-[#6B6B6B]">
-                                                    {averageRating.toFixed(1)}
+                                                    {averageFoodRating.toFixed(1)}
                                                 </span>
                                             </div>
                                         )}
@@ -120,7 +126,7 @@ const FoodCard = ({
                                     </svg>
 
                                     <p className="text-sm text-gray-700">
-                                        {wishlistCount || 0}
+                                        {totalWishes || 0}
                                     </p>
                                 </div>
                             ) : isWishlist ? (
@@ -187,7 +193,10 @@ const FoodCard = ({
                             {isMenuManagement ? (
                                 <div className="flex items-center gap-2">
                                     <button
-                                        onClick={onEdit}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEdit?.();
+                                        }}
                                         className="p-2 rounded-md hover:bg-gray-100 text-gray-600 group"
                                         title="Edit"
                                     >
@@ -208,7 +217,10 @@ const FoodCard = ({
                                         </svg>
                                     </button>
                                     <button
-                                        onClick={onDelete}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDelete?.();
+                                        }}
                                         disabled={isDeleting}
                                         className={`p-2 rounded-md text-gray-600 hover:bg-gray-100 group transition-colors duration-300 ${
                                             isDeleting ? 'opacity-50 cursor-not-allowed' : ''

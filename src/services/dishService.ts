@@ -16,6 +16,8 @@ export interface Dish {
     price?: number | null;
     imageURL?: string | null;
     rating?: number | null;
+    averageFoodRating?: number | null;
+    totalWishes?: number | null;
     favoritesCount?: number | null;
     categoryId?: number | string | null;
     categoryName?: string | null;
