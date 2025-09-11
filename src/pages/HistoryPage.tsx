@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { getVoteHistory, type VoteHistoryResponse } from "../services/historyService";
 import { getDishes, type Dish } from "../services/dishService";
 import LatestVote from "../components/LatestVote";
+import Navbar from "../components/Navbar";
+import PageTransition from "../components/PageTransition";
 
 const HistoryPage = () => {
     const [history, setHistory] = useState<VoteHistoryResponse | null>(null);
@@ -32,6 +34,10 @@ const HistoryPage = () => {
 
     return (
         <div>
+            <Navbar />
+            <PageTransition>
+                <div></div>
+            </PageTransition>
             <h1 className="text-center font-bold text-2xl mb-6">Your Latest Vote</h1>
             {history.userVote ? (
                 <LatestVote
