@@ -279,6 +279,7 @@ const Navbar = () => {
                                             </button>
                                             <button
                                                 onClick={() => {
+                                                    navigate("/history")
                                                     setShowUserDropdown(false);
                                                     console.log("clicked");
                                                 }}
