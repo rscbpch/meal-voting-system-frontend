@@ -165,11 +165,6 @@ const MenuManagement = () => {
         }
     };
 
-    // Calculate favorite count for selected dish
-    const getFavoriteCount = (dishId: number) => {
-        return wishes.filter(wish => Number(wish.dishId) === Number(dishId)).length;
-    };
-
     const confirmDeleteDish = async () => {
         if (!deletingDish) return;
 
