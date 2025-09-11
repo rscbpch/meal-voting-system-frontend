@@ -20,6 +20,7 @@ const Wishlist = () => {
     const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [wishes, setWishes] = useState<WishData[]>([]);
+    // const [userWish, setUserWish] = useState<number | null>(null);
     const limit = 10; // items per page
 
 
@@ -36,6 +37,10 @@ const Wishlist = () => {
                 setTotal(dishRes.total);
                 setCategories(catRes);
                 setWishes(wishRes.dishes);
+
+                // Get current user's wish from localStorage
+                // const userWishes = JSON.parse(localStorage.getItem("user_wishes") || "[]");
+                // setUserWish(userWishes[0]?.dishId ?? null);
             } catch (err: any) {
                 setError(err.message || "Failed to load data");
             } finally {
@@ -46,6 +51,16 @@ const Wishlist = () => {
     }, [currentPage]);
 
     const totalPages = Math.ceil(total / limit);
+
+    // Handler to update wishes and user wish after a wish change
+    const handleWishChange = async () => {
+        // Refetch wishes and update userWish state
+        const wishRes = await fetchAllWishes();
+        setWishes(wishRes.dishes);
+        // Also update user wish from localStorage
+    // const userWishes = JSON.parse(localStorage.getItem("user_wishes") || "[]");
+    // setUserWish(userWishes[0]?.dishId ?? null);
+    };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -110,6 +125,7 @@ const Wishlist = () => {
                                                 isWishlist={true}
                                                 wishlistCount={wishCount}
                                                 ranking={ranking}
+                                                onWishChange={handleWishChange}
                                             />
                                         );
                                     })}
