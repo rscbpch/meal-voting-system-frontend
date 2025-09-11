@@ -456,9 +456,9 @@ const Navbar = () => {
                                     </Link>
 
                                     <Link
-                                        to="/about"
+                                        to="/about-us"
                                         className={`flex items-center space-x-3 p-3 font-medium transition-colors rounded-lg cursor-pointer ${
-                                            location.pathname === "/about"
+                                            location.pathname === "/about-us"
                                                 ? "text-[#3E7B27] bg-[#EAF6E7] font-semibold"
                                                 : "text-gray-700 hover:text-[#3E7B27] hover:bg-[#EAF6E7] font-medium"
                                         }`}
