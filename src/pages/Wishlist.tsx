@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import CardV2 from "../components/CardV2";
 import Pagination from "../components/Pagination";
 import { getMostWishedDishes, getCategories } from "../services/dishService";
+import Loading from "../components/Loading";
 import type { Dish, Category } from "../services/dishService";
 import { fetchAllWishes } from "../services/wishService";
 import type { WishData } from "../services/wishService";
@@ -78,13 +79,18 @@ const Wishlist = () => {
                     {/* Food cards grid below the wishlist box */}
                     <div className="mt-8">
                         {loading ? (
-                            <div className="py-10 text-center">Loading...</div>
+                            <div className="flex justify-center items-center min-h-[300px] w-full">
+                                <Loading className="" />
+                            </div>
                         ) : error ? (
                             <div className="text-red-500 py-10 text-center">{error}</div>
                         ) : dishes.length === 0 ? (
                             <div className="py-10 text-gray-500 text-center">No dishes found.</div>
                         ) : (
                             <>
+                                <div>
+                                    <h2 className="text-[20px] font-bold">All menu</h2>
+                                </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
                                     {(Array.isArray(dishes) ? dishes.slice((currentPage - 1) * limit, currentPage * limit) : []).map((dish, idx) => {
                                         // Find category name from categories list if not present in dish
