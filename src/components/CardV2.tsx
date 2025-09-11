@@ -16,9 +16,8 @@ interface Card {
     onDelete?: () => void;
     onToggleWishlist?: () => void;
     averageRating?: number;
-    wishlistCount?: number;
+    wishlistCount?: number; // wish count for this dish
     ranking?: number;
-    totalWishlistCount?: number;
     currentVoteCount?: number;
     isDeleting?: boolean;
 }
@@ -40,7 +39,6 @@ const FoodCard = ({
     averageRating,
     wishlistCount,
     ranking,
-    totalWishlistCount,
     currentVoteCount,
     isDeleting = false,
 }: Card) => {
@@ -126,20 +124,9 @@ const FoodCard = ({
                                     </p>
                                 </div>
                             ) : isWishlist ? (
-                                <div className="text-sm text-gray-700 flex items-center">
-                                    <div className="flex items-center gap-2 pr-3 border-r border-gray-300 h-4">
-                                        <svg
-                                            width="22"
-                                            height="31"
-                                            viewBox="0 0 14 23"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                d="M7.73937 7.16312L7.22312 6.13617C7.13781 5.95785 6.87094 5.9514 6.77687 6.13617L6.26063 7.16312L5.11656 7.32425C4.91313 7.35433 4.82562 7.6014 4.97656 7.74964L5.80781 8.54457L5.61094 9.6639C5.58031 9.86371 5.79031 10.0184 5.97844 9.92601L7.00437 9.3932L8.02375 9.91742C8.21187 10.0098 8.42406 9.85511 8.39125 9.65531L8.19438 8.53597L9.02563 7.74964C9.17438 7.60355 9.08906 7.35648 8.88562 7.32425L7.74156 7.16312H7.73937ZM5.6 11.5008C5.21281 11.5008 4.9 11.808 4.9 12.1883V16.3133C4.9 16.6936 5.21281 17.0008 5.6 17.0008H8.4C8.78719 17.0008 9.1 16.6936 9.1 16.3133V12.1883C9.1 11.808 8.78719 11.5008 8.4 11.5008H5.6ZM0.7 12.8758C0.312812 12.8758 0 13.183 0 13.5633V16.3133C0 16.6936 0.312812 17.0008 0.7 17.0008H3.5C3.88719 17.0008 4.2 16.6936 4.2 16.3133V13.5633C4.2 13.183 3.88719 12.8758 3.5 12.8758H0.7ZM9.8 14.9383V16.3133C9.8 16.6936 10.1128 17.0008 10.5 17.0008H13.3C13.6872 17.0008 14 16.6936 14 16.3133V14.9383C14 14.558 13.6872 14.2508 13.3 14.2508H10.5C10.1128 14.2508 9.8 14.558 9.8 14.9383Z"
-                                                fill="#D6D6D6"
-                                            />
-                                        </svg>
+                                <div className="flex items-center gap-2">
+                                    {/* Ranking for top 3 only */}
+                                    {ranking && ranking >= 1 && ranking <= 3 && (
                                         <p
                                             className={`text-base font-semibold ${
                                                 ranking === 1
@@ -150,19 +137,29 @@ const FoodCard = ({
                                                     ? "text-[#77C74C]"
                                                     : "text-[#676767]"
                                             }`}
+                                            style={{ minWidth: 24, textAlign: "center" }}
                                         >
-                                            {ranking || 1}
+                                            {ranking}
                                         </p>
-                                    </div>
-
-                                    <div className="text-[#A2A2A2] px-3">
-                                        <p>
-                                            {totalWishlistCount || 0}{" "}
-                                            {totalWishlistCount === 1
-                                                ? "like"
-                                                : "likes"}
-                                        </p>
-                                    </div>
+                                    )}
+                                    <svg
+                                        width="20"
+                                        height="21"
+                                        viewBox="0 0 20 21"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M13.2872 3.83325C11.8564 3.83325 10.6209 4.69775 10 5.95875C9.3791 4.69775 8.1436 3.83325 6.7128 3.83325C4.6618 3.83325 3 5.60775 3 7.79175C3 9.97575 4.2719 11.9778 5.9155 13.6223C7.5591 15.2668 10 16.8333 10 16.8333C10 16.8333 12.3618 15.2928 14.0845 13.6223C15.922 11.8413 17 9.98225 17 7.79175C17 5.60125 15.3382 3.83325 13.2872 3.83325Z"
+                                            stroke="#AAD36C"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                    <p className="text-sm text-gray-700">
+                                        {wishlistCount || 0} {wishlistCount === 1 ? "like" : "likes"}
+                                    </p>
                                 </div>
                             ) : isVote ? (
                                 <div className="flex items-center justify-center gap-2">

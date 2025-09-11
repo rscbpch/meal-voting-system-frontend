@@ -115,6 +115,7 @@ export const checkDishNames = async (
         return { nameExists: false, nameKhExists: false };
     }
 };
+
 // Fetch categories
 export const getCategories = async (): Promise<Category[]> => {
     try {
@@ -238,6 +239,25 @@ export const deleteDish = async (
             err?.response?.data?.error ||
             err.message ||
             "Failed to delete dish";
+        throw new Error(msg);
+    }
+};
+
+// Fetch dishes with the most wishes (most favorited)
+export const getMostWishedDishes = async (): Promise<DishListResponse> => {
+    try {
+        // Set a large limit to fetch all dishes
+        const res = await API.get("/dishes/most-favorited", { params: { limit: 1000 } });
+        const items: Dish[] = res.data?.items || [];
+        const total: number = typeof res.data?.total === 'number' ? res.data.total : items.length;
+        const nextOffset: number | null = typeof res.data?.nextOffset === 'number' ? res.data.nextOffset : null;
+        return { success: true, items, total, nextOffset };
+    } catch (err: any) {
+        const msg =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            err.message ||
+            "Failed to fetch most wished dishes";
         throw new Error(msg);
     }
 };

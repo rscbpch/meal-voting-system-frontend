@@ -29,10 +29,10 @@ export const fetchAllWishes = async (): Promise<WishListResponse> => {
         return res.data;
     } catch (err: any) {
         const msg =
-            err?.response?.data?.message ||
-            err?.response?.data?.error ||
-            err.message ||
-            "Failed to fetch wishes";
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err.message ||
+        "Failed to fetch wishes";
         throw new Error(msg);
     }
 };
@@ -44,14 +44,6 @@ export const getTotalWishesMap = (wishes: WishData[]): Record<number, number> =>
         map[wish.dishId] = wish.totalWishes;
     });
     return map;
-};
-
-// Get top 3 dishes with the most wishes
-export const getTopWishedDishes = (wishes: WishData[]): WishData[] => {
-    return wishes
-        .slice()
-        .sort((a, b) => b.totalWishes - a.totalWishes)
-        .slice(0, 3);
 };
 
 // Helper function to get wish count for a specific dish
