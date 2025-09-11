@@ -605,7 +605,6 @@ const MenuManagement = () => {
                         }}
                         dish={selectedDish}
                         isVoter={false} // Staff members are not voters
-                        favoriteCount={selectedDish ? getFavoriteCount(Number(selectedDish.id)) : 0}
                         totalWishes={selectedDish?.totalWishes}
                     />
                 </PageTransition>
