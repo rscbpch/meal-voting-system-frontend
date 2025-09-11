@@ -169,3 +169,26 @@ export const editVotePoll = async (votePollId: number | string, votePollData: { 
 // TODO: Add other vote poll functions later
 // - getVotePolls
 // - getVotePollById
+
+/**
+ * Finalize a poll by submitting selected dishes
+ * @param pollId - The ID of the poll to finalize
+ * @param selectedDishIds - Array of selected dish IDs
+ * @returns Promise<{ message: string; pollId: number | string; finalizedDishes: (number | string)[] }>
+ */
+export const finalizeVotePoll = async (
+  pollId: number | string,
+  selectedDishIds: (number | string)[]
+): Promise<{ message: string; pollId: number | string; finalizedDishes: (number | string)[] }> => {
+  try {
+    const response = await API.post(`/polls/${pollId}/finalize`, { selectedDishIds });
+    return response.data;
+  } catch (error: any) {
+    console.error("Error finalizing vote poll:", error);
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to finalize vote poll"
+    );
+  }
+};
