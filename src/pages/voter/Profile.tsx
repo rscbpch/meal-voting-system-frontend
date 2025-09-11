@@ -162,7 +162,7 @@ const Profile = () => {
                                     </h3>
                                     <div className="space-y-3">
                                         <Link
-                                            to="/orders"
+                                            to="/history"
                                             className="block w-full text-left p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-102 hover:shadow-md"
                                         >
                                             <p className="font-medium text-gray-700 transition-colors duration-200">
