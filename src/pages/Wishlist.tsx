@@ -7,7 +7,7 @@ import Pagination from "../components/Pagination";
 import { getMostWishedDishes, getCategories } from "../services/dishService";
 import Loading from "../components/Loading";
 import type { Dish, Category } from "../services/dishService";
-import { fetchAllWishes, fetchAndStoreUserWishes } from "../services/wishService";
+import { fetchAllWishes } from "../services/wishService";
 import type { WishData } from "../services/wishService";
 
 
@@ -20,7 +20,7 @@ const Wishlist = () => {
     const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [wishes, setWishes] = useState<WishData[]>([]);
-    const [userWish, setUserWish] = useState<number | null>(null);
+    // const [userWish, setUserWish] = useState<number | null>(null);
     const limit = 10; // items per page
 
 
@@ -39,8 +39,8 @@ const Wishlist = () => {
                 setWishes(wishRes.dishes);
 
                 // Get current user's wish from localStorage
-                const userWishes = JSON.parse(localStorage.getItem("user_wishes") || "[]");
-                setUserWish(userWishes[0]?.dishId ?? null);
+                // const userWishes = JSON.parse(localStorage.getItem("user_wishes") || "[]");
+                // setUserWish(userWishes[0]?.dishId ?? null);
             } catch (err: any) {
                 setError(err.message || "Failed to load data");
             } finally {
@@ -58,8 +58,8 @@ const Wishlist = () => {
         const wishRes = await fetchAllWishes();
         setWishes(wishRes.dishes);
         // Also update user wish from localStorage
-        const userWishes = JSON.parse(localStorage.getItem("user_wishes") || "[]");
-        setUserWish(userWishes[0]?.dishId ?? null);
+    // const userWishes = JSON.parse(localStorage.getItem("user_wishes") || "[]");
+    // setUserWish(userWishes[0]?.dishId ?? null);
     };
 
     const handlePageChange = (page: number) => {
