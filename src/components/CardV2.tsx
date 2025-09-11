@@ -17,6 +17,7 @@ interface Card {
     onToggleWishlist?: () => void;
     averageRating?: number;
     wishlistCount?: number;
+    totalWishes?: number;
     onViewDetails?: () => void;
     averageFoodRating?: number;
     ranking?: number;
@@ -44,6 +45,7 @@ const FoodCard = ({
     ranking,
     currentVoteCount,
     isDeleting = false,
+    wishlistCount, // <-- Added this line
 }: Card) => {
     const [votes, setVotes] = useState<number>(initialVotes);
 
