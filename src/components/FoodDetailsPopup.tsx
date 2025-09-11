@@ -64,13 +64,12 @@ interface FoodDetailsPopupProps {
     onClose: () => void;
     dish: Dish | null;
     isVoter: boolean;
-    favoriteCount?: number;
     totalWishes?: number | null;
 }
 
 const animalIcons = [FaCat, FaDog, FaDragon, FaHippo, FaCrow, FaFrog, FaFish];
 
-const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, favoriteCount = 0, totalWishes }: FoodDetailsPopupProps) => {
+const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, totalWishes }: FoodDetailsPopupProps) => {
     const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -344,7 +343,7 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, favoriteCount = 0, t
                                                 {dish.name}
                                             </h3>
                                             {/* Backend Total Wishes */}
-                                            {totalWishes !== undefined && totalWishes !== null && totalWishes > 0 && (
+                                            {totalWishes !== undefined && totalWishes !== null && (
                                                 <div className="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
                                                     <FaHeart className="w-4 h-4" style={{ color: '#AAD36C' }} />
                                                     <span className="text-sm font-medium text-gray-700">
@@ -352,31 +351,7 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, favoriteCount = 0, t
                                                     </span>
                                                 </div>
                                             )}
-                                            {/* Fallback to favoriteCount for non-voters if no backend data */}
-                                            {!isVoter && !totalWishes && favoriteCount > 0 && (
-                                                <div className="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
-                                                    <FaHeart className="w-4 h-4" style={{ color: '#AAD36C' }} />
-                                                    <span className="text-sm font-medium text-gray-700">
-                                                        {favoriteCount}
-                                                    </span>
-                                                </div>
-                                            )}
                                         </div>
-                                        
-                                        {/* Feedback Statistics */}
-                                        {ratingStats.totalRatings > 0 && (
-                                            <div className="flex items-center gap-4 mb-4">
-                                                <div className="flex items-center gap-1 bg-yellow-50 rounded-full px-3 py-1">
-                                                    <Star filled={true} />
-                                                    <span className="text-sm font-medium text-gray-700">
-                                                        {averageRating} average
-                                                    </span>
-                                                </div>
-                                                <div className="text-sm text-gray-600">
-                                                    from {ratingStats.totalRatings} rating{ratingStats.totalRatings !== 1 ? 's' : ''}
-                                                </div>
-                                            </div>
-                                        )}
                                         
                                         {/* Description */}
                                         <p className="text-gray-600 leading-relaxed mb-4">

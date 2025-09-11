@@ -140,14 +140,14 @@ const Sidebar = () => {
                         <div className="w-full flex items-center justify-between px-3 py-2 rounded-md">
                             <div className="flex items-center gap-3">
                                 <div className="w-11 h-11 rounded-full bg-[#3E7E1F] flex items-center justify-center text-white font-semibold text-lg">
-                                    {getInitials(user?.displayName || "U")}
+                                    {getInitials(user?.displayName || user?.email || "U")}
                                 </div>
                                 <div>
                                     <p className="text-md font-medium">
-                                        {user?.displayName}
+                                        {user?.displayName || "Staff User"}
                                     </p>
                                     <p className="text-sm text-gray-500">
-                                        {user?.email}
+                                        {user?.email || "No email"}
                                     </p>
                                 </div>
                             </div>

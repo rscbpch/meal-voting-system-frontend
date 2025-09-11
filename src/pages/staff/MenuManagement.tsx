@@ -14,15 +14,12 @@ import {
     deleteDish,
 } from "../../services/dishService";
 import type { Dish, Category } from "../../services/dishService";
-import { fetchAllWishes } from "../../services/wishService";
-import type { WishData } from "../../services/wishService";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 const MenuManagement = () => {
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
-    const [wishes, setWishes] = useState<WishData[]>([]);
     const [loading, setLoading] = useState(true);
     const [dishesLoading, setDishesLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -70,19 +67,6 @@ const MenuManagement = () => {
         fetchCategories();
     }, []);
 
-    // Fetch wishes separately
-    useEffect(() => {
-        const fetchWishesData = async () => {
-            try {
-                const wishesData = await fetchAllWishes();
-                setWishes(wishesData.dishes);
-                console.log("Wishes loaded:", wishesData.dishes);
-            } catch (error) {
-                console.error("Error fetching wishes:", error);
-            }
-        };
-        fetchWishesData();
-    }, []);
 
     // Filter dishes based on search only (category filtering is now done on backend)
     const filteredDishes = dishes.filter((dish) => {
@@ -163,11 +147,6 @@ const MenuManagement = () => {
             setSelectedDish(dishToView);
             setShowDetailsPopup(true);
         }
-    };
-
-    // Calculate favorite count for selected dish
-    const getFavoriteCount = (dishId: number) => {
-        return wishes.filter(wish => Number(wish.dishId) === Number(dishId)).length;
     };
 
     const confirmDeleteDish = async () => {
@@ -605,7 +584,6 @@ const MenuManagement = () => {
                         }}
                         dish={selectedDish}
                         isVoter={false} // Staff members are not voters
-                        favoriteCount={selectedDish ? getFavoriteCount(Number(selectedDish.id)) : 0}
                         totalWishes={selectedDish?.totalWishes}
                     />
                 </PageTransition>
