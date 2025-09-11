@@ -15,6 +15,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Feedback from "./pages/voter/Feedback";
 import MenuManagement from "./pages/staff/MenuManagement";
 import FoodForVoter from "./pages/staff/FoodForVoter";
+import AboutUs from "./pages/AboutUs";
 
 const AppRoutes = () => {
     const location = useLocation();
@@ -47,6 +48,7 @@ const AppRoutes = () => {
                 <Route path="/staff-login" element={<StaffLogin />} />
                 <Route path="/auth/callback" element={<Callback />} />
                 <Route path="/setup-account" element={<SetupAccount />} />
+                <Route path="/about-us" element={<AboutUs />} />
 
                 {/* Private routes */}
                 <Route
