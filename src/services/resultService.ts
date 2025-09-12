@@ -1,5 +1,4 @@
 import API from "./axios";
-import { BACKEND_URL } from "./axios";
 
 export interface CandidateDish {
     dish: string | undefined;
