@@ -64,8 +64,12 @@ export interface TodayVoteResponse {
 
 export const getTodayVote = async (): Promise<TodayVoteResponse | null> => {
     try {
-        const res = await API.get<TodayVoteResponse>("/votes/today");
-        return res.data;
+        const res = await fetch("api/votes/today", {
+            method: "GET",
+            credentials: "include",
+        });
+        if (!res.ok) return null;
+        return await res.json();
     } catch (error) {
         return null;
     }
@@ -96,7 +100,16 @@ export const getTopThreeToday = async (): Promise<Array<{name: string; descripti
 };
 
 export const voteForDish = async (dishId: number) => {
-    return API.post("/votes", { dishId });
+    const res = await fetch("api/votes", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ dishId }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();  
 };
 
 export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
@@ -118,7 +131,14 @@ export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
 };
 
 export const updateVoteForDish = async (dishId: number) => {
-    return API.put("/votes", { dishId });
-}
+    const res = await fetch("api/votes", {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type" : "application/json" },
+        body: JSON.stringify({ dishId }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+};
 
 
