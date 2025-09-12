@@ -51,7 +51,7 @@ const Wishlist = () => {
                 const user = await getProfile();
                 setIsLoggedIn(!!user);
                 if (user) {
-                    // Fetch and store user wish in localStorage, then set state
+                    // Fetch user wish from API and set state directly
                     const wishes = await fetchAndStoreUserWishes();
                     setUserWish(wishes[0] || null);
                 } else {
@@ -69,12 +69,16 @@ const Wishlist = () => {
 
     // Handler to update wishes and user wish after a wish change
     const handleWishChange = async () => {
-        // Refetch wishes and update userWish state
+        // Refetch wishes and update userWish state from API
         const wishRes = await fetchAllWishes();
         setWishes(wishRes.dishes);
-        // Also update user wish from localStorage
-        const wishes = getUserWishesFromStorage();
-        setUserWish(wishes[0] || null);
+        // Fetch user wish from API and set state directly
+        try {
+            const wishes = await fetchAndStoreUserWishes();
+            setUserWish(wishes[0] || null);
+        } catch {
+            setUserWish(null);
+        }
     };
 
     const handlePageChange = (page: number) => {
@@ -104,14 +108,6 @@ const Wishlist = () => {
                                             const ranking = sortedWishes.findIndex(w => w.dishId === userWish.dishId) + 1;
                                             // Find category name
                                             const categoryName = userWish.categoryName && userWish.categoryName !== "" ? userWish.categoryName : (categories.find(cat => String(cat.id) === String(userWish.categoryId))?.name || "");
-                                            // Use a local fallback image if userWish.image is missing
-                                            // Use import for fallback image (Vite/React)
-                                            // eslint-disable-next-line @typescript-eslint/no-var-requires
-                                            // const fallbackImg = require("../assets/LogoGreen.svg");
-                                            // Use import instead of require
-                                            // Place at top of file: import LogoGreen from '../assets/LogoGreen.svg';
-                                            // But for inline, use dynamic import fallback
-                                            // fallback for now:
                                             const fallbackImg = '/src/assets/LogoGreen.svg';
                                             const imgSrc = userWish.image && userWish.image.trim() !== "" ? userWish.image : fallbackImg;
                                             return (
