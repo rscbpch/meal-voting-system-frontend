@@ -138,10 +138,12 @@ const Menu = () => {
                 }
                 alert("Your vote has been reset. Please vote again.");
             } catch (err: any) {
+                console.error("Vote error:", err);
                 alert(err?.response?.data?.message || "Failed to vote for dish");
             }
         } else {
             alert(error?.response?.data?.message || "Failed to vote for dish");
+            console.error("Vote error:", error);
         }
     }
     };

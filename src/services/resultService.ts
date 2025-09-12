@@ -1,4 +1,5 @@
 import API from "./axios";
+import { BACKEND_URL } from "./axios";
 
 export interface CandidateDish {
     dish: string | undefined;
@@ -64,7 +65,7 @@ export interface TodayVoteResponse {
 
 export const getTodayVote = async (): Promise<TodayVoteResponse | null> => {
     try {
-        const res = await fetch("api/votes/today", {
+        const res = await fetch("/api/votes/today", {
             method: "GET",
             credentials: "include",
         });
@@ -100,7 +101,7 @@ export const getTopThreeToday = async (): Promise<Array<{name: string; descripti
 };
 
 export const voteForDish = async (dishId: number) => {
-    const res = await fetch("api/votes", {
+    const res = await fetch(`${BACKEND_URL}/votes`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -131,7 +132,7 @@ export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
 };
 
 export const updateVoteForDish = async (dishId: number) => {
-    const res = await fetch("api/votes", {
+    const res = await fetch("/api/votes", {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type" : "application/json" },
