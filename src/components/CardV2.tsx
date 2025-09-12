@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FiHeart, FiTrash2 } from "react-icons/fi";
-import { updateUserWish, getUserWishesFromStorage, type UserWish } from "../services/wishService";
+import { updateUserWish } from "../services/wishService";
 
 interface Card {
     name: string;
@@ -54,25 +54,24 @@ const FoodCard = ({
     const [favorite, setFavorite] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
 
-    // Get the current user's wish from localStorage
-    const userWishes: UserWish[] = getUserWishesFromStorage();
-    const userWish = userWishes.length > 0 ? userWishes[0] : null;
-    const userWishDishId = userWish?.dishId ?? null;
+    // For isWishlist: persist and read favorite dishId from localStorage for the logged-in user
+    let userId = null;
+    try {
+        // You may want to adjust this to your actual user id storage logic
+        userId = JSON.parse(localStorage.getItem("user_profile") || "null")?.id;
+    } catch {}
 
-    // Use the dishId prop instead of window.dishId
-    // Fallback to undefined if not provided
+    // Use a key that is unique per user
+    const wishKey = userId ? `user_wish_${userId}` : "user_wish";
+    const storedWishDishId = Number(localStorage.getItem(wishKey));
     const cardDishId = dishId;
 
-    // Check if this card is the user's current wish
-    const isFavorite = userWishDishId === null
-        ? false
-        : (cardDishId && userWishDishId === Number(cardDishId))
-            ? true
-            : name === userWish?.dishName;
+    // For isWishlist, use localStorage for favorite state
+    const isFavorite = isWishlist && cardDishId && storedWishDishId === cardDishId;
 
-    // Keep local state in sync with storage
+    // Keep local state in sync with storage for isWishlist
     useState(() => {
-        setFavorite(isFavorite);
+        if (isWishlist) setFavorite(!!isFavorite);
     });
 
     // Handler for wishlist heart click
@@ -82,40 +81,38 @@ const FoodCard = ({
         setLoading(true);
 
         try {
-            // If user has no wish yet (dishId is null), just add this dish as wish
-            if (!userWish || userWishDishId === null) {
+            // For isWishlist, store the favorite dishId in localStorage for the user
+            if (isWishlist) {
                 if (!cardDishId) {
                     alert("Dish ID not found.");
                     setLoading(false);
                     return;
                 }
-                await updateUserWish(Number(cardDishId));
-                setFavorite(true);
-                onWishChange?.(); // notify parent to update wishes
-                setLoading(false);
-                return;
-            }
-
-            // If user already wished this dish, do nothing
-            if (isFavorite) {
-                setLoading(false);
-                return;
-            }
-
-            // If user already has a wish for another dish, confirm before changing
-            const confirmChange = window.confirm(
-                `You have already wished for "${userWish.dishName}". Do you want to change your wish to "${name}"?`
-            );
-            if (confirmChange) {
-                if (!cardDishId) {
-                    alert("Dish ID not found.");
+                // If already favorite, do nothing
+                if (storedWishDishId === cardDishId) {
                     setLoading(false);
                     return;
                 }
+                // If another wish exists, confirm before changing
+                if (storedWishDishId && storedWishDishId !== cardDishId) {
+                    const confirmChange = window.confirm(
+                        `You have already wished for another dish. Do you want to change your wish to "${name}"?`
+                    );
+                    if (!confirmChange) {
+                        setLoading(false);
+                        return;
+                    }
+                }
+                // Update backend and localStorage
                 await updateUserWish(Number(cardDishId));
+                localStorage.setItem(wishKey, String(cardDishId));
                 setFavorite(true);
                 onWishChange?.();
+                setLoading(false);
+                return;
             }
+            // fallback for other cases (should not happen)
+            setLoading(false);
         } catch (err: any) {
             alert(err.message || "Failed to update wish.");
         } finally {
@@ -240,12 +237,10 @@ const FoodCard = ({
 
                                     <div className="text-[#A2A2A2] px-3">
                                         <p>
-\\
                                             {totalWishes || 0}{" "}
                                             {totalWishes === 1
                                                 ? "like"
                                                 : "likes"}
-\
                                         </p>
                                     </div>
                                 </div>
@@ -325,8 +320,8 @@ const FoodCard = ({
                                 <button
                                     onClick={handleWishlistClick}
                                     disabled={loading}
-                                    className={`p-2 rounded-full ${isFavorite ? "text-red-500 bg-red-50" : "text-gray-400"} hover:text-red-500 hover:bg-red-50 transform hover:scale-110 transition-all duration-500 ease-in-out`}
-                                    title={isFavorite ? "This is your wish" : "Add to Wishlist"}
+                                    className={`p-2 rounded-full ${isFavorite || favorite ? "text-red-500 bg-red-50" : "text-gray-400"} hover:text-red-500 hover:bg-red-50 transform hover:scale-110 transition-all duration-500 ease-in-out`}
+                                    title={isFavorite || favorite ? "This is your wish" : "Add to Wishlist"}
                                 >
                                     <FiHeart
                                         size={18}
