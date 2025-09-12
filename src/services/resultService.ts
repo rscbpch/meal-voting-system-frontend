@@ -64,12 +64,8 @@ export interface TodayVoteResponse {
 
 export const getTodayVote = async (): Promise<TodayVoteResponse | null> => {
     try {
-        const res = await fetch("/api/votes/today", {
-            method: "GET",
-            credentials: "include",
-        });
-        if (!res.ok) return null;
-        return await res.json();
+        const res = await API.get<TodayVoteResponse>("/votes/today");
+        return res.data;
     } catch (error) {
         return null;
     }
