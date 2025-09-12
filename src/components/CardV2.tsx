@@ -42,7 +42,6 @@ const FoodCard = ({
     onViewDetails,
     averageFoodRating,
     totalWishes,
-    totalRatingCount,
     ranking,
     totalWishlistCount,
     currentVoteCount,
