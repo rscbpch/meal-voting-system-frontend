@@ -26,6 +26,7 @@ interface Card {
     ranking?: number;
     currentVoteCount?: number;
     isDeleting?: boolean;
+    currentWishDishId?: number | null;
 }
 
 const FoodCard = ({
@@ -49,39 +50,20 @@ const FoodCard = ({
     ranking,
     currentVoteCount,
     isDeleting = false,
+    currentWishDishId,
 }: Card ) => {
     const [votes, setVotes] = useState<number>(initialVotes);
-    const [favorite, setFavorite] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
-
-    // For isWishlist: persist and read favorite dishId from localStorage for the logged-in user
-    let userId = null;
-    try {
-        // You may want to adjust this to your actual user id storage logic
-        userId = JSON.parse(localStorage.getItem("user_profile") || "null")?.id;
-    } catch {}
-
-    // Use a key that is unique per user
-    const wishKey = userId ? `user_wish_${userId}` : "user_wish";
-    const storedWishDishId = Number(localStorage.getItem(wishKey));
     const cardDishId = dishId;
-
-    // For isWishlist, use localStorage for favorite state
-    const isFavorite = isWishlist && cardDishId && storedWishDishId === cardDishId;
-
-    // Keep local state in sync with storage for isWishlist
-    useState(() => {
-        if (isWishlist) setFavorite(!!isFavorite);
-    });
+    // Use prop for current favorite dishId
+    const isFavorite = isWishlist && cardDishId && currentWishDishId === cardDishId;
 
     // Handler for wishlist heart click
     const handleWishlistClick = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (loading) return;
         setLoading(true);
-
         try {
-            // For isWishlist, store the favorite dishId in localStorage for the user
             if (isWishlist) {
                 if (!cardDishId) {
                     alert("Dish ID not found.");
@@ -89,12 +71,12 @@ const FoodCard = ({
                     return;
                 }
                 // If already favorite, do nothing
-                if (storedWishDishId === cardDishId) {
+                if (currentWishDishId === cardDishId) {
                     setLoading(false);
                     return;
                 }
                 // If another wish exists, confirm before changing
-                if (storedWishDishId && storedWishDishId !== cardDishId) {
+                if (currentWishDishId && currentWishDishId !== cardDishId) {
                     const confirmChange = window.confirm(
                         `You have already wished for another dish. Do you want to change your wish to "${name}"?`
                     );
@@ -103,15 +85,12 @@ const FoodCard = ({
                         return;
                     }
                 }
-                // Update backend and localStorage
+                // Update backend
                 await updateUserWish(Number(cardDishId));
-                localStorage.setItem(wishKey, String(cardDishId));
-                setFavorite(true);
                 onWishChange?.();
                 setLoading(false);
                 return;
             }
-            // fallback for other cases (should not happen)
             setLoading(false);
         } catch (err: any) {
             alert(err.message || "Failed to update wish.");
@@ -320,13 +299,13 @@ const FoodCard = ({
                                 <button
                                     onClick={handleWishlistClick}
                                     disabled={loading}
-                                    className={`p-2 rounded-full ${isFavorite || favorite ? "text-red-500 bg-red-50" : "text-gray-400"} hover:text-red-500 hover:bg-red-50 transform hover:scale-110 transition-all duration-500 ease-in-out`}
-                                    title={isFavorite || favorite ? "This is your wish" : "Add to Wishlist"}
+                                    className={`p-2 rounded-full ${isFavorite ? "text-red-500 bg-red-50" : "text-gray-400"} hover:text-red-500 hover:bg-red-50 transform hover:scale-110 transition-all duration-500 ease-in-out`}
+                                    title={isFavorite ? "This is your wish" : "Add to Wishlist"}
                                 >
                                     <FiHeart
                                         size={18}
                                         className="transition-all duration-500 ease-in-out"
-                                        fill={isFavorite || favorite ? "#ef4444" : "none"}
+                                        fill={isFavorite ? "#ef4444" : "none"}
                                     />
                                 </button>
                             ) : (

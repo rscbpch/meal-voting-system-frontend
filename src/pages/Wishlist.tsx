@@ -180,6 +180,7 @@ const Wishlist = () => {
                                                 totalWishes={wishCount}
                                                 ranking={ranking}
                                                 onWishChange={handleWishChange}
+                                                currentWishDishId={userWish?.dishId ?? null}
                                             />
                                         );
                                     })}
