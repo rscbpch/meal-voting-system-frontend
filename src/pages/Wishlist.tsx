@@ -166,20 +166,20 @@ const Wishlist = () => {
                     {/* Show user wish card if logged in */}
                     {isLoggedIn === true ? (
                         <div>
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 flex flex-col items-center justify-center">
-                                <div className="bg-white rounded-lg flex flex-col items-center justify-center w-full min-h-[320px]">
-                                    {userWish ? (
-                                        (() => {
-                                            const dishName = userWish.dishName || userWish.name || "-";
-                                            const categoryName = userWish.categoryName || categories.find(cat => String(cat.id) === String(userWish.categoryId))?.name || "-";
-                                            const description = userWish.description || "No description available.";
-                                            const wishCount = wishes.find(w => w.dishId === userWish.dishId)?.totalWishes || 0;
-                                            const sortedWishes = [...wishes].sort((a, b) => b.totalWishes - a.totalWishes);
-                                            const ranking = sortedWishes.findIndex(w => w.dishId === userWish.dishId) + 1;
-                                            const fallbackImg = '/src/assets/LogoGreen.svg';
-                                            const imgSrc = userWish.image && userWish.image.trim() !== "" ? userWish.image : fallbackImg;
+                            {userWish ? (
+                                (() => {
+                                    const dishName = userWish.dishName || userWish.name || "-";
+                                    const categoryName = userWish.categoryName || categories.find(cat => String(cat.id) === String(userWish.categoryId))?.name || "-";
+                                    const description = userWish.description || "No description available.";
+                                    const wishCount = wishes.find(w => w.dishId === userWish.dishId)?.totalWishes || 0;
+                                    const sortedWishes = [...wishes].sort((a, b) => b.totalWishes - a.totalWishes);
+                                    const ranking = sortedWishes.findIndex(w => w.dishId === userWish.dishId) + 1;
+                                    const fallbackImg = '/src/assets/LogoGreen.svg';
+                                    const imgSrc = userWish.image && userWish.image.trim() !== "" ? userWish.image : fallbackImg;
 
-                                            return (
+                                    return (
+                                        <div>
+                                            <div className="bg-white rounded-lg flex flex-col items-center justify-center w-full min-h-[180px]">
                                                 <div className="flex flex-col md:flex-row items-center justify-between w-full p-6">
                                                     <div className="flex items-center gap-6 w-full md:w-auto">
                                                         <img
@@ -221,9 +221,13 @@ const Wishlist = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            );
-                                        })()
-                                    ) : (
+                                            </div>
+                                        </div>
+                                    );
+                                })()
+                            ) : (
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 flex flex-col items-center justify-center">
+                                    <div className="bg-white rounded-lg flex flex-col items-center justify-center w-full min-h-[320px]">
                                         <div className="flex flex-col items-center justify-center w-full h-full py-12">
                                             <div className="bg-[#F6FFE8] rounded-full w-16 h-16 flex items-center justify-center mb-4">
                                                 <FiHeart className="text-3xl text-[#4B8F29]" />
@@ -231,9 +235,9 @@ const Wishlist = () => {
                                             <h3 className="text-2xl font-semibold text-gray-700 mb-1 text-center">No favorite dish yet</h3>
                                             <p className="text-gray-500 text-center mb-6">Pick your favorite dish from the menu below</p>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     ) : isLoggedIn === false ? (
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 flex flex-col items-center justify-center">
