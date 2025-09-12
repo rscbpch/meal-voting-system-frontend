@@ -18,6 +18,7 @@ interface Card {
     onViewDetails?: () => void;
     averageFoodRating?: number;
     totalWishes?: number;
+    totalRatingCount?: number;
     ranking?: number;
     totalWishlistCount?: number;
     currentVoteCount?: number;
@@ -41,6 +42,7 @@ const FoodCard = ({
     onViewDetails,
     averageFoodRating,
     totalWishes,
+    totalRatingCount,
     ranking,
     totalWishlistCount,
     currentVoteCount,
@@ -87,15 +89,18 @@ const FoodCard = ({
                                     <h1 className="font-bold text-lg">
                                         {name}
                                     </h1>
-                                    {isMenuManagement &&
-                                        averageFoodRating !== undefined && (
-                                            <div className="flex items-center gap-1">
-                                                <Star />
-                                                <span className="text-sm text-[#6B6B6B]">
-                                                    {averageFoodRating.toFixed(1)}
-                                                </span>
-                                            </div>
-                                        )}
+                                    {isMenuManagement && (
+                                        <div className="flex items-center gap-1">
+                                            <Star />
+                                            <span className="text-sm text-[#6B6B6B]">
+                                                {averageFoodRating !== undefined && averageFoodRating !== null 
+                                                    ? averageFoodRating.toFixed(1)
+                                                    : 'No rating'
+                                                }
+
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                                 <p className="bg-[#F4F4F4] px-2 py-1 rounded text-xs text-[#919191]">
                                     {categoryName}
