@@ -1,5 +1,4 @@
 import API from "./axios";
-import { BACKEND_URL } from "./axios";
 
 export interface CandidateDish {
     dish: string | undefined;
@@ -101,16 +100,22 @@ export const getTopThreeToday = async (): Promise<Array<{name: string; descripti
 };
 
 export const voteForDish = async (dishId: number) => {
-    const res = await fetch(`${BACKEND_URL}/votes`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ dishId }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();  
+    // const res = await fetch(`${BACKEND_URL}/votes`, {
+    //     method: "POST",
+    //     credentials: "include",
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({ dishId }),
+    // });
+    // if (!res.ok) throw new Error(await res.text());
+    // return res.json();  
+    try {
+        const res = await API.post("/votes", { dishId });
+        return res.data;
+    } catch (error: any) {
+        throw error.response?.data?.error || error;
+    }
 };
 
 export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
@@ -131,15 +136,22 @@ export const getHighestVotedDish = async (): Promise<CandidateDish | null> => {
     return top ?? null;
 };
 
+// export const updateVoteForDish = async (dishId: number) => {
+//     const res = await fetch("/api/votes", {
+//         method: "PUT",
+//         credentials: "include",
+//         headers: { "Content-Type" : "application/json" },
+//         body: JSON.stringify({ dishId }),
+//     });
+//     if (!res.ok) throw new Error(await res.text());
+//     return res.json();
+// };
 export const updateVoteForDish = async (dishId: number) => {
-    const res = await fetch("/api/votes", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type" : "application/json" },
-        body: JSON.stringify({ dishId }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-};
-
+    try {
+        const res = await API.put("/votes", { dishId });
+        return res.data;
+    } catch (error: any) {
+        throw error.response?.data?.error || error;
+    }
+}
 
