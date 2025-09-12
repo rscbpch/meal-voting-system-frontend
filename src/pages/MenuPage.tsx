@@ -42,7 +42,12 @@ const Menu = () => {
                         // localStorage.setItem("votedDishId", String(vote.dishId));
                         // localStorage.setItem("votePollId", String(vote.votePollId));
                     } else {
-                        setVotedDishId(null);
+                        const storedVotedDishId = localStorage.getItem("votedDishId");
+                        if (storedVotedDishId) {
+                            setVotedDishId(Number(storedVotedDishId));
+                        } else {
+                            setVotedDishId(null);
+                        }
                         // localStorage.removeItem("votedDishId");
                         // localStorage.setItem("votePollId", String(res.votePollId));
                     }
