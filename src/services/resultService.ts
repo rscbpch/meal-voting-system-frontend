@@ -40,6 +40,19 @@ export interface UpcomingResult {
     dish: UpcomingDish[];
 }
 
+export interface TodayVoteResponse {
+    votePollId: number;
+    dishId: number;
+}
+
+export const getTodayVote = async (): Promise<TodayVoteResponse | null> => {
+    try {
+        const res = await API.get<TodayVoteResponse>("/votes/today");
+        return res.data;
+    } catch (error) {
+        return null;
+    }
+}
 export const getTodayResult = async (): Promise<TodayResult> => {
     const res = await API.get<TodayResult>("/results/today");
     return res.data;

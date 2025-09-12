@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { FiHeart, FiTrash2 } from "react-icons/fi";
+import { updateUserWish, getUserWishesFromStorage, type UserWish } from "../services/wishService";
 
 interface Card {
     name: string;
+    dishId?: number;
     categoryName: string;
     description: string;
     imgURL: string;
@@ -14,13 +16,15 @@ interface Card {
     isVote?: boolean;
     onEdit?: () => void;
     onDelete?: () => void;
-    onToggleWishlist?: () => void;
+    onWishChange?: () => void;
+    averageRating?: number;
+    wishlistCount?: number;
+    totalWishes?: number;
     onViewDetails?: () => void;
     averageFoodRating?: number;
     totalWishes?: number;
     totalRatingCount?: number;
     ranking?: number;
-    totalWishlistCount?: number;
     currentVoteCount?: number;
     isDeleting?: boolean;
 }
@@ -28,6 +32,7 @@ interface Card {
 const FoodCard = ({
     name,
     categoryName,
+    dishId,
     description,
     imgURL,
     initialVotes = 0,
@@ -38,16 +43,87 @@ const FoodCard = ({
     isVote = false,
     onEdit,
     onDelete,
-    onToggleWishlist,
     onViewDetails,
+    onWishChange,
     averageFoodRating,
     totalWishes,
     ranking,
-    totalWishlistCount,
     currentVoteCount,
     isDeleting = false,
-}: Card) => {
+    wishlistCount, 
+}: Card ) => {
     const [votes, setVotes] = useState<number>(initialVotes);
+    const [favorite, setFavorite] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+
+    // Get the current user's wish from localStorage
+    const userWishes: UserWish[] = getUserWishesFromStorage();
+    const userWish = userWishes.length > 0 ? userWishes[0] : null;
+    const userWishDishId = userWish?.dishId ?? null;
+
+    // Use the dishId prop instead of window.dishId
+    // Fallback to undefined if not provided
+    const cardDishId = dishId;
+
+    // Check if this card is the user's current wish
+    const isFavorite = userWishDishId === null
+        ? false
+        : (cardDishId && userWishDishId === Number(cardDishId))
+            ? true
+            : name === userWish?.dishName;
+
+    // Keep local state in sync with storage
+    useState(() => {
+        setFavorite(isFavorite);
+    });
+
+    // Handler for wishlist heart click
+    const handleWishlistClick = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (loading) return;
+        setLoading(true);
+
+        try {
+            // If user has no wish yet (dishId is null), just add this dish as wish
+            if (!userWish || userWishDishId === null) {
+                if (!cardDishId) {
+                    alert("Dish ID not found.");
+                    setLoading(false);
+                    return;
+                }
+                await updateUserWish(Number(cardDishId));
+                setFavorite(true);
+                onWishChange?.(); // notify parent to update wishes
+                setLoading(false);
+                return;
+            }
+
+            // If user already wished this dish, do nothing
+            if (isFavorite) {
+                setLoading(false);
+                return;
+            }
+
+            // If user already has a wish for another dish, confirm before changing
+            const confirmChange = window.confirm(
+                `You have already wished for "${userWish.dishName}". Do you want to change your wish to "${name}"?`
+            );
+            if (confirmChange) {
+                if (!cardDishId) {
+                    alert("Dish ID not found.");
+                    setLoading(false);
+                    return;
+                }
+                await updateUserWish(Number(cardDishId));
+                setFavorite(true);
+                onWishChange?.();
+            }
+        } catch (err: any) {
+            alert(err.message || "Failed to update wish.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleVote = () => {
         if (!disabled && onVote) {
@@ -166,10 +242,7 @@ const FoodCard = ({
 
                                     <div className="text-[#A2A2A2] px-3">
                                         <p>
-                                            {totalWishlistCount || 0}{" "}
-                                            {totalWishlistCount === 1
-                                                ? "like"
-                                                : "likes"}
+                                            {wishlistCount || 0} {wishlistCount === 1 ? "like" : "likes"}
                                         </p>
                                     </div>
                                 </div>
@@ -247,13 +320,15 @@ const FoodCard = ({
                                 </div>
                             ) : isWishlist ? (
                                 <button
-                                    onClick={onToggleWishlist}
-                                    className="p-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transform hover:scale-110 transition-all duration-500 ease-in-out"
-                                    title="Add to Wishlist"
+                                    onClick={handleWishlistClick}
+                                    disabled={loading}
+                                    className={`p-2 rounded-full ${isFavorite ? "text-red-500 bg-red-50" : "text-gray-400"} hover:text-red-500 hover:bg-red-50 transform hover:scale-110 transition-all duration-500 ease-in-out`}
+                                    title={isFavorite ? "This is your wish" : "Add to Wishlist"}
                                 >
                                     <FiHeart
                                         size={18}
                                         className="transition-all duration-500 ease-in-out"
+                                        fill={isFavorite || favorite ? "#ef4444" : "none"}
                                     />
                                 </button>
                             ) : (
