@@ -37,8 +37,8 @@ const Menu = () => {
                 setVotePollId(res.votePollId);
 
                 getTodayVote().then((vote) => {
-                    if (vote && vote.votePollId === res.votePollId) {
-                        setVotedDishId(vote.dishId);
+                    if (vote && vote.votePollId === res.votePollId && vote.userVote) {
+                        setVotedDishId(vote.userVote.dishId);
                         // localStorage.setItem("votedDishId", String(vote.dishId));
                         // localStorage.setItem("votePollId", String(vote.votePollId));
                     } else {
@@ -167,8 +167,8 @@ const Menu = () => {
                                 categoryId={Number(candidate.categoryId) ?? 0}
                                 description={candidate.description ?? ""}
                                 imgURL={candidate.imageURL ?? ""}
-                                initialVotes={candidate.voteCount}
-                                hasVoted={votedDishId === candidate.dishId}
+                                initialVotes={candidate.voteCount}  
+                                hasVoted={Number(votedDishId) === Number(candidate.dishId)}
                                 disabled={false} // show button for everyone
                                 onVote={() => {
                                     if (!isLoggedIn) {

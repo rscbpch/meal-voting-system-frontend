@@ -42,7 +42,24 @@ export interface UpcomingResult {
 
 export interface TodayVoteResponse {
     votePollId: number;
-    dishId: number;
+    voteDate: string;
+    userVote?: {
+        id: number;
+        votePollId: number;
+        dishId: number;
+        userId: number;
+        Dish: {
+            id: number;
+            name: string;
+            name_kh?: string;
+        };
+    };
+    candidateDishes?: Array<{
+        id: number;
+        dishId: number;
+        name: string;
+        name_kh?: string;
+    }>
 }
 
 export const getTodayVote = async (): Promise<TodayVoteResponse | null> => {
