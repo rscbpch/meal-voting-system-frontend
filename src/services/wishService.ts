@@ -1,3 +1,68 @@
+// Update the current user's wish (change the wished dish)
+export const updateUserWish = async (dishId: number): Promise<UserWish> => {
+    try {
+        const res = await API.put("/wishes", { dishId });
+        // The API returns the updated wish object
+        return res.data;
+    } catch (err: any) {
+        const msg =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            err.message ||
+            "Failed to update user wish";
+        throw new Error(msg);
+    }
+};
+
+// Type for a user's own wish
+export interface UserWish {
+    dishId: number;
+    dishName: string;
+    dishNameKh: string;
+    image: string;
+    description: string;
+    descriptionKh: string;
+    categoryId: number;
+    categoryName: string;
+    updatedAt: string;
+}
+
+const USER_WISHES_KEY = "user_wishes";
+
+// Fetch current user's wishes and store in localStorage
+export const fetchAndStoreUserWishes = async (): Promise<UserWish[]> => {
+    try {
+        const res = await API.get("/wishes/mine");
+        // The API may return a single wish or an array; normalize to array
+        const wishes: UserWish[] = Array.isArray(res.data)
+            ? res.data
+            : res.data
+                ? [res.data]
+                : [];
+        localStorage.setItem(USER_WISHES_KEY, JSON.stringify(wishes));
+        return wishes;
+    } catch (err: any) {
+        // On error, clear local storage for user wishes
+        localStorage.removeItem(USER_WISHES_KEY);
+        const msg =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            err.message ||
+            "Failed to fetch user wishes";
+        throw new Error(msg);
+    }
+};
+
+// Get user wishes from localStorage
+export const getUserWishesFromStorage = (): UserWish[] => {
+    const wishes = localStorage.getItem(USER_WISHES_KEY);
+    if (!wishes) return [];
+    try {
+        return JSON.parse(wishes);
+    } catch {
+        return [];
+    }
+};
 import API from "./axios";
 
 export interface WishData {
@@ -29,10 +94,10 @@ export const fetchAllWishes = async (): Promise<WishListResponse> => {
         return res.data;
     } catch (err: any) {
         const msg =
-            err?.response?.data?.message ||
-            err?.response?.data?.error ||
-            err.message ||
-            "Failed to fetch wishes";
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err.message ||
+        "Failed to fetch wishes";
         throw new Error(msg);
     }
 };
@@ -44,14 +109,6 @@ export const getTotalWishesMap = (wishes: WishData[]): Record<number, number> =>
         map[wish.dishId] = wish.totalWishes;
     });
     return map;
-};
-
-// Get top 3 dishes with the most wishes
-export const getTopWishedDishes = (wishes: WishData[]): WishData[] => {
-    return wishes
-        .slice()
-        .sort((a, b) => b.totalWishes - a.totalWishes)
-        .slice(0, 3);
 };
 
 // Helper function to get wish count for a specific dish
