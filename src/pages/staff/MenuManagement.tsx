@@ -14,7 +14,7 @@ import {
     deleteDish,
 } from "../../services/dishService";
 import type { Dish, Category } from "../../services/dishService";
-import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 const MenuManagement = () => {
@@ -48,6 +48,7 @@ const MenuManagement = () => {
         setDisplayMode("category");
         setShowCategoryDropdown(false);
         setCurrentPage(1); // Reset to first page when filtering
+        setSortBy("recent"); // Clear sort filter to avoid conflicts with category filtering
     };
     // Fetch categories when component mounts (like FoodForVoter)
     useEffect(() => {
@@ -69,12 +70,15 @@ const MenuManagement = () => {
 
 
     // Filter dishes based on search only (category filtering is now done on backend)
-    const filteredDishes = dishes.filter((dish) => {
-        const matchesSearch =
-            dish.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            dish.name_kh?.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesSearch;
-    });
+    // Note: This filtering is only applied when there's a search query
+    const filteredDishes = searchQuery.trim() !== "" 
+        ? dishes.filter((dish) => {
+            const matchesSearch =
+                dish.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                dish.name_kh?.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesSearch;
+        })
+        : dishes;
 
     // Handle "All" category selection
     const handleAllCategorySelect = () => {
@@ -82,6 +86,14 @@ const MenuManagement = () => {
         setSelectedCategory("all");
         setSelectedCategoryObj(null);
         setCurrentPage(1); // Reset to first page
+        setSearchQuery(""); // Clear search query
+        setSortBy("recent"); // Reset to recent sort
+    };
+
+    // Handle clearing search input
+    const handleClearSearch = () => {
+        setSearchQuery("");
+        setCurrentPage(1); // Reset to first page when clearing search
     };
 
     const handleDishCreated = async () => {
@@ -198,49 +210,101 @@ const MenuManagement = () => {
     // Determine if search filter is applied (category filtering is now done on backend)
     const isSearchFiltered = searchQuery.trim() !== "";
     
+    // Check if we're using special sorts that fetch all items
+    const isSpecialSort = sortBy === "most_rated" || sortBy === "most_favorite";
+    
     // Check if we're currently searching (to disable animations)
     const isSearching = searchQuery.trim() !== "";
 
     // Determine total items and total pages for pagination
-    // For search: use filtered results length, for category: use backend total
-    const paginationTotal = isSearchFiltered ? filteredDishes.length : total;
+    // For search or special sorts: use filtered results length, for category: use backend total
+    const paginationTotal = (isSearchFiltered || isSpecialSort) ? filteredDishes.length : total;
     const paginationTotalPages = Math.ceil(paginationTotal / limit);
 
     // Determine the dishes to display on the current page
-    const displayedDishes = isSearchFiltered
+    // For search filtering or special sorts: slice the client-side filtered results
+    // For category filtering: use the server-side paginated results directly
+    const displayedDishes = (isSearchFiltered || isSpecialSort)
         ? filteredDishes.slice((currentPage - 1) * limit, currentPage * limit)
         : dishes;
+
 
     const fetchDishes = async (page: number) => {
         try {
             setDishesLoading(true);
-            const offset = (page - 1) * limit;
             
-            // Determine if we should filter by category
-            const categoryId = selectedCategory !== "all" ? selectedCategory : undefined;
+            // For most-rated and most-favorited, ignore category filter and show all dishes
+            // For other sorts, use category filter if selected
+            const isSpecialSort = sortBy === "most_rated" || sortBy === "most_favorite";
+            const categoryId = (isSpecialSort || selectedCategory === "all") ? undefined : selectedCategory;
+            
+            // For special sorts (most-rated/most-favorited), fetch ALL items since they don't support category filtering
+            // If there's a search query, fetch ALL items for client-side filtering and pagination
+            // Otherwise, use server-side pagination
+            const isSearchActive = searchQuery.trim() !== "";
+            const shouldFetchAll = isSearchActive || isSpecialSort;
+            const offset = shouldFetchAll ? 0 : (page - 1) * limit;
+            const fetchLimit = shouldFetchAll ? 1000 : limit; // Fetch more items when searching or using special sorts
+            
+            console.log('Fetching dishes with params:', {
+                sortBy,
+                isSpecialSort,
+                categoryId,
+                selectedCategory,
+                page,
+                limit,
+                shouldFetchAll,
+                fetchLimit
+            });
             
             const res = await getDishes({ 
-                limit, 
+                limit: fetchLimit, 
                 offset, 
                 sort: sortBy,
                 categoryId: categoryId
             });
 
+
             if (res.success) {
+                console.log('Successfully fetched dishes:', {
+                    itemsCount: res.items.length,
+                    total: res.total,
+                    sortBy,
+                    isSpecialSort,
+                    shouldFetchAll
+                });
                 setDishes(res.items);
                 setTotal(res.total);
+            } else {
+                console.error('API returned unsuccessful response:', res);
+                // Keep existing dishes if API fails
             }
         } catch (err) {
-            console.error(err);
+            console.error('Error fetching dishes:', err);
+            // Don't clear existing dishes on error to prevent blank page
+            // setDishes([]);
+            // setTotal(0);
         } finally {
             setDishesLoading(false);
         }
     };
 
-    // Fetch dishes when page changes, sort changes, or category changes
+    // Reset to page 1 when search query changes
+    useEffect(() => {
+        if (searchQuery.trim() !== "") {
+            setCurrentPage(1);
+        }
+    }, [searchQuery]);
+
+    // Reset to page 1 when sort changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [sortBy]);
+
+    // Fetch dishes when page changes, sort changes, category changes, or search query changes
     useEffect(() => {
         fetchDishes(currentPage);
-    }, [currentPage, sortBy, selectedCategory]);
+    }, [currentPage, sortBy, selectedCategory, searchQuery]);
 
     // Trigger animation when dishes are loaded and not loading
     useEffect(() => {
@@ -269,8 +333,8 @@ const MenuManagement = () => {
                             {
                                 dishesLoading
                                     ? "..."
-                                    : isSearchFiltered
-                                    ? filteredDishes.length // show search filtered count
+                                    : (isSearchFiltered || isSpecialSort)
+                                    ? filteredDishes.length // show search filtered count or special sort count
                                     : total // show total from backend (includes category filtering)
                             }
                         </div>
@@ -388,8 +452,17 @@ const MenuManagement = () => {
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
                                     }
-                                    className="pl-10 pr-4 py-2 bg-white rounded-lg shadow-sm focus:outline-none focus:border-[#429818]  focus:ring-1 focus:ring-[#429818]  w-64"
+                                    className="pl-10 pr-10 py-2 bg-white rounded-lg shadow-sm focus:outline-none focus:border-[#429818] focus:ring-1 focus:ring-[#429818] w-64"
                                 />
+                                {searchQuery && (
+                                    <button
+                                        onClick={handleClearSearch}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors"
+                                        aria-label="Clear search"
+                                    >
+                                        <XMarkIcon className="h-5 w-5" />
+                                    </button>
+                                )}
                             </div>
 
                             {/* Sort Dropdown */}
@@ -404,7 +477,7 @@ const MenuManagement = () => {
                                             ? "Recently Added"
                                             : sortBy === "most_rated"
                                             ? "Most Rated"
-                                            : "Most Favorite"}
+                                            : "Most Favorited"}
                                     </span>
                                     <ChevronDownIcon className="h-4 w-4 text-gray-400" />
                                 </button>
@@ -415,6 +488,7 @@ const MenuManagement = () => {
                                             <button
                                                 onClick={() => {
                                                     setSortBy("recent");
+                                                    setCurrentPage(1); // Reset to page 1
                                                     setShowSortDropdown(false);
                                                 }}
                                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -424,6 +498,11 @@ const MenuManagement = () => {
                                             <button
                                                 onClick={() => {
                                                     setSortBy("most_rated");
+                                                    setCurrentPage(1); // Reset to page 1
+                                                    // Clear category filter for special sorts
+                                                    if (selectedCategory !== "all") {
+                                                        handleAllCategorySelect();
+                                                    }
                                                     setShowSortDropdown(false);
                                                 }}
                                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -433,17 +512,23 @@ const MenuManagement = () => {
                                             <button
                                                 onClick={() => {
                                                     setSortBy("most_favorite");
+                                                    setCurrentPage(1); // Reset to page 1
+                                                    // Clear category filter for special sorts
+                                                    if (selectedCategory !== "all") {
+                                                        handleAllCategorySelect();
+                                                    }
                                                     setShowSortDropdown(false);
                                                 }}
                                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             >
-                                                Most Favorite
+                                                Most Favorited
                                             </button>
                                             <div className="border-t border-gray-200 my-1"></div>
                                             <button
                                                 onClick={() => {
                                                     setSearchQuery("");
                                                     setSortBy("recent");
+                                                    setCurrentPage(1); // Reset to page 1
                                                     setShowSortDropdown(false);
                                                     handleAllCategorySelect();
                                                 }}
@@ -479,56 +564,68 @@ const MenuManagement = () => {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {displayedDishes.map((dish, index) => (
-                                    <div
-                                        key={dish.id}
-                                        className={
-                                            animateCards && !isSearching && !dishesLoading
-                                                ? "animate-fade-in-up"
-                                                : "opacity-100"
-                                        }
-                                        style={{
-                                            animationDelay: animateCards && !isSearching && !dishesLoading
-                                                ? `${index * 100}ms`
-                                                : "0ms",
-                                            animationFillMode: "both",
-                                        }}
-                                    >
-                                        <CardV2
-                                            name={
-                                                dish.name ||
-                                                dish.name_kh ||
-                                                "Food item"
-                                            }
-                                            categoryName={
-                                                categories.find(
-                                                    (c) =>
-                                                        c.id === dish.categoryId
-                                                )?.name || "Uncategorized"
-                                            }
-                                            description={dish.description || ""}
-                                            imgURL={dish.imageURL || ""}
-                                            isMenuManagement={true}
-                                            onEdit={() =>
-                                                handleEditDish(Number(dish.id))
-                                            }
-                                            onDelete={() =>
-                                                handleDeleteDish(
-                                                    Number(dish.id)
-                                                )
-                                            }
-                                            onViewDetails={() =>
-                                                handleViewDetails(Number(dish.id))
-                                            }
-                                            isDeleting={
-                                                deletingDishId ===
-                                                Number(dish.id)
-                                            }
-                                            averageFoodRating={dish.averageFoodRating || 0}
-                                            totalWishes={dish.totalWishes || 0}
-                                        />
-                                    </div>
-                                ))}
+                                {displayedDishes.map((dish, index) => {
+                                    try {
+                                        return (
+                                            <div
+                                                key={dish.id}
+                                                className={
+                                                    animateCards && !isSearching && !dishesLoading
+                                                        ? "animate-fade-in-up"
+                                                        : "opacity-100"
+                                                }
+                                                style={{
+                                                    animationDelay: animateCards && !isSearching && !dishesLoading
+                                                        ? `${index * 100}ms`
+                                                        : "0ms",
+                                                    animationFillMode: "both",
+                                                }}
+                                            >
+                                                <CardV2
+                                                    name={
+                                                        dish.name ||
+                                                        dish.name_kh ||
+                                                        "Food item"
+                                                    }
+                                                    categoryName={
+                                                        categories.find(
+                                                            (c) =>
+                                                                c.id === dish.categoryId
+                                                        )?.name || "Uncategorized"
+                                                    }
+                                                    description={dish.description || ""}
+                                                    imgURL={dish.imageURL || ""}
+                                                    isMenuManagement={true}
+                                                    onEdit={() =>
+                                                        handleEditDish(Number(dish.id))
+                                                    }
+                                                    onDelete={() =>
+                                                        handleDeleteDish(
+                                                            Number(dish.id)
+                                                        )
+                                                    }
+                                                    onViewDetails={() =>
+                                                        handleViewDetails(Number(dish.id))
+                                                    }
+                                                    isDeleting={
+                                                        deletingDishId ===
+                                                        Number(dish.id)
+                                                    }
+                                                    averageFoodRating={dish.averageFoodRating || 0}
+                                                    totalWishes={dish.totalWishes || 0}
+                                                    totalRatingCount={dish.totalRatingCount || 0}
+                                                />
+                                            </div>
+                                        );
+                                    } catch (error) {
+                                        console.error('Error rendering dish card:', error, dish);
+                                        return (
+                                            <div key={dish.id} className="p-4 border border-red-200 rounded-lg bg-red-50">
+                                                <p className="text-red-600">Error loading dish: {dish.name || dish.id}</p>
+                                            </div>
+                                        );
+                                    }
+                                })}
                             </div>
                         )}
                     </div>

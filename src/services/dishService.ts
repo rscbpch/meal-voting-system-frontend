@@ -18,6 +18,7 @@ export interface Dish {
     rating?: number | null;
     averageFoodRating?: number | null;
     totalWishes?: number | null;
+    totalRatingCount?: number | null;
     favoritesCount?: number | null;
     categoryId?: number | string | null;
     categoryName?: string | null;
@@ -58,22 +59,95 @@ export type UpdateDishForm = Partial<Omit<CreateDishForm, "image_kh">> & {
 export const getDishes = async (
     params: GetDishesParams = {}
 ): Promise<DishListResponse> => {
-    const { categoryId, limit, offset } = params;
+    const { categoryId, limit, offset, sort } = params;
     try {
-        // Backend endpoint supports pagination
-        const res = categoryId
-            ? await API.get(`/dishes/category/${categoryId}`, {
-                  params: { limit, offset },
-              })
-            : await API.get(`/dishes`, { params: { limit, offset } });
+        let res;
+        
+        // Use specific endpoints for most-rated and most-favorited when those filters are selected
+        if (sort === "most_rated") {
+            try {
+                console.log('Using most-rated endpoint with params:', { limit, offset });
+                res = await API.get(`/dishes/most-rated`, {
+                    params: { limit, offset },
+                });
+                console.log('Most-rated response:', res.status, res.data);
+            } catch (error: any) {
+                console.error('Most-rated endpoint failed, falling back to regular endpoint:', error);
+                // Fallback to regular endpoint if specific endpoint fails
+                res = await API.get(`/dishes`, { 
+                    params: { limit, offset, sort: "most_rated" } 
+                });
+            }
+        } else if (sort === "most_favorite") {
+            try {
+                console.log('Using most-favorited endpoint with params:', { limit, offset });
+                res = await API.get(`/dishes/most-favorited`, {
+                    params: { limit, offset },
+                });
+                console.log('Most-favorited response:', res.status, res.data);
+            } catch (error: any) {
+                console.error('Most-favorited endpoint failed, falling back to regular endpoint:', error);
+                // Fallback to regular endpoint if specific endpoint fails
+                res = await API.get(`/dishes`, { 
+                    params: { limit, offset, sort: "most_favorite" } 
+                });
+            }
+        } else {
+            // Use regular endpoints for recent and other sorts
+            res = categoryId
+                ? await API.get(`/dishes/category/${categoryId}`, {
+                      params: { limit, offset, sort },
+                  })
+                : await API.get(`/dishes`, { params: { limit, offset, sort } });
+        }
 
         // Handle different response structures
-        const items: Dish[] = res.data?.items || res.data?.data || [];
-        const total: number = res.data?.total || items.length;
+        const rawItems: any[] = res.data?.items || res.data?.data || [];
+        const total: number = res.data?.total || rawItems.length;
         const nextOffset: number | null = res.data?.nextOffset ?? null;
+
+        // Map backend field names to frontend field names with proper validation
+        const items: Dish[] = rawItems.map(item => {
+            // Ensure we have valid data for required fields
+            const mappedItem = {
+                ...item,
+                // Map backend field names to frontend expected names with fallbacks
+                averageFoodRating: item.averageRating !== undefined ? Number(item.averageRating) : 
+                                 item.averageFoodRating !== undefined ? Number(item.averageFoodRating) : 0,
+                totalRatingCount: item.ratingCount !== undefined ? Number(item.ratingCount) : 
+                                item.totalRatingCount !== undefined ? Number(item.totalRatingCount) : 0,
+                totalWishes: item.wishCount !== undefined ? Number(item.wishCount) : 
+                           item.totalWishes !== undefined ? Number(item.totalWishes) : 0,
+                // Ensure required fields have fallbacks
+                name: item.name || 'Unknown Dish',
+                categoryName: item.categoryName || 'Uncategorized',
+                imageURL: item.imageURL || '',
+                description: item.description || ''
+            };
+            
+            console.log('Mapped item:', {
+                id: mappedItem.id,
+                name: mappedItem.name,
+                averageFoodRating: mappedItem.averageFoodRating,
+                totalRatingCount: mappedItem.totalRatingCount,
+                totalWishes: mappedItem.totalWishes
+            });
+            
+            return mappedItem;
+        });
 
         return { success: true, items, total, nextOffset };
     } catch (err: any) {
+        console.error('Error in getDishes:', {
+            sort,
+            categoryId,
+            limit,
+            offset,
+            error: err,
+            status: err?.response?.status,
+            data: err?.response?.data
+        });
+        
         const msg =
             err?.response?.data?.message ||
             err?.response?.data?.error ||
