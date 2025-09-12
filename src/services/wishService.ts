@@ -23,6 +23,7 @@ export interface WishListResponse {
 
 // Type for a user's own wish
 export interface UserWish {
+    name: string;
     dishId: number;
     dishName: string;
     dishNameKh: string;
@@ -86,16 +87,25 @@ const USER_WISHES_KEY = "user_wishes";
 export const fetchAndStoreUserWishes = async (): Promise<UserWish[]> => {
     try {
         const res = await API.get("/wishes/mine");
-        // The API may return a single wish or an array; normalize to array
+        // Map API fields to UserWish interface if needed
         const wishes: UserWish[] = Array.isArray(res.data)
-            ? res.data
+            ? res.data.map(wish => ({
+                ...wish,
+                dishName: wish.dishName || wish.name || "",
+                description: wish.description || wish.desc || "",
+                categoryName: wish.categoryName || wish.catName || "",
+            }))
             : res.data
-                ? [res.data]
+                ? [{
+                    ...res.data,
+                    dishName: res.data.dishName || res.data.name || "",
+                    description: res.data.description || res.data.desc || "",
+                    categoryName: res.data.categoryName || res.data.catName || "",
+                }]
                 : [];
         localStorage.setItem(USER_WISHES_KEY, JSON.stringify(wishes));
         return wishes;
     } catch (err: any) {
-        // On error, clear local storage for user wishes
         localStorage.removeItem(USER_WISHES_KEY);
         const msg =
             err?.response?.data?.message ||
