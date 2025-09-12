@@ -11,19 +11,88 @@ import { fetchAllWishes, fetchAndStoreUserWishes } from "../services/wishService
 import type { WishData, UserWish } from "../services/wishService";
 import { getProfile } from "../services/authService";
 
-const Wishlist = () => {
-    const [dishes, setDishes] = useState<Dish[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
+// Mock categories
+const mockCategories: Category[] = [
+    { id: 1, name: "Soups & Stews" },
+    { id: 2, name: "Grilled" },
+];
 
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+// Mock dishes
+const mockDishes: Dish[] = [
+    {
+        id: 12,
+        name: "Beef Soup",
+        description: "A healthy soup made with beef and Khmer herbs",
+        imageURL: "https://pub-26c75c3ff0b349439d5f6ea652b128d8.r2.dev/dishes/1757131117500_BeefSoup.jpg",
+        categoryId: 1,
+        categoryName: "Soups & Stews",
+    },
+    {
+        id: 13,
+        name: "Grilled Chicken",
+        description: "Juicy grilled chicken with local spices",
+        imageURL: "https://via.placeholder.com/150",
+        categoryId: 2,
+        categoryName: "Grilled",
+    },
+];
+
+// Mock wishes
+const mockWishes: WishData[] = [
+    {
+        dishId: 12,
+        name: "Beef Soup",
+        imageUrl: "https://pub-26c75c3ff0b349439d5f6ea652b128d8.r2.dev/dishes/1757131117500_BeefSoup.jpg",
+        categoryId: 1,
+        categoryName: "Soups & Stews",
+        totalWishes: 15,
+    },
+    {
+        dishId: 13,
+        name: "Grilled Chicken",
+        imageUrl: "https://via.placeholder.com/150",
+        categoryId: 2,
+        categoryName: "Grilled",
+        totalWishes: 8,
+    },
+];
+
+// Mock user wish
+const mockUserWish: UserWish = {
+    name: "Beef Soup",
+    dishId: 12,
+    dishName: "Beef Soup",
+    dishNameKh: "ស៊ុបសាច់គោ",
+    image: "https://pub-26c75c3ff0b349439d5f6ea652b128d8.r2.dev/dishes/1757131117500_BeefSoup.jpg",
+    description: "A healthy soup made with beef and Khmer herbs",
+    descriptionKh: "ស៊ុបសាច់គោខ្មែរ",
+    categoryId: 1,
+    categoryName: "Soups & Stews",
+    updatedAt: "2025-09-12T07:31:05.830Z",
+};
+
+const Wishlist = () => {
+    // const [dishes, setDishes] = useState<Dish[]>([]);
+    // const [categories, setCategories] = useState<Category[]>([]);
+    // const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+    // const [loading, setLoading] = useState(false);
+    // const [error, setError] = useState<string | null>(null);
+    // const [total, setTotal] = useState(0);
+    // const [currentPage, setCurrentPage] = useState(1);
+    // const [wishes, setWishes] = useState<WishData[]>([]);
+    // const [userWish, setUserWish] = useState<UserWish | null>(null);
+    // const limit = 10;
+
+    const [dishes, setDishes] = useState<Dish[]>(mockDishes);
+    const [categories, setCategories] = useState<Category[]>(mockCategories);
+    const [wishes, setWishes] = useState<WishData[]>(mockWishes);
+    const [userWish, setUserWish] = useState<UserWish | null>(mockUserWish);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [total, setTotal] = useState(0);
+    const [total, setTotal] = useState(mockDishes.length);
     const [currentPage, setCurrentPage] = useState(1);
-    const [wishes, setWishes] = useState<WishData[]>([]);
-    const [userWish, setUserWish] = useState<UserWish | null>(null);
     const limit = 10;
-    // const [userWish, setUserWish] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -91,12 +160,12 @@ const Wishlist = () => {
             <Navbar />
             <PageTransition>
                 <main className="min-h-screen mx-auto p-6 bg-[#F6FFE8]">
+                    <div>
+                        <h2 className="text-[20px] font-bold">Your wishlist</h2>
+                    </div>
                     {/* Show user wish card if logged in */}
                     {isLoggedIn === true ? (
                         <div>
-                            <div>
-                                <h2 className="text-[20px] font-bold">Your wishlist</h2>
-                            </div>
                             <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 flex flex-col items-center justify-center">
                                 <div className="bg-white rounded-lg flex flex-col items-center justify-center w-full min-h-[320px]">
                                     {userWish ? (
@@ -124,24 +193,33 @@ const Wishlist = () => {
                                                         <p className="text-gray-500 text-sm max-w-md">{description}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-col items-center mt-6 md:mt-0 md:ml-8">
-                                                        <div className="flex items-center gap-4">
-                                                            {/* Ranking */}
-                                                            <div className="flex items-center gap-1 pr-3 border-r border-gray-300 h-4">
-                                                                <svg width="22" height="31" viewBox="0 0 14 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M7.73937 7.16312L7.22312 6.13617C7.13781 5.95785 6.87094 5.9514 6.77687 6.13617L6.26063 7.16312L5.11656 7.32425C4.91313 7.35433 4.82562 7.6014 4.97656 7.74964L5.80781 8.54457L5.61094 9.6639C5.58031 9.86371 5.79031 10.0184 5.97844 9.92601L7.00437 9.3932L8.02375 9.91742C8.21187 10.0098 8.42406 9.85511 8.39125 9.65531L8.19438 8.53597L9.02563 7.74964C9.17438 7.60355 9.08906 7.35648 8.88562 7.32425L7.74156 7.16312H7.73937ZM5.6 11.5008C5.21281 11.5008 4.9 11.808 4.9 12.1883V16.3133C4.9 16.6936 5.21281 17.0008 5.6 17.0008H8.4C8.78719 17.0008 9.1 16.6936 9.1 16.3133V12.1883C9.1 11.808 8.78719 11.5008 8.4 11.5008H5.6ZM0.7 12.8758C0.312812 12.8758 0 13.183 0 13.5633V16.3133C0 16.6936 0.312812 17.0008 0.7 17.0008H3.5C3.88719 17.0008 4.2 16.6936 4.2 16.3133V13.5633C4.2 13.183 3.88719 12.8758 3.5 12.8758H0.7ZM9.8 14.9383V16.3133C9.8 16.6936 10.1128 17.0008 10.5 17.0008H13.3C13.6872 17.0008 14 16.6936 14 16.3133V14.9383C14 14.558 13.6872 14.2508 13.3 14.2508H10.5C10.1128 14.2508 9.8 14.558 9.8 14.9383Z" fill="#D6D6D6" />
-                                                                </svg>
-                                                                <p className={`text-base font-semibold ${ranking === 1 ? "text-[#367A14]" : ranking === 2 ? "text-[#51A927]" : ranking === 3 ? "text-[#77C74C]" : "text-[#676767]"}`}>{ranking || 1}</p>
-                                                            </div>
-                                                            {/* Wish count */}
-                                                            <div className="text-[#A2A2A2] px-3">
-                                                                <p>{wishCount} {wishCount === 1 ? "like" : "likes"}</p>
-                                                            </div>
+                                                    <div className="flex flex-row items-center gap-8 mt-6 md:mt-0 md:ml-8">
+                                                        {/* Large green heart on the left */}
+                                                        <div className="flex items-center justify-center">
+                                                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                                                <path
+                                                                    d="M20 36s-1.45-1.32-3.6-3.13C10.2 28.13 4 22.6 4 16.5 4 11.36 8.36 7 13.5 7c2.54 0 4.99 1.19 6.5 3.09C21.51 8.19 23.96 7 26.5 7 31.64 7 36 11.36 36 16.5c0 6.1-6.2 11.63-12.4 16.37C21.45 34.68 20 36 20 36z"
+                                                                    fill="#A3D47C"
+                                                                />
+                                                            </svg>
                                                         </div>
-                                                        <div className="bg-[#E6F4D7] rounded-full w-12 h-12 flex items-center justify-center mb-2 mt-4">
-                                                            <FiHeart className="text-2xl text-[#7BC043]" />
+                                                        {/* Ranking and likes */}
+                                                        <div className="flex flex-col items-start">
+                                                            <div className="flex items-center gap-4">
+                                                                {/* Ranking */}
+                                                                <div className="flex items-center gap-1 pr-3 border-r border-gray-300 h-6">
+                                                                    <svg width="22" height="31" viewBox="0 0 14 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path d="M7.73937 7.16312L7.22312 6.13617C7.13781 5.95785 6.87094 5.9514 6.77687 6.13617L6.26063 7.16312L5.11656 7.32425C4.91313 7.35433 4.82562 7.6014 4.97656 7.74964L5.80781 8.54457L5.61094 9.6639C5.58031 9.86371 5.79031 10.0184 5.97844 9.92601L7.00437 9.3932L8.02375 9.91742C8.21187 10.0098 8.42406 9.85511 8.39125 9.65531L8.19438 8.53597L9.02563 7.74964C9.17438 7.60355 9.08906 7.35648 8.88562 7.32425L7.74156 7.16312H7.73937ZM5.6 11.5008C5.21281 11.5008 4.9 11.808 4.9 12.1883V16.3133C4.9 16.6936 5.21281 17.0008 5.6 17.0008H8.4C8.78719 17.0008 9.1 16.6936 9.1 16.3133V12.1883C9.1 11.808 8.78719 11.5008 8.4 11.5008H5.6ZM0.7 12.8758C0.312812 12.8758 0 13.183 0 13.5633V16.3133C0 16.6936 0.312812 17.0008 0.7 17.0008H3.5C3.88719 17.0008 4.2 16.6936 4.2 16.3133V13.5633C4.2 13.183 3.88719 12.8758 3.5 12.8758H0.7ZM9.8 14.9383V16.3133C9.8 16.6936 10.1128 17.0008 10.5 17.0008H13.3C13.6872 17.0008 14 16.6936 14 16.3133V14.9383C14 14.558 13.6872 14.2508 13.3 14.2508H10.5C10.1128 14.2508 9.8 14.558 9.8 14.9383Z" fill="#D6D6D6" />
+                                                                    </svg>
+                                                                    <p className={`text-base font-semibold ${ranking === 1 ? "text-[#367A14]" : ranking === 2 ? "text-[#51A927]" : ranking === 3 ? "text-[#77C74C]" : "text-[#676767]"}`}>{ranking || 1}</p>
+                                                                </div>
+                                                                {/* Wish count */}
+                                                                <div className="text-[#A2A2A2] px-3 text-lg font-medium">
+                                                                    <p>{wishCount.toLocaleString()} {wishCount === 1 ? "like" : "likes"}</p>
+                                                                </div>
+                                                            </div>
+                                                            <span className="text-green-700 font-semibold text-lg mt-2">Your Favorite</span>
                                                         </div>
-                                                        <span className="text-green-700 font-semibold text-lg">Your Favorite</span>
                                                     </div>
                                                 </div>
                                             );
