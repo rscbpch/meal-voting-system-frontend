@@ -23,62 +23,36 @@ const Menu = () => {
     const [votePollId, setVotePollId] = useState<number | null>(null);
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
     // const [votedDishId, setVotedDishId] = useState<number | null>(null);
+
     useEffect(() => {
         const token = localStorage.getItem("token");
         setIsLoggedIn(!!token);
-        
-        const saveVote = localStorage.getItem("votedDishId");
-        if (saveVote) {
-            setVotedDishId(Number(saveVote));
-        }
 
         getDishes()
             .then((res) => setFoods(res.items))
             .catch(() => setError("Failed to fetch dishes"));
 
-        // getTodayResult()
-        //     .then((res) => {
-        //         setCandidate(res.dishes);
-        //         setVotePollId(res.votePollId);
+        getTodayResult()
+            .then((res) => {
+                setCandidate(res.dishes);
+                setVotePollId(res.votePollId);
 
-        //         getTodayVote().then((vote) => {
-        //             if (vote && vote.votePollId === res.votePollId && vote.userVote) {
-        //                 setVotedDishId(vote.userVote.dishId);
-        //                 // localStorage.setItem("votedDishId", String(vote.userVote.dishId));
-        //                 // localStorage.setItem("votePollId", String(vote.userVote.votePollId));
-        //             } else {
-        //                 setVotedDishId(null);
-        //                 localStorage.removeItem("votedDishId");
-        //                 localStorage.removeItem("votePollId");
-        //             }
-        //             setLoading(false);
-        //         });
-        //     })
-        //     .catch(() => {
-        //         setTodayError("Failed to fetch today's result");
-        //         setLoading(false);
-        //     });
-        Promise.all([getTodayResult(), getTodayVote()])
-            .then(([result, vote]) => {
-                setCandidate(result.dishes);
-                setVotePollId(result.votePollId);
-
-                if (
-                    vote && 
-                    vote.votePollId === result.votePollId &&
-                    vote.userVote &&
-                    vote.userVote.dishId
-                ) {
-                    setVotedDishId(vote.userVote.dishId);
-                } else {
-                    setVotedDishId(null);
-                }
-                setLoading(false);
+                getTodayVote().then((vote) => {
+                    if (vote && vote.votePollId === res.votePollId && vote.userVote) {
+                        setVotedDishId(vote.userVote.dishId);
+                        // localStorage.setItem("votedDishId", String(vote.userVote.dishId));
+                        // localStorage.setItem("votePollId", String(vote.userVote.votePollId));
+                    } else {
+                        setVotedDishId(null);
+                    }
+                    setLoading(false);
+                });
             })
             .catch(() => {
-                setTodayError("Failed to fetch today's result or vote");
+                setTodayError("Failed to fetch today's result");
                 setLoading(false);
-            })
+            });
+
         getUpcomingResults()
             .then((res: any) => {
                 if (Array.isArray(res)) {
@@ -93,13 +67,13 @@ const Menu = () => {
             })
             .catch(() => setUpcomingError("Failed to fetch upcoming results"));
     }, []); 
-    useEffect(() => {
-        if (votedDishId !== null) {
-            localStorage.setItem("votedDishId", String(votedDishId));
-        } else {
-            localStorage.removeItem("votedDishId");
-        }
-    }, [votedDishId]);
+    // useEffect(() => {
+    //     if (votedDishId !== null) {
+    //         localStorage.setItem("votedDishId", String(votedDishId));
+    //     } else {
+    //         localStorage.removeItem("votedDishId");
+    //     }
+    // }, [votedDishId]);
 
     const upcomingBannerItems = useMemo(() => {
         if (!upcomingResults || upcomingResults.length === 0) return [];
@@ -134,16 +108,14 @@ const Menu = () => {
         try {
             if (votedDishId === null) {
                 await voteForDish(dishId);
-        } else {
+            } else {
                 await updateVoteForDish(dishId);
             }
-            setVotedDishId(dishId);
-            const res = await getTodayResult();
-            setCandidate(res.dishes);
-            
-            localStorage.setItem("votedDishId", String(dishId));
-            if (votePollId !== null) {
-                localStorage.setItem("votePollId", String(votePollId));
+            const vote = await getTodayVote();
+            if (vote && vote.userVote) {
+                setVotedDishId(vote.userVote.dishId);
+            } else {
+                setVotedDishId(null);
             }
     } catch (error: any) {
         if (
