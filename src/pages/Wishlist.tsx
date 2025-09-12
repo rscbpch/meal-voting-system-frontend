@@ -193,7 +193,7 @@ const Wishlist = () => {
                                                         <p className="text-gray-500 text-sm max-w-md">{description}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-row items-center gap-8 mt-6 md:mt-0 md:ml-8">
+                                                    <div className="flex flex-col items-center gap-8 mt-6 md:mt-0 md:ml-8">
                                                         {/* Large green heart on the left */}
                                                         <div className="flex items-center justify-center">
                                                             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -204,7 +204,7 @@ const Wishlist = () => {
                                                             </svg>
                                                         </div>
                                                         {/* Ranking and likes */}
-                                                        <div className="flex flex-col items-start">
+                                                        <div className="flex flex-row items-start">
                                                             <div className="flex items-center gap-4">
                                                                 {/* Ranking */}
                                                                 <div className="flex items-center gap-1 pr-3 border-r border-gray-300 h-6">
@@ -218,7 +218,6 @@ const Wishlist = () => {
                                                                     <p>{wishCount.toLocaleString()} {wishCount === 1 ? "like" : "likes"}</p>
                                                                 </div>
                                                             </div>
-                                                            <span className="text-green-700 font-semibold text-lg mt-2">Your Favorite</span>
                                                         </div>
                                                     </div>
                                                 </div>
