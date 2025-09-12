@@ -39,12 +39,12 @@ const Menu = () => {
                 getTodayVote().then((vote) => {
                     if (vote && vote.votePollId === res.votePollId) {
                         setVotedDishId(vote.dishId);
-                        localStorage.setItem("votedDishId", String(vote.dishId));
-                        localStorage.setItem("votePollId", String(vote.votePollId));
+                        // localStorage.setItem("votedDishId", String(vote.dishId));
+                        // localStorage.setItem("votePollId", String(vote.votePollId));
                     } else {
                         setVotedDishId(null);
-                        localStorage.removeItem("votedDishId");
-                        localStorage.setItem("votePollId", String(res.votePollId));
+                        // localStorage.removeItem("votedDishId");
+                        // localStorage.setItem("votePollId", String(res.votePollId));
                     }
                     setLoading(false);
                 });
