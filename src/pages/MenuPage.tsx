@@ -39,17 +39,12 @@ const Menu = () => {
                 getTodayVote().then((vote) => {
                     if (vote && vote.votePollId === res.votePollId && vote.userVote) {
                         setVotedDishId(vote.userVote.dishId);
-                        // localStorage.setItem("votedDishId", String(vote.dishId));
-                        // localStorage.setItem("votePollId", String(vote.votePollId));
+                        // localStorage.setItem("votedDishId", String(vote.userVote.dishId));
+                        // localStorage.setItem("votePollId", String(vote.userVote.votePollId));
                     } else {
-                        const storedVotedDishId = localStorage.getItem("votedDishId");
-                        if (storedVotedDishId) {
-                            setVotedDishId(Number(storedVotedDishId));
-                        } else {
-                            setVotedDishId(null);
-                        }
-                        // localStorage.removeItem("votedDishId");
-                        // localStorage.setItem("votePollId", String(res.votePollId));
+                        setVotedDishId(null);
+                        localStorage.removeItem("votedDishId");
+                        localStorage.removeItem("votePollId");
                     }
                     setLoading(false);
                 });
