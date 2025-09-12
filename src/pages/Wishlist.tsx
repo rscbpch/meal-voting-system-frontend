@@ -103,19 +103,29 @@ const Wishlist = () => {
                                             const sortedWishes = [...wishes].sort((a, b) => b.totalWishes - a.totalWishes);
                                             const ranking = sortedWishes.findIndex(w => w.dishId === userWish.dishId) + 1;
                                             // Find category name
-                                            const categoryName = userWish.categoryName || categories.find(cat => String(cat.id) === String(userWish.categoryId))?.name || "";
+                                            const categoryName = userWish.categoryName && userWish.categoryName !== "" ? userWish.categoryName : (categories.find(cat => String(cat.id) === String(userWish.categoryId))?.name || "");
+                                            // Use a local fallback image if userWish.image is missing
+                                            // Use import for fallback image (Vite/React)
+                                            // eslint-disable-next-line @typescript-eslint/no-var-requires
+                                            // const fallbackImg = require("../assets/LogoGreen.svg");
+                                            // Use import instead of require
+                                            // Place at top of file: import LogoGreen from '../assets/LogoGreen.svg';
+                                            // But for inline, use dynamic import fallback
+                                            // fallback for now:
+                                            const fallbackImg = '/src/assets/LogoGreen.svg';
+                                            const imgSrc = userWish.image && userWish.image.trim() !== "" ? userWish.image : fallbackImg;
                                             return (
                                                 <div className="flex flex-col md:flex-row items-center justify-between w-full p-6">
                                                     <div className="flex items-center gap-6 w-full md:w-auto">
                                                         <img
-                                                            src={userWish.image || "https://via.placeholder.com/120"}
-                                                            alt={userWish.dishName}
+                                                            src={imgSrc}
+                                                            alt={userWish.dishName || "Favorite Dish"}
                                                             className="w-28 h-28 object-cover rounded-full border-2 border-[#E6F4D7] shadow-md"
                                                         />
                                                         <div className="flex flex-col gap-2">
-                                                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-medium w-fit">Cat. {categoryName}</span>
-                                                            <h3 className="text-2xl font-bold text-gray-800">{userWish.dishName}</h3>
-                                                            <p className="text-gray-500 text-sm max-w-md">{userWish.description}</p>
+                                                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-medium w-fit">Cat. {categoryName || "-"}</span>
+                                                            <h3 className="text-2xl font-bold text-gray-800">{userWish.dishName || "-"}</h3>
+                                                            <p className="text-gray-500 text-sm max-w-md">{userWish.description || "No description available."}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col items-center mt-6 md:mt-0 md:ml-8">
