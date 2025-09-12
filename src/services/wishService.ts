@@ -87,20 +87,24 @@ const USER_WISHES_KEY = "user_wishes";
 export const fetchAndStoreUserWishes = async (): Promise<UserWish[]> => {
     try {
         const res = await API.get("/wishes/mine");
-        // Map API fields to UserWish interface if needed
+        // Flatten the dish and category fields if present
         const wishes: UserWish[] = Array.isArray(res.data)
             ? res.data.map(wish => ({
                 ...wish,
-                dishName: wish.dishName || wish.name || "",
-                description: wish.description || wish.desc || "",
-                categoryName: wish.categoryName || wish.catName || "",
+                dishName: wish.Dish?.name || wish.dishName || wish.name || "",
+                description: wish.Dish?.description || wish.description || wish.desc || "",
+                image: wish.Dish?.imageURL || wish.image || "",
+                categoryId: wish.Dish?.categoryId || wish.categoryId,
+                categoryName: wish.Dish?.Category?.name || wish.categoryName || "",
             }))
             : res.data
                 ? [{
                     ...res.data,
-                    dishName: res.data.dishName || res.data.name || "",
-                    description: res.data.description || res.data.desc || "",
-                    categoryName: res.data.categoryName || res.data.catName || "",
+                    dishName: res.data.Dish?.name || res.data.dishName || res.data.name || "",
+                    description: res.data.Dish?.description || res.data.description || res.data.desc || "",
+                    image: res.data.Dish?.imageURL || res.data.image || "",
+                    categoryId: res.data.Dish?.categoryId || res.data.categoryId,
+                    categoryName: res.data.Dish?.Category?.name || res.data.categoryName || "",
                 }]
                 : [];
         localStorage.setItem(USER_WISHES_KEY, JSON.stringify(wishes));
