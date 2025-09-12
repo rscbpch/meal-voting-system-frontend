@@ -19,9 +19,10 @@ interface Card {
     onWishChange?: () => void;
     averageRating?: number;
     wishlistCount?: number;
-    totalWishes?: number;
     onViewDetails?: () => void;
     averageFoodRating?: number;
+    totalWishes?: number;
+    totalRatingCount?: number;
     ranking?: number;
     currentVoteCount?: number;
     isDeleting?: boolean;
@@ -48,7 +49,6 @@ const FoodCard = ({
     ranking,
     currentVoteCount,
     isDeleting = false,
-    wishlistCount, 
 }: Card ) => {
     const [votes, setVotes] = useState<number>(initialVotes);
     const [favorite, setFavorite] = useState<boolean>(false);
@@ -162,15 +162,18 @@ const FoodCard = ({
                                     <h1 className="font-bold text-lg">
                                         {name}
                                     </h1>
-                                    {isMenuManagement &&
-                                        averageFoodRating !== undefined && (
-                                            <div className="flex items-center gap-1">
-                                                <Star />
-                                                <span className="text-sm text-[#6B6B6B]">
-                                                    {averageFoodRating.toFixed(1)}
-                                                </span>
-                                            </div>
-                                        )}
+                                    {isMenuManagement && (
+                                        <div className="flex items-center gap-1">
+                                            <Star />
+                                            <span className="text-sm text-[#6B6B6B]">
+                                                {averageFoodRating !== undefined && averageFoodRating !== null 
+                                                    ? averageFoodRating.toFixed(1)
+                                                    : 'No rating'
+                                                }
+
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                                 <p className="bg-[#F4F4F4] px-2 py-1 rounded text-xs text-[#919191]">
                                     {categoryName}
@@ -237,7 +240,12 @@ const FoodCard = ({
 
                                     <div className="text-[#A2A2A2] px-3">
                                         <p>
-                                            {wishlistCount || 0} {wishlistCount === 1 ? "like" : "likes"}
+\\
+                                            {totalWishes || 0}{" "}
+                                            {totalWishes === 1
+                                                ? "like"
+                                                : "likes"}
+\
                                         </p>
                                     </div>
                                 </div>
