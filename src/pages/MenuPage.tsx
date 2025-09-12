@@ -111,12 +111,13 @@ const Menu = () => {
             } else {
                 await updateVoteForDish(dishId);
             }
-            const vote = await getTodayVote();
+            const [vote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
             if (vote && vote.userVote) {
                 setVotedDishId(vote.userVote.dishId);
             } else {
                 setVotedDishId(null);
             }
+            setCandidate(todayResult.dishes);
     } catch (error: any) {
         if (
             error?.response?.data?.message &&
