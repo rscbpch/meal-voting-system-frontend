@@ -20,7 +20,6 @@ interface Card {
     totalWishes?: number;
     totalRatingCount?: number;
     ranking?: number;
-    totalWishlistCount?: number;
     currentVoteCount?: number;
     isDeleting?: boolean;
 }
@@ -43,7 +42,6 @@ const FoodCard = ({
     averageFoodRating,
     totalWishes,
     ranking,
-    totalWishlistCount,
     currentVoteCount,
     isDeleting = false,
 }: Card) => {
@@ -166,8 +164,8 @@ const FoodCard = ({
 
                                     <div className="text-[#A2A2A2] px-3">
                                         <p>
-                                            {totalWishlistCount || 0}{" "}
-                                            {totalWishlistCount === 1
+                                            {totalWishes || 0}{" "}
+                                            {totalWishes === 1
                                                 ? "like"
                                                 : "likes"}
                                         </p>
