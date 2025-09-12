@@ -31,29 +31,49 @@ const Menu = () => {
             .then((res) => setFoods(res.items))
             .catch(() => setError("Failed to fetch dishes"));
 
-        getTodayResult()
-            .then((res) => {
-                setCandidate(res.dishes);
-                setVotePollId(res.votePollId);
+        // getTodayResult()
+        //     .then((res) => {
+        //         setCandidate(res.dishes);
+        //         setVotePollId(res.votePollId);
 
-                getTodayVote().then((vote) => {
-                    if (vote && vote.votePollId === res.votePollId && vote.userVote) {
-                        setVotedDishId(vote.userVote.dishId);
-                        // localStorage.setItem("votedDishId", String(vote.userVote.dishId));
-                        // localStorage.setItem("votePollId", String(vote.userVote.votePollId));
-                    } else {
-                        setVotedDishId(null);
-                        localStorage.removeItem("votedDishId");
-                        localStorage.removeItem("votePollId");
-                    }
-                    setLoading(false);
-                });
+        //         getTodayVote().then((vote) => {
+        //             if (vote && vote.votePollId === res.votePollId && vote.userVote) {
+        //                 setVotedDishId(vote.userVote.dishId);
+        //                 // localStorage.setItem("votedDishId", String(vote.userVote.dishId));
+        //                 // localStorage.setItem("votePollId", String(vote.userVote.votePollId));
+        //             } else {
+        //                 setVotedDishId(null);
+        //                 localStorage.removeItem("votedDishId");
+        //                 localStorage.removeItem("votePollId");
+        //             }
+        //             setLoading(false);
+        //         });
+        //     })
+        //     .catch(() => {
+        //         setTodayError("Failed to fetch today's result");
+        //         setLoading(false);
+        //     });
+        Promise.all([getTodayResult(), getTodayVote()])
+            .then(([result, vote]) => {
+                setCandidate(result.dishes);
+                setVotePollId(result.votePollId);
+
+                if (
+                    vote && 
+                    vote.votePollId === result.votePollId &&
+                    vote.userVote &&
+                    vote.userVote.dishId
+                ) {
+                    setVotedDishId(vote.userVote.dishId);
+                } else {
+                    setVotedDishId(null);
+                }
+                setLoading(false);
             })
             .catch(() => {
-                setTodayError("Failed to fetch today's result");
+                setTodayError("Failed to fetch today's result or vote");
                 setLoading(false);
-            });
-
+            })
         getUpcomingResults()
             .then((res: any) => {
                 if (Array.isArray(res)) {
