@@ -41,6 +41,7 @@ const Homepage = () => {
                 console.error("Failed to fetch todays's results:", err);
             }
         };
+
         const checkAuth = async () => {
             try {
                 const user = await getProfile();
@@ -49,8 +50,10 @@ const Homepage = () => {
                 setIsLoggedIn(false);
             }
         };
+
         fetchStatus();
         checkAuth();
+        
         const pollId = window.setInterval(fetchStatus, 15000);
         return () => {
             mounted = false;

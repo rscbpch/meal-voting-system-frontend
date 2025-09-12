@@ -7,22 +7,23 @@ import Pagination from "../components/Pagination";
 import { getMostWishedDishes, getCategories } from "../services/dishService";
 import Loading from "../components/Loading";
 import type { Dish, Category } from "../services/dishService";
-import { fetchAllWishes } from "../services/wishService";
-import type { WishData } from "../services/wishService";
-
+import { fetchAllWishes, fetchAndStoreUserWishes, getUserWishesFromStorage } from "../services/wishService";
+import type { WishData, UserWish } from "../services/wishService";
+import { getProfile } from "../services/authService";
 
 const Wishlist = () => {
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
 
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [wishes, setWishes] = useState<WishData[]>([]);
+    const [userWish, setUserWish] = useState<UserWish | null>(null);
+    const limit = 10;
     // const [userWish, setUserWish] = useState<number | null>(null);
-    const limit = 10; // items per page
-
 
     useEffect(() => {
         const fetchData = async () => {
@@ -37,10 +38,6 @@ const Wishlist = () => {
                 setTotal(dishRes.total);
                 setCategories(catRes);
                 setWishes(wishRes.dishes);
-
-                // Get current user's wish from localStorage
-                // const userWishes = JSON.parse(localStorage.getItem("user_wishes") || "[]");
-                // setUserWish(userWishes[0]?.dishId ?? null);
             } catch (err: any) {
                 setError(err.message || "Failed to load data");
             } finally {
@@ -48,6 +45,24 @@ const Wishlist = () => {
             }
         };
         fetchData();
+
+        const checkAuthAndFetchWish = async () => {
+            try {
+                const user = await getProfile();
+                setIsLoggedIn(!!user);
+                if (user) {
+                    // Fetch and store user wish in localStorage, then set state
+                    const wishes = await fetchAndStoreUserWishes();
+                    setUserWish(wishes[0] || null);
+                } else {
+                    setUserWish(null);
+                }
+            } catch {
+                setIsLoggedIn(false);
+                setUserWish(null);
+            }
+        };
+        checkAuthAndFetchWish();
     }, [currentPage]);
 
     const totalPages = Math.ceil(total / limit);
@@ -58,8 +73,8 @@ const Wishlist = () => {
         const wishRes = await fetchAllWishes();
         setWishes(wishRes.dishes);
         // Also update user wish from localStorage
-    // const userWishes = JSON.parse(localStorage.getItem("user_wishes") || "[]");
-    // setUserWish(userWishes[0]?.dishId ?? null);
+        const wishes = getUserWishesFromStorage();
+        setUserWish(wishes[0] || null);
     };
 
     const handlePageChange = (page: number) => {
@@ -72,10 +87,48 @@ const Wishlist = () => {
             <Navbar />
             <PageTransition>
                 <main className="min-h-screen mx-auto p-6 bg-[#F6FFE8]">
-                    <div>
+                    {/* Show user wish card if logged in */}
+                    {isLoggedIn === true ? (
                         <div>
-                            <h2 className="text-[20px] font-bold">Your wishlist</h2>
+                            <div>
+                                <h2 className="text-[20px] font-bold">Your wishlist</h2>
+                            </div>
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 flex flex-col items-center justify-center">
+                                <div className="bg-white rounded-lg flex flex-col items-center justify-center w-full min-h-[320px]">
+                                    {userWish ? (
+                                        <div className="flex flex-col md:flex-row items-center justify-between w-full p-6">
+                                            <div className="flex items-center gap-6 w-full md:w-auto">
+                                                <img
+                                                    src={userWish.image || "https://via.placeholder.com/120"}
+                                                    alt={userWish.dishName}
+                                                    className="w-28 h-28 object-cover rounded-full border-2 border-[#E6F4D7] shadow-md"
+                                                />
+                                                <div className="flex flex-col gap-2">
+                                                    <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded font-medium w-fit">Cat. {userWish.categoryId}</span>
+                                                    <h3 className="text-2xl font-bold text-gray-800">{userWish.dishName}</h3>
+                                                    <p className="text-gray-500 text-sm max-w-md">{userWish.description}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-center mt-6 md:mt-0 md:ml-8">
+                                                <div className="bg-[#E6F4D7] rounded-full w-12 h-12 flex items-center justify-center mb-2">
+                                                    <FiHeart className="text-2xl text-[#7BC043]" />
+                                                </div>
+                                                <span className="text-green-700 font-semibold text-lg">Your Favorite</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center w-full h-full py-12">
+                                            <div className="bg-[#F6FFE8] rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                                                <FiHeart className="text-3xl text-[#4B8F29]" />
+                                            </div>
+                                            <h3 className="text-2xl font-semibold text-gray-700 mb-1 text-center">No favorite dish yet</h3>
+                                            <p className="text-gray-500 text-center mb-6">Pick your favorite dish from the menu below</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
+                    ) : isLoggedIn === false ? (
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 flex flex-col items-center justify-center">
                             <div className="bg-white rounded-lg flex flex-col items-center justify-center w-full min-h-[320px]">
                                 <div className="flex flex-col items-center justify-center w-full">
@@ -90,8 +143,8 @@ const Wishlist = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    {/* Food cards grid below the wishlist box */}
+                    ) : null}
+                    {/* Food cards grid always shown */}
                     <div className="mt-8">
                         {loading ? (
                             <div className="flex justify-center items-center min-h-[300px] w-full">
@@ -124,6 +177,7 @@ const Wishlist = () => {
                                                 imgURL={dish.imageURL || "https://via.placeholder.com/150"}
                                                 isWishlist={true}
                                                 wishlistCount={wishCount}
+                                                totalWishes={wishCount}
                                                 ranking={ranking}
                                                 onWishChange={handleWishChange}
                                             />
