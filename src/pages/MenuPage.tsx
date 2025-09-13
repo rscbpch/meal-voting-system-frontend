@@ -20,7 +20,7 @@ const Menu = () => {
     const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
     const [todayError, setTodayError] = useState<string | null>(null);
     const [upcomingError, setUpcomingError] = useState<string | null>(null);
-    const [votePollId, setVotePollId] = useState<number | null>(null);
+    // const [votePollId, setVotePollId] = useState<number | null>(null);
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
     // const [votedDishId, setVotedDishId] = useState<number | null>(null);
 
@@ -38,7 +38,7 @@ const Menu = () => {
         getTodayResult()
             .then((res) => {
                 setCandidate(res.dishes);
-                setVotePollId(res.votePollId);
+                // setVotePollId(res.votePollId);
 
                 getTodayVote().then((vote) => {
                     if (vote && vote.votePollId === res.votePollId && vote.userVote) {
