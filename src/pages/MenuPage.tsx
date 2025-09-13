@@ -22,6 +22,7 @@ const Menu = () => {
     const [upcomingError, setUpcomingError] = useState<string | null>(null);
     // const [votePollId, setVotePollId] = useState<number | null>(null);
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
+    const [todayVote, setTodayVote] = useState<any>(null);
     // const [votedDishId, setVotedDishId] = useState<number | null>(null);
 
     useEffect(() => {
@@ -41,6 +42,7 @@ const Menu = () => {
                 // setVotePollId(res.votePollId);
 
                 getTodayVote().then((vote) => {
+                    setTodayVote(vote);
                     if (vote && vote.votePollId === res.votePollId && vote.userVote) {
                         setVotedDishId(vote.userVote.dishId);
                         // localStorage.setItem("votedDishId", String(vote.userVote.dishId));
@@ -133,6 +135,7 @@ const Menu = () => {
             }
 
             const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
+            setTodayVote(newVote);
             if (newVote && newVote.userVote) {
                 setVotedDishId(newVote.userVote.dishId);
             } else {
@@ -168,7 +171,10 @@ const Menu = () => {
                                 imgURL={candidate.imageURL ?? ""}
                                 initialVotes={candidate.voteCount}  
                                 hasVoted={Number(votedDishId) === Number(candidate.dishId)}
-                                disabled={localStorage.getItem("hasVotedOnThisDevice") === "true"} // show button for everyone
+                                disabled={
+                                    !!localStorage.getItem("votedUserId") &&
+                                    String(localStorage.getItem("votedUserId")) !== String(todayVote?.userVote?.userId)
+                                } // show button for everyone
                                 onVote={() => {
                                     if (!isLoggedIn) {
                                         navigate("/sign-in");
