@@ -4,20 +4,20 @@ interface LatestVoteProps {
     name: string,
     id: number,
     description: string,
-    category: number,
+    categoryId: number,
     totalVote: number,
     votedAt: string,
     imgURL: string,
 }
 
-const LatestVote: React.FC<LatestVoteProps> = ({ name, category, votedAt, description, totalVote, imgURL }) => (
+const LatestVote: React.FC<LatestVoteProps> = ({ name, categoryId, votedAt, description, totalVote, imgURL }) => (
     <div>
         <p>{name}</p>
-        <p>{category}</p>
+        <p>Category: {categoryId}</p>
         <span>{new Date(votedAt).toLocaleDateString()}</span>
         <p>{description}</p>
-        <p>{totalVote}</p>
-        <p>{imgURL}</p>
+        <p>Total Votes:{totalVote}</p>
+        <img src={imgURL} alt={name} />
     </div>
 )
 
