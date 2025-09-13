@@ -113,25 +113,23 @@ const Menu = () => {
 
         const vote = await getTodayVote();
         const currentUserId = vote?.userVote?.userId;
-
         const votedUserId = localStorage.getItem("votedUserId");
 
-        if (votedDishId && String(currentUserId) !== votedUserId) {
-            alert("You have already voted in this poll.");
+        if (
+            votedUserId &&
+            String(currentUserId) !== votedUserId
+        ) {
+            alert("You have already voted today.");
             return;
         }
-        // if (localStorage.getItem("hasVotedOnThisDevice") === "true") {
-        //     alert("You have already voted on this device.");
-        //     return;
-        // }
         try {
             if (votedDishId === null) {
                 await voteForDish(dishId);
-                if (currentUserId) {
-                    localStorage.setItem("votedUserId", String(currentUserId));
-                }
             } else {
                 await updateVoteForDish(dishId);
+            }
+            if (currentUserId) {
+                localStorage.setItem("votedUserId", String(currentUserId));
             }
 
             const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
