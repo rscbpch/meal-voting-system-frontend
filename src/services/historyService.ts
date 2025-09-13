@@ -6,6 +6,9 @@ export interface UserVote {
     Dish: {
         id: number;
         name: string;
+        description: string;
+        imageURL: string;
+        categoryId: number;
     };
 }
 
