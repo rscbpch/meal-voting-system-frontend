@@ -23,6 +23,7 @@ export interface WishListResponse {
 
 // Type for a user's own wish
 export interface UserWish {
+    Dish: null;
     name: string;
     dishId: number;
     dishName: string;
