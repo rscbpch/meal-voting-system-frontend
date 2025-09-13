@@ -25,8 +25,11 @@ const Menu = () => {
     // const [votedDishId, setVotedDishId] = useState<number | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token);
+        // const token = localStorage.getItem("token");
+        // setIsLoggedIn(!!token);
+        setVotedDishId(null);
+        setIsLoggedIn(!!localStorage.getItem("token"));
+        setLoading(true);
 
         getDishes()
             .then((res) => setFoods(res.items))
