@@ -150,4 +150,3 @@ export const updateVoteForDish = async (dishId: number) => {
         throw error.response?.data?.error || error;
     }
 }
-
