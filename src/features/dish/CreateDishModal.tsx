@@ -422,10 +422,17 @@ const CreateDishModal = ({
                         Add New Food
                     </h3>
                     <button
-                        disabled
-                        className="p-2 rounded-full transition-colors cursor-not-allowed opacity-50"
+                        onClick={handleClose}
+                        disabled={isSubmitting}
+                        className={`p-2 rounded-full transition-colors ${
+                            isSubmitting 
+                                ? "cursor-not-allowed opacity-50" 
+                                : "hover:bg-gray-100 cursor-pointer"
+                        }`}
                     >
-                        <XMarkIcon className="w-6 h-6 text-gray-300" />
+                        <XMarkIcon className={`w-6 h-6 ${
+                            isSubmitting ? "text-gray-300" : "text-gray-500"
+                        }`} />
                     </button>
                 </div>
 
@@ -710,6 +717,18 @@ const CreateDishModal = ({
 
                 {/* Action Buttons */}
                 <div className="flex justify-end gap-4 p-6 border-t border-gray-200">
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        disabled={isSubmitting}
+                        className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+                            isSubmitting
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                : "bg-gray-200 text-gray-600 hover:bg-gray-300 cursor-pointer"
+                        }`}
+                    >
+                        Cancel
+                    </button>
                     <button
                         type="submit"
                         form="add-dish-form"

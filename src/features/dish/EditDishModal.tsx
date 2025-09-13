@@ -491,9 +491,16 @@ const EditDishModal = ({
                     </h3>
                     <button
                         onClick={handleClose}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        disabled={isSubmitting}
+                        className={`p-2 rounded-full transition-colors ${
+                            isSubmitting 
+                                ? "cursor-not-allowed opacity-50" 
+                                : "hover:bg-gray-100 cursor-pointer"
+                        }`}
                     >
-                        <XMarkIcon className="w-6 h-6 text-gray-500" />
+                        <XMarkIcon className={`w-6 h-6 ${
+                            isSubmitting ? "text-gray-300" : "text-gray-500"
+                        }`} />
                     </button>
                 </div>
 
@@ -781,7 +788,12 @@ const EditDishModal = ({
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="px-6 py-2 bg-[#EEEEEE] text-[#888888] rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-colors font-medium"
+                        disabled={isSubmitting}
+                        className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+                            isSubmitting
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                : "bg-gray-200 text-gray-600 hover:bg-gray-300 cursor-pointer"
+                        }`}
                     >
                         Cancel
                     </button>
