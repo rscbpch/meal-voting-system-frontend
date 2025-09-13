@@ -4,23 +4,30 @@ import { getDishes, type Dish } from "../services/dishService";
 import LatestVote from "../components/LatestVote";
 import Navbar from "../components/Navbar";
 import PageTransition from "../components/PageTransition";
+import DatePicker from "../components/DatePicker";
 
 const HistoryPage = () => {
     const [history, setHistory] = useState<VoteHistoryResponse | null>(null);
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState<string>("");
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     useEffect(() => {
-        Promise.all([getVoteHistory(), getDishes()])
+        setLoading(true);
+        Promise.all([
+            getVoteHistory(selectedDate ? selectedDate.toString().split("T")[0] : undefined),
+            getDishes()
+        ])
             .then(([historyData, dishesData]) => {
                 setHistory(historyData);
                 setDishes(dishesData.items);
             })
             .catch ((err) => setError(err.message || "Failed to load data"))
             .finally(() => setLoading(false));
-    }, []);
-
+    }, [selectedDate]);
+    
     if (loading) return <div className="text-center mt-10">Loading...</div>
     if (error) return <div className="text-center text-red-500 mt-10">{error}</div>
 
@@ -32,13 +39,42 @@ const HistoryPage = () => {
         ? dishes.find(dish => dish.id === history.userVote!.dishId)
         : null;
 
+    const userDishVotes = history.dishes 
+        ? history.dishes.find(d => d.dishId === history.userVote?.dishId)?.voteCount ?? 1
+        : 1;
+
     return (
         <div>
             <Navbar />
             <PageTransition>
                 <div></div>
             </PageTransition>
-            <h1 className="text-center font-bold text-2xl mb-6">Your Latest Vote</h1>
+            <div>
+                <div>
+                    <h1 className="text-left font-bold text-2xl mb-6">History</h1>
+                    <button 
+                        className="mb-4 px-4 py-2 text-white rounded"
+                        onClick={() => setShowDatePicker(true)}
+                    >
+                        Pick a Date
+                    </button>
+                    <DatePicker 
+                        selectedDate={selectedDate}
+                        onDateSelect={data => {
+                            setSelectedDate(data);
+                            setShowDatePicker(false);
+                        }}
+                        showDatePicker={showDatePicker}
+                        onClose={() => setShowDatePicker(false)}
+                    />
+                    {selectedDate && (
+                        <div className="mb-4 text-gray-600">
+                            Showing result for: <span className="font-semibold">{new Date(selectedDate).toLocaleDateString()}</span>
+                        </div>
+                    )}
+                    <h2>Your Pick:</h2>
+                </div>
+            </div>
             {history.userVote ? (
                 <LatestVote
                     key={history.userVote.id}
@@ -46,7 +82,7 @@ const HistoryPage = () => {
                     id={history.userVote.dishId}
                     description={userDish?.description || ""}
                     category={userDish?.categoryId ? Number(userDish.categoryId) : 0}
-                    totalVote={0}
+                    totalVote={userDishVotes}
                     votedAt={history.voteDate}
                     imgURL={userDish?.imageURL || ""}
                 />
