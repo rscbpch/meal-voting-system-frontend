@@ -56,21 +56,21 @@ const CountdownTimer: React.FC = () => {
                     <FlipCard digit={Math.floor(hrs /10)} />
                     <FlipCard digit={hrs % 10}/>
                 </div>
-                <span className="text-xs md:text-sm">Hours</span>
+                <span className="text-xs md:text-sm font-medium">Hours</span>
             </div>
             <div className="flex flex-col items-center gap-1">
                 <div className="flex gap-0.5 md:gap-1 transform scale-75 md:scale-100">
                     <FlipCard digit={Math.floor(mins /10)} />
                     <FlipCard digit={mins % 10}/>
                 </div>
-                <span className="text-xs md:text-sm">Minutes</span>
+                <span className="text-xs md:text-sm font-medium">Minutes</span>
             </div>
             <div className="flex flex-col items-center gap-1">
                 <div className="flex gap-0.5 md:gap-1 transform scale-75 md:scale-100">
                     <FlipCard digit={Math.floor(secs /10)} />
                     <FlipCard digit={secs % 10}/>
                 </div>
-                <span className="text-xs md:text-sm">Seconds</span>
+                <span className="text-xs md:text-sm font-medium">Seconds</span>
             </div>
         </div>
     );

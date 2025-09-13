@@ -5,10 +5,10 @@ import {
     FiRotateCw,
     FiLogOut,
     FiGlobe,
-    FiHeart,
     FiChevronDown,
     FiLogIn,
 } from "react-icons/fi";
+import { MdRestaurantMenu } from "react-icons/md";
 import { HiOutlineMenuAlt2 } from "react-icons/hi";
 import { TbHistoryToggle } from "react-icons/tb";
 import LogoWhite from "../assets/LogoWhite-removebg.svg";
@@ -24,7 +24,6 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { isEng, setIsEng } = useLanguage();
-    // const [hover, setHover] = useState(false);
     const [open, setOpen] = useState(false); // dropdown open state
     const [isDesktop, setIsDesktop] = useState(true); // track screen size
 
@@ -84,7 +83,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="sticky top-0 z-50 max-w-full h-16 p-3 flex items-center shadow-md shadow-gray-200 bg-white">
+    <nav className="sticky top-0 z-50 max-w-full h-16 px-4 sm:px-6 lg:px-14 flex items-center shadow-md shadow-gray-200 bg-white">
             <div className="flex-1 flex items-center">
                 <div className="h-20 w-20">
                     <img
@@ -116,6 +115,16 @@ const Navbar = () => {
                     Voting
                 </Link>
                 <Link
+                    to="/wishlist"
+                    className={`font-semibold transition-colors cursor-pointer ${
+                        location.pathname === "/wishlist"
+                            ? "text-[#3E7B27]"
+                            : "text-gray-700 hover:text-[#3E7B27]"
+                    }`}
+                >
+                    Menu
+                </Link>
+                <Link
                     to="/feedback"
                     className={`font-semibold transition-colors cursor-pointer ${
                         location.pathname === "/feedback"
@@ -136,21 +145,11 @@ const Navbar = () => {
                     About Us
                 </Link>
             </div>
-            <div className="flex-1 flex items-center justify-end">
-                <div className="flex items-center lg:space-x-4 space-x-1 ">
+            <div className="flex-1 flex items-center justify-end ">
+                <div className="flex items-center lg:gap-4">
                     {/* <button className="cursor-pointer bg-[#F0F0F0] p-2 rounded-full transition-colors group hover:bg-[#DDF4E7]"> */}
 
                     <div className="flex items-center space-x-3">
-                        <button
-                            onClick={() => navigate("/wishlist")}
-                            className="p-2 hover:bg-[#DDF4E7] rounded-full transition-all group duration-300 ease-in-out transform hover:scale-110 cursor-pointer hidden lg:block"
-                        >
-                            <FiHeart
-                                size={20}
-                                className="transition-colors group-hover:stroke-[#386641]"
-                            />
-                        </button>
-
                         <div
                             className="relative inline-block"
                             onMouseEnter={() => isDesktop && setOpen(true)}
@@ -495,8 +494,8 @@ const Navbar = () => {
                                                     : "text-gray-700 hover:text-[#3E7B27] hover:bg-[#EAF6E7] font-medium"
                                             }`}
                                         >
-                                            <FiHeart size={20} />
-                                            <span>Wishlist</span>
+                                            <MdRestaurantMenu size={20} />
+                                            <span>Menu</span>
                                         </Link>
                                         <Link
                                             to="/history"

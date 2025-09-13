@@ -4,11 +4,13 @@ import Footer from "../components/Footer";
 import ResultBanner from "../components/ResultBanner";
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
+import Loading from "../components/Loading";
 import { getDishes } from "../services/dishService";
 import type { Dish } from "../services/dishService";
 import { getTodayResult, voteForDish, updateVoteForDish, type CandidateDish, getTodayVote } from "../services/resultService";
 import { getUpcomingResults, type UpcomingResult } from "../services/resultService";
 import { useMemo } from "react";
+import PageTransition from "../components/PageTransition";
 
 const Menu = () => {
     const navigate = useNavigate();
@@ -168,83 +170,87 @@ const Menu = () => {
     };
     return (
         <div>
-            <div>
-                <div className="mb-20">
-                    <Navbar/>
-                </div>
-                <div>
-                    {/* Show upcoming result in the banner */}
-                    <ResultBanner items={upcomingBannerItems} />
-                </div>
-                <div>
-                    <h1 className="text-[48px] font-bold p-5 mb-10 ml-5">Menu</h1>
-                </div>
-                    <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
-                        {loading && <div>Loading...</div>}
-                        {!loading && !error && candidate.map(candidate => {
-                            const user = JSON.parse(localStorage.getItem("user") || "{}");
-                            const currentUserId = user.id;
-                            const votedUserId = localStorage.getItem("votedUserId");
-                            // Disable voting if device has voted with a different user
-                            const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
-
-                            return (
-                                <Card 
-                                    key={candidate.dishId}
-                                    name={candidate.name}
-                                    categoryId={Number(candidate.categoryId) ?? 0}
-                                    description={candidate.description ?? ""}
-                                    imgURL={candidate.imageURL ?? ""}
-                                    initialVotes={candidate.voteCount}  
-                                    hasVoted={Number(votedDishId) === Number(candidate.dishId)}
-                                    disabled={votingDisabled}
-                                    onVote={() => {
-                                        if (!isLoggedIn) {
-                                            navigate("/sign-in");
-                                            return;
-                                        }
-                                        handleVote(candidate.dishId);
-                                    }}
-                                />
-                            );
-                        })}
+            <Navbar/>
+            <PageTransition>
+                <main className="min-h-screen mx-auto pt-10 pb-16 px-4 sm:px-6 lg:px-14 bg-[#F6FFE8]">
+                    <div>
+                        {/* Show upcoming result in the banner */}
+                        <ResultBanner items={upcomingBannerItems} />
                     </div>
-                <div>
-                    {(error || todayError || upcomingError) && (
-                        <div className="flex justify-center items-center w-full my-8">
-                            {error && <div className="text-red-500">{error}</div>}
-                            {todayError && <div className="text-red-500">{todayError}</div>}
-                            {upcomingError && <div className="text-red-500">{upcomingError}</div>}
-                        </div>
-                    )}
+                    <div>
+                        <h2 className="text-[20px] font-bold">Vote poll</h2>
+                    </div>
+                        <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
+                            {loading && (
+                                <div className="flex justify-center items-center w-full col-span-4 py-10">
+                                    <Loading />
+                                </div>
+                            )}
+                            {!loading && !error && candidate.map(candidate => {
+                                const user = JSON.parse(localStorage.getItem("user") || "{}");
+                                const currentUserId = user.id;
+                                const votedUserId = localStorage.getItem("votedUserId");
+                                // Disable voting if device has voted with a different user
+                                const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
 
-                    {/* Only show menu and voting if logged in */}
-                    {/* {isLoggedIn && (
-                        <>
-                            <div>
-                                <h1 className="text-[48px] font-bold p-5 mb-10 ml-5">Menu</h1>
-                            </div>
-                            <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
-                                {loading && <div>Loading...</div>}
-                                {!loading && !error && candidate.map(candidate => (
+                                return (
                                     <Card 
                                         key={candidate.dishId}
                                         name={candidate.name}
                                         categoryId={Number(candidate.categoryId) ?? 0}
                                         description={candidate.description ?? ""}
                                         imgURL={candidate.imageURL ?? ""}
-                                        initialVotes={candidate.voteCount}
-                                        hasVoted={votedDishId === candidate.dishId}
-                                        disabled={!isLoggedIn}
-                                        onVote={() => handleVote(candidate.dishId)}
+                                        initialVotes={candidate.voteCount}  
+                                        hasVoted={Number(votedDishId) === Number(candidate.dishId)}
+                                        disabled={votingDisabled}
+                                        onVote={() => {
+                                            if (!isLoggedIn) {
+                                                navigate("/sign-in");
+                                                return;
+                                            }
+                                            handleVote(candidate.dishId);
+                                        }}
                                     />
-                                ))}
+                                );
+                            })}
+                        </div>
+                    <div>
+                        {(error || todayError || upcomingError) && (
+                            <div className="flex justify-center items-center w-full my-8">
+                                {error && <div className="text-red-500">{error}</div>}
+                                {todayError && <div className="text-red-500">{todayError}</div>}
+                                {upcomingError && <div className="text-red-500">{upcomingError}</div>}
                             </div>
-                        </>
-                    )} */}
-                </div>
-                <Footer/>
-            </div>
+                        )}
+
+                        {/* Only show menu and voting if logged in */}
+                        {/* {isLoggedIn && (
+                            <>
+                                <div>
+                                    <h1 className="text-[48px] font-bold p-5 mb-10 ml-5">Menu</h1>
+                                </div>
+                                <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
+                                    {loading && <div>Loading...</div>}
+                                    {!loading && !error && candidate.map(candidate => (
+                                        <Card 
+                                            key={candidate.dishId}
+                                            name={candidate.name}
+                                            categoryId={Number(candidate.categoryId) ?? 0}
+                                            description={candidate.description ?? ""}
+                                            imgURL={candidate.imageURL ?? ""}
+                                            initialVotes={candidate.voteCount}
+                                            hasVoted={votedDishId === candidate.dishId}
+                                            disabled={!isLoggedIn}
+                                            onVote={() => handleVote(candidate.dishId)}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )} */}
+                    </div>
+                </main>
+            </PageTransition>
+            <Footer/>
         </div>
     );
 }
