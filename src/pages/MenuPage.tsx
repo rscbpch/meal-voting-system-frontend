@@ -108,12 +108,19 @@ const Menu = () => {
             navigate('/sign-in');
             return;
         }
+        if (localStorage.getItem("hasVotedOnThisDevice") === "true") {
+            alert("You have already voted on this device.");
+            return;
+        }
         try {
             if (votedDishId === null) {
                 await voteForDish(dishId);
             } else {
                 await updateVoteForDish(dishId);
             }
+
+            localStorage.setItem("hasVotedOnThisDevice", "true");
+
             const [vote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
             if (vote && vote.userVote) {
                 setVotedDishId(vote.userVote.dishId);
@@ -172,7 +179,7 @@ const Menu = () => {
                                 imgURL={candidate.imageURL ?? ""}
                                 initialVotes={candidate.voteCount}  
                                 hasVoted={Number(votedDishId) === Number(candidate.dishId)}
-                                disabled={false} // show button for everyone
+                                disabled={localStorage.getItem("hasVotedOnThisDevice") === "true"} // show button for everyone
                                 onVote={() => {
                                     if (!isLoggedIn) {
                                         navigate("/sign-in");
