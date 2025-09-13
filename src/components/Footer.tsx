@@ -34,7 +34,7 @@ function Footer() {
             {/* Quick Links */}
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 <li>
                   <Link to="/" className="text-[#747474] hover:text-[#429818] transition-colors">
                     Home
@@ -43,6 +43,11 @@ function Footer() {
                 <li>
                   <Link to="/menu" className="text-[#747474] hover:text-[#429818] transition-colors">
                     Voting
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/wishlist" className="text-[#747474] hover:text-[#429818] transition-colors">
+                    Menu
                   </Link>
                 </li>
                 <li>

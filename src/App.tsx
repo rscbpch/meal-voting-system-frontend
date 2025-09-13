@@ -9,7 +9,7 @@ import SetupAccount from "./pages/auth/SetupAccount";
 import Profile from "./pages/voter/Profile";
 import Dashboard from "./pages/staff/Dashboard";
 import Menu from "./pages/MenuPage";
-import Wishlist from "./pages/Wishlist";
+import Wishlist from "./pages/voter/Wishlist";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Feedback from "./pages/voter/Feedback";

@@ -141,7 +141,7 @@ const Feedback = () => {
             <Navbar />
 
             <PageTransition className="overflow-visible">
-                <div className="max-w-6xl mx-auto pt-12 pb-20 px-4 grid grid-cols-1 md:grid-cols-2 gap-10 ">
+                <div className="max-w-6xl mx-auto pt-10 pb-16 px-4 sm:px-6 lg:px-14 grid grid-cols-1 md:grid-cols-2 gap-10 ">
                     {/* Desktop sticky form */}
                     <div className="hidden md:block">
                         <div className="sticky top-[72px]">
