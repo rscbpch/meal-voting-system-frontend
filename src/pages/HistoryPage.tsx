@@ -92,13 +92,13 @@ const HistoryPage = () => {
                 {history.userVote ? (
                     <LatestVote
                         key={history.userVote.id}
-                        name={userDish?.name || history.userVote.Dish.name}
+                        name={history.userVote.Dish.name}
                         id={history.userVote.dishId}
-                        description={userDish?.description || ""}
-                        categoryId={userDish?.categoryId ? Number(userDish.categoryId) : 0}
+                        description={history.userVote.Dish.description || ""}
+                        categoryId={history.userVote.Dish.categoryId ?? 0}
                         totalVote={userDishVotes}
                         votedAt={history.voteDate}
-                        imgURL={userDish?.imageURL || ""}
+                        imgURL={history.userVote.Dish.imageURL || ""}
                     />
                 ) : (
                     <div className="text-center text-gray-500">You have not voted yet.</div>
