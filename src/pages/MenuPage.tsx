@@ -114,6 +114,7 @@ const Menu = () => {
         const vote = await getTodayVote();
         const currentUserId = vote?.userVote?.userId;
         const votedUserId = localStorage.getItem("votedUserId");
+        console.log("vote:", vote, "currentUserId:", currentUserId, "votedUserId:", votedUserId);
 
         if (
             votedUserId &&
