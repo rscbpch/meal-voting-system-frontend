@@ -111,29 +111,21 @@ const Menu = () => {
             return;
         }
 
-        const vote = await getTodayVote();
-        const currentUserId = vote?.userVote?.userId;
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const currentUserId = user.id;
         const votedUserId = localStorage.getItem("votedUserId");
-        console.log("vote:", vote, "currentUserId:", currentUserId, "votedUserId:", votedUserId);
+        // console.log("vote:", vote, "currentUserId:", currentUserId, "votedUserId:", votedUserId);
 
-        if (
-            votedUserId &&
-            String(currentUserId) !== votedUserId
-        ) {
-            alert("You have already voted today.");
+        if (votedDishId && votedUserId !== currentUserId) {
+            alert("You have already voted. You can only vote once per vote poll.");
             return;
         }
         try {
-            if (votedDishId === null) {
+            if (!todayVote?.userVote) {
                 await voteForDish(dishId);
-                if (!votedUserId && currentUserId) {
-                    localStorage.setItem("votedUserId", String(currentUserId));
-                }
+                localStorage.setItem("votedUserId", currentUserId);
             } else {
                 await updateVoteForDish(dishId);
-            }
-            if (currentUserId) {
-                localStorage.setItem("votedUserId", String(currentUserId));
             }
 
             const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
@@ -144,10 +136,35 @@ const Menu = () => {
                 setVotedDishId(null);
             }
             setCandidate(todayResult.dishes);
-    } catch (error: any) {
+        } catch (error: any) {
             alert(error?.message || "Failed to vote. Please try again.");
             console.error("Vote error:", error);
-    }
+        }
+    //     try {
+    //         if (votedDishId === null) {
+    //             await voteForDish(dishId);
+    //             if (!votedUserId && currentUserId) {
+    //                 localStorage.setItem("votedUserId", String(currentUserId));
+    //             }
+    //         } else {
+    //             await updateVoteForDish(dishId);
+    //         }
+    //         if (currentUserId) {
+    //             localStorage.setItem("votedUserId", String(currentUserId));
+    //         }
+
+    //         const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
+    //         setTodayVote(newVote);
+    //         if (newVote && newVote.userVote) {
+    //             setVotedDishId(newVote.userVote.dishId);
+    //         } else {
+    //             setVotedDishId(null);
+    //         }
+    //         setCandidate(todayResult.dishes);
+    // } catch (error: any) {
+    //         alert(error?.message || "Failed to vote. Please try again.");
+    //         console.error("Vote error:", error);
+    // }
     };
     return (
         <div>
@@ -164,28 +181,33 @@ const Menu = () => {
                 </div>
                     <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
                         {loading && <div>Loading...</div>}
-                        {!loading && !error && candidate.map(candidate => (
-                            <Card 
-                                key={candidate.dishId}
-                                name={candidate.name}
-                                categoryId={Number(candidate.categoryId) ?? 0}
-                                description={candidate.description ?? ""}
-                                imgURL={candidate.imageURL ?? ""}
-                                initialVotes={candidate.voteCount}  
-                                hasVoted={Number(votedDishId) === Number(candidate.dishId)}
-                                disabled={
-                                    !!localStorage.getItem("votedUserId") &&
-                                    String(localStorage.getItem("votedUserId")) !== String(todayVote?.userVote?.userId)
-                                } // show button for everyone
-                                onVote={() => {
-                                    if (!isLoggedIn) {
-                                        navigate("/sign-in");
-                                        return;
-                                    }
-                                    handleVote(candidate.dishId);
-                                }}
-                            />
-                        ))}
+                        {!loading && !error && candidate.map(candidate => {
+                            const user = JSON.parse(localStorage.getItem("user") || "{}");
+                            const currentUserId = user.id;
+                            const votedUserId = localStorage.getItem("votedUserId");
+                            // Disable voting if device has voted with a different user
+                            const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
+
+                            return (
+                                <Card 
+                                    key={candidate.dishId}
+                                    name={candidate.name}
+                                    categoryId={Number(candidate.categoryId) ?? 0}
+                                    description={candidate.description ?? ""}
+                                    imgURL={candidate.imageURL ?? ""}
+                                    initialVotes={candidate.voteCount}  
+                                    hasVoted={Number(votedDishId) === Number(candidate.dishId)}
+                                    disabled={votingDisabled}
+                                    onVote={() => {
+                                        if (!isLoggedIn) {
+                                            navigate("/sign-in");
+                                            return;
+                                        }
+                                        handleVote(candidate.dishId);
+                                    }}
+                                />
+                            );
+                        })}
                     </div>
                 <div>
                     {(error || todayError || upcomingError) && (
