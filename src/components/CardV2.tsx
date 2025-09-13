@@ -133,27 +133,34 @@ const FoodCard = ({
                     {/* Card content */}
                     <div className="flex flex-col flex-1 gap-4">
                         <div className="flex flex-col gap-2">
-                            <div className="flex justify-between items-center">
-                                <div className="flex flex-col">
-                                    <h1 className="font-bold text-lg">
+                            <div className="flex flex-col items-start gap-1">
+                                <div className="flex flex-col gap-1">
+                                    <h1 className="text-[14px] md:text-[18px] font-bold text-gray-800 max-h-[42px] md:max-h-[54px] min-h-[42px] md:min-h-[54px] flex">
                                         {name}
                                     </h1>
                                     {isMenuManagement && (
-                                        <div className="flex items-center gap-1">
-                                            <Star />
-                                            <span className="text-sm text-[#6B6B6B]">
-                                                {averageFoodRating !== undefined && averageFoodRating !== null 
-                                                    ? averageFoodRating.toFixed(1)
-                                                    : 'No rating'
-                                                }
+                                        <div className="flex flex-row gap-2">
+                                            <p className="bg-gray-100 text-gray-600 text-[10px] px-1 py-0.5 md:text-[12px] md:px-2 md:py-1 rounded font-medium w-fit">
+                                                {categoryName}
+                                            </p>
+                                            <div className="flex items-center gap-1">
+                                                <Star />
+                                                <span className="text-sm text-[#6B6B6B]">
+                                                    {averageFoodRating !== undefined && averageFoodRating !== null 
+                                                        ? averageFoodRating.toFixed(1)
+                                                        : 'No rating'
+                                                    }
 
-                                            </span>
+                                                </span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
-                                <p className="bg-[#F4F4F4] px-2 py-1 rounded text-xs text-[#919191]">
-                                    {categoryName}
-                                </p>
+                                {!isMenuManagement && (
+                                    <p className="bg-gray-100 text-gray-600 text-[10px] px-1 py-0.5 md:text-[12px] md:px-2 md:py-1 rounded font-medium w-fit">
+                                        {categoryName}
+                                    </p>
+                                )}
                             </div>
                             <div className="text-sm text-[#6B6B6B] line-clamp-3 min-h-[3.75rem]">
                                 {description}

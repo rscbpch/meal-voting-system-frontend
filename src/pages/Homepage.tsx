@@ -70,7 +70,7 @@ const Homepage = () => {
                         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 relative">
                             <div className="mx-auto max-w-[620px] text-center">
                                 <h1 className="title-font text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-none">Your Meal, Your Choice</h1>
-                                <p className="mt-6 text-xs sm:text-sm md:text-base lg:text-lg leading-tight">
+                                <p className="mt-6 text-base sm:text-lg md:text-xl  leading-relexed">
                                     Vote daily on your preferred meals and help the canteen prepare exactly what’s in demand; fresher, tastier, and waste-free.
                                 </p>
                                 <div className="mt-8 md:mt-10 flex items-center justify-center gap-x-6">
@@ -143,7 +143,7 @@ const Homepage = () => {
                             </svg>
                         </div>
                     </div>
-                    <div className="relative flex justify-center px-12 py-20 lg:text-[20px] mt-8">
+                    <div className="relative flex justify-center px-12 py-20 sm:text-[20px] mt-8">
                         <div className="absolute inset-x-0 top-6 z-20 flex justify-center">
                             {status === 'open' ? (
                                 <div>
@@ -153,7 +153,7 @@ const Homepage = () => {
                             ) : (
                                 <div>
                                     <p className="text-center font-semibold">Voting has closed.</p>
-                                    <p className="text-center text-[14px] md:text-[16px]">Vote will start again at 6am.</p>
+                                    <p className="text-center text-[16px]">Vote will start again at 6am.</p>
                                 </div>
                             )}
                         </div>
@@ -205,12 +205,15 @@ const Homepage = () => {
                             )}
                         </div>
                     </div>
-                    <div className={`flex flex-col justify-center ${status === 'open' ? 'py-12' : 'pt-0 pb-12'}`}>
-                        <p className="title-font font-semibold text-[32px] text-center">Today's top vote</p>
-                        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 mt-6">
-                            <RankingPodium />
+
+                    {status === 'open' && (
+                        <div className="flex flex-col justify-center pt-10 pb-12">
+                            <p className="title-font font-bold text-[24px] text-center">Today's top vote</p>
+                            <div className="mx-auto max-w-6xl sm:px-6 lg:px-8 mt-6">
+                                <RankingPodium />
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </main>
             </PageTransition>
             <Footer />

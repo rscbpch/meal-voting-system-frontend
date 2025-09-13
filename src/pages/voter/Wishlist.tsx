@@ -1,16 +1,16 @@
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import PageTransition from "../components/PageTransition";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import PageTransition from "../../components/PageTransition";
 import { FiHeart } from "react-icons/fi";
 import { useEffect, useState } from "react";
-import CardV2 from "../components/CardV2";
-import Pagination from "../components/Pagination";
-import { getMostWishedDishes, getCategories } from "../services/dishService";
-import Loading from "../components/Loading";
-import type { Dish, Category } from "../services/dishService";
-import { fetchAllWishes, fetchAndStoreUserWishes } from "../services/wishService";
-import type { WishData, UserWish } from "../services/wishService";
-import { getProfile } from "../services/authService";
+import CardV2 from "../../components/CardV2";
+import Pagination from "../../components/Pagination";
+import { getMostWishedDishes, getCategories } from "../../services/dishService";
+import Loading from "../../components/Loading";
+import type { Dish, Category } from "../../services/dishService";
+import { fetchAllWishes, fetchAndStoreUserWishes } from "../../services/wishService";
+import type { WishData, UserWish } from "../../services/wishService";
+import { getProfile } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 
 const Wishlist = () => {
@@ -91,10 +91,10 @@ const Wishlist = () => {
         <div>
             <Navbar />
             <PageTransition>
-                <main className="min-h-screen mx-auto px-4 pt-8  bg-[#F6FFE8]">
+                <main className="min-h-screen mx-auto pt-10 pb-16 px-4 sm:px-6 lg:px-14 bg-[#F6FFE8]">
                     <div>
-                        <div className="mt-4 mb-2 md:my-4">
-                            <h2 className="text-[18px] md:text-[20px] font-bold">Your wishlist</h2>
+                        <div>
+                            <h2 className="text-[20px] font-bold">Your wishlist</h2>
                         </div>
                         {/* Show user wish card if logged in */}
                         {isLoggedIn === true ? (
@@ -127,7 +127,7 @@ const Wishlist = () => {
                                                                     {dishName}
                                                                 </h3>
                                                                 <span className="bg-gray-100 text-gray-600 text-[10px] px-1 py-0.5 md:text-[12px] md:px-2 md:py-1 rounded font-medium w-fit">
-                                                                    Cat. {categoryName}
+                                                                    {categoryName}
                                                                 </span>
                                                                 <p className="hidden md:block text-gray-500 text-[14px] max-h-[22px] max-w-[700px] truncate overflow-hidden whitespace-nowrap">
                                                                     {description}
