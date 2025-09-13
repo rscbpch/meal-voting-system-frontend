@@ -113,7 +113,7 @@ const Navbar = () => {
                             : "text-gray-700 hover:text-[#3E7B27]"
                     }`}
                 >
-                    Menu
+                    Voting
                 </Link>
                 <Link
                     to="/feedback"
@@ -133,7 +133,7 @@ const Navbar = () => {
                             : "text-gray-700 hover:text-[#3E7B27]"
                     }`}
                 >
-                    About us
+                    About Us
                 </Link>
             </div>
             <div className="flex-1 flex items-center justify-end">
@@ -363,10 +363,10 @@ const Navbar = () => {
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ duration: 0.5, ease: "easeOut" }}
-                        className="lg:hidden fixed top-0 right-0 h-full w-55 bg-gray-50 shadow-xl z-50"
+                        className="lg:hidden fixed top-0 right-0 h-full w-70 bg-gray-50 shadow-xl z-50"
                     >
                         {/* Menu content here */}
-                        <div className="lg:hidden fixed top-0 right-0 h-full w-55 bg-gray-50 shadow-xl z-50 transform transition-all duration-500 ease-out animate-slideInRightSlow">
+                        <div className="lg:hidden fixed top-0 right-0 h-full w-70 bg-gray-50 shadow-xl z-50 transform transition-all duration-500 ease-out animate-slideInRightSlow">
                             {/* Header */}
                             <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
                                 <h2 className="text-xl font-bold text-gray-600">
@@ -531,7 +531,7 @@ const Navbar = () => {
                                                     <p className="font-medium text-gray-900">
                                                         {user.displayName}
                                                     </p>
-                                                    <p className="text-sm text-gray-500">
+                                                    <p className="text-sm text-gray-500 truncate max-w-[150px] sm:max-w-[200px]">
                                                         {user.email}
                                                     </p>
                                                 </div>

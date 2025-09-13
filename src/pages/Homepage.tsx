@@ -76,7 +76,7 @@ const Homepage = () => {
                                             onClick={() => navigate('/sign-in')}
                                             className="cursor-pointer px-5 sm:px-6 py-2 rounded-[10px] font-semibold bg-[#429818] text-white hover:bg-[#3E7B27] transition-colors"
                                         >
-                                            Sign in to vote
+                                            Vote Now
                                         </button>
                                     ) : (
                                         <button

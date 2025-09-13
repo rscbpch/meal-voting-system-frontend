@@ -112,4 +112,34 @@ body {
     animation: slide-in-right 0.5s ease-out forwards;
     opacity: 0;
   }
+  
+  @keyframes dropdown-enter {
+    0% {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  @keyframes dropdown-exit {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.95);
+    }
+  }
+  
+  .animate-dropdown-enter {
+    animation: dropdown-enter 0.2s ease-out forwards;
+  }
+  
+  .animate-dropdown-exit {
+    animation: dropdown-exit 0.15s ease-in forwards;
+  }
 }
