@@ -126,6 +126,9 @@ const Menu = () => {
         try {
             if (votedDishId === null) {
                 await voteForDish(dishId);
+                if (!votedUserId && currentUserId) {
+                    localStorage.setItem("votedUserId", String(currentUserId));
+                }
             } else {
                 await updateVoteForDish(dishId);
             }
