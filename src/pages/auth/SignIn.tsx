@@ -38,8 +38,8 @@ const SignIn = () => {
         <PageTransition>
             <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#d9f2e3] via-[#f0fdf4] to-white animate-gradient-move pt-16 pb-16">
                 {/* Back Button */}
-                <div className="absolute top-2 left-2">
-                    <div className="px-10 pt-6">
+                <div className="absolute top-2 left-4 sm:left-2">
+                    <div className="pt-6">
                         <button
                             onClick={() => navigate("/")}
                             className="flex items-center bg-white px-4 py-4 rounded-lg shadow-md text-[#429818] hover:text-[#3E7B27] hover:shadow-lg transition-all duration-200"
@@ -62,7 +62,7 @@ const SignIn = () => {
                 </div>
 
                 {/* Card */}
-                <div className="w-full max-w-md bg-white rounded-2xl shadow-xl px-12 py-14 flex flex-col items-center">
+                <div className="w-[calc(100%-2rem)] max-w-md bg-white rounded-2xl shadow-xl px-6 sm:px-12 py-14 flex flex-col items-center sm:w-full sm:mx-0">
                     {/* Welcome Message */}
                     <div className="text-center mb-8">
                         <h2 className="title-font text-2xl font-bold text-gray-800 mb-2">

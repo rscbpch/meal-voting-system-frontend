@@ -82,7 +82,7 @@ const Profile = () => {
                                         <h2 className="text-2xl font-bold text-gray-700">
                                             {user?.displayName}
                                         </h2>
-                                        <p className="text-gray-600 mt-1">
+                                        <p className="text-gray-600 mt-1 truncate max-w-[250px] sm:max-w-[300px]">
                                             {user?.email}
                                         </p>
                                     </div>
@@ -102,7 +102,7 @@ const Profile = () => {
                                             <p className="text-sm text-gray-500 transition-colors duration-200">
                                                 Email Address
                                             </p>
-                                            <p className="font-medium text-gray-700 transition-colors duration-200">
+                                            <p className="font-medium text-gray-700 transition-colors duration-200 truncate max-w-[200px] sm:max-w-[250px]">
                                                 {user?.email}
                                             </p>
                                         </div>
