@@ -108,51 +108,40 @@ const Menu = () => {
             navigate('/sign-in');
             return;
         }
-        if (localStorage.getItem("hasVotedOnThisDevice") === "true") {
-            alert("You have already voted on this device.");
+
+        const vote = await getTodayVote();
+        const currentUserId = vote?.userVote?.userId;
+
+        const votedUserId = localStorage.getItem("votedUserId");
+
+        if (votedDishId && String(currentUserId) !== votedUserId) {
+            alert("You have already voted in this poll.");
             return;
         }
+        // if (localStorage.getItem("hasVotedOnThisDevice") === "true") {
+        //     alert("You have already voted on this device.");
+        //     return;
+        // }
         try {
             if (votedDishId === null) {
                 await voteForDish(dishId);
+                if (currentUserId) {
+                    localStorage.setItem("votedUserId", String(currentUserId));
+                }
             } else {
                 await updateVoteForDish(dishId);
             }
 
-            localStorage.setItem("hasVotedOnThisDevice", "true");
-
-            const [vote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
-            if (vote && vote.userVote) {
-                setVotedDishId(vote.userVote.dishId);
+            const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
+            if (newVote && newVote.userVote) {
+                setVotedDishId(newVote.userVote.dishId);
             } else {
                 setVotedDishId(null);
             }
             setCandidate(todayResult.dishes);
     } catch (error: any) {
-        if (
-            error?.response?.data?.message &&
-            error.response.data.message.includes("No existing vote found")
-        ) {
-            setVotedDishId(null);
-            // localStorage.removeItem("votedDishId");
-            try {
-                await voteForDish(dishId);
-                setVotedDishId(dishId);
-                const res = await getTodayResult();
-                setCandidate(res.dishes);
-                // localStorage.setItem("votedDishId", String(dishId));
-                // if (votePollId !== null) {
-                //     localStorage.setItem("votePollId", String(votePollId));
-                // }
-                alert("Your vote has been reset. Please vote again.");
-            } catch (err: any) {
-                console.error("Vote error:", err);
-                alert(err?.response?.data?.message || "Failed to vote for dish");
-            }
-        } else {
-            alert(error?.response?.data?.message || "Failed to vote for dish");
+            alert(error?.message || "Failed to vote. Please try again.");
             console.error("Vote error:", error);
-        }
     }
     };
     return (
