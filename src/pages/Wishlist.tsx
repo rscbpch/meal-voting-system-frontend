@@ -95,7 +95,7 @@ const Wishlist = () => {
                     {/* Show user wish card if logged in */}
                     {isLoggedIn === true ? (
                         <div>
-                            {userWish ? (
+                            {userWish && userWish.dishId && userWish.dishId !== null && userWish.Dish !== null ? (
                                 (() => {
                                     const dishName = userWish.dishName || userWish.name || "-";
                                     const categoryName = userWish.categoryName || categories.find(cat => String(cat.id) === String(userWish.categoryId))?.name || "-";
