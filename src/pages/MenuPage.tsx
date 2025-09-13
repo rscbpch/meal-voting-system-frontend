@@ -20,7 +20,7 @@ const Menu = () => {
     const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
     const [todayError, setTodayError] = useState<string | null>(null);
     const [upcomingError, setUpcomingError] = useState<string | null>(null);
-    const [votePollId, setVotePollId] = useState<number | null>(null);
+    // const [votePollId, setVotePollId] = useState<number | null>(null);
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
     // const [votedDishId, setVotedDishId] = useState<number | null>(null);
 
@@ -38,7 +38,7 @@ const Menu = () => {
         getTodayResult()
             .then((res) => {
                 setCandidate(res.dishes);
-                setVotePollId(res.votePollId);
+                // setVotePollId(res.votePollId);
 
                 getTodayVote().then((vote) => {
                     if (vote && vote.votePollId === res.votePollId && vote.userVote) {
@@ -127,16 +127,16 @@ const Menu = () => {
             error.response.data.message.includes("No existing vote found")
         ) {
             setVotedDishId(null);
-            localStorage.removeItem("votedDishId");
+            // localStorage.removeItem("votedDishId");
             try {
                 await voteForDish(dishId);
                 setVotedDishId(dishId);
                 const res = await getTodayResult();
                 setCandidate(res.dishes);
-                localStorage.setItem("votedDishId", String(dishId));
-                if (votePollId !== null) {
-                    localStorage.setItem("votePollId", String(votePollId));
-                }
+                // localStorage.setItem("votedDishId", String(dishId));
+                // if (votePollId !== null) {
+                //     localStorage.setItem("votePollId", String(votePollId));
+                // }
                 alert("Your vote has been reset. Please vote again.");
             } catch (err: any) {
                 console.error("Vote error:", err);
