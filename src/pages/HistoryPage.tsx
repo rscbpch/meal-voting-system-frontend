@@ -38,9 +38,9 @@ const HistoryPage = () => {
     if (!history) return <div className="text-center mt-10">No history available.</div>
 
     // Find the user's voted dish info
-    const userDish = history.userVote
-        ? dishes.find(dish => dish.id === history.userVote!.dishId)
-        : null;
+    // const userDish = history.userVote
+    //     ? dishes.find(dish => dish.id === history.userVote!.dishId)
+    //     : null;
 
     const userDishVotes = history.dishes
         ? history.dishes.find(d => d.dishId === history.userVote?.dishId)?.voteCount ?? 1
