@@ -69,7 +69,7 @@ const HistoryPage = () => {
             <div className="flex justify-between">
                 <h1 className="text-left text-[32px] font-bold text-2xl mb-6">History</h1>
                 <button 
-                    className="mb-4 px-4 py-2 bg-green-600 text-white rounded"
+                    className="mb-4 px-4 py-2 bg-[#FFFEFE] text-[#3A4038] shadow-md rounded"
                     onClick={() => setShowDatePicker(true)}
                 >
                     Pick a Date
@@ -88,7 +88,9 @@ const HistoryPage = () => {
                         Showing result for: <span className="font-semibold">{new Date(selectedDate).toLocaleDateString()}</span>
                     </div>
                 )}
-                <h2 className="text-lg font-semibold mb-2">Your Pick:</h2>
+            </div>
+            <div>
+                <h2 className="text-lg font-semibold mb-2 w-full shadow-md">Your Pick:</h2>
                 {history.userVote ? (
                     <LatestVote
                         key={history.userVote.id}
@@ -103,14 +105,16 @@ const HistoryPage = () => {
                 ) : (
                     <div className="text-center text-gray-500">You have not voted yet.</div>
                 )}
-
-                <h2 className="text-xl font-semibold mt-10 mb-4 text-center">Result</h2>
+            </div>
+            <div>
+                <h2 className="text-xl font-semibold mt-10 mb-4 text-left text-[32px]">Result</h2>
                 {resultBannerItems.length > 0 ? (
                     <ResultBanner items={resultBannerItems} />
                 ) : (
                     <div className="text-center text-gray-500">Result not available yet.</div>
                 )}
             </div>
+
         </div>
     );
 };
