@@ -11,87 +11,16 @@ import { fetchAllWishes, fetchAndStoreUserWishes } from "../services/wishService
 import type { WishData, UserWish } from "../services/wishService";
 import { getProfile } from "../services/authService";
 
-// Mock categories
-const mockCategories: Category[] = [
-    { id: 1, name: "Soups & Stews" },
-    { id: 2, name: "Grilled" },
-];
-
-// Mock dishes
-const mockDishes: Dish[] = [
-    {
-        id: 12,
-        name: "Beef Soup",
-        description: "A healthy soup made with beef and Khmer herbs",
-        imageURL: "https://pub-26c75c3ff0b349439d5f6ea652b128d8.r2.dev/dishes/1757131117500_BeefSoup.jpg",
-        categoryId: 1,
-        categoryName: "Soups & Stews",
-    },
-    {
-        id: 13,
-        name: "Grilled Chicken",
-        description: "Juicy grilled chicken with local spices",
-        imageURL: "https://via.placeholder.com/150",
-        categoryId: 2,
-        categoryName: "Grilled",
-    },
-];
-
-// Mock wishes
-const mockWishes: WishData[] = [
-    {
-        dishId: 12,
-        name: "Beef Soup",
-        imageUrl: "https://pub-26c75c3ff0b349439d5f6ea652b128d8.r2.dev/dishes/1757131117500_BeefSoup.jpg",
-        categoryId: 1,
-        categoryName: "Soups & Stews",
-        totalWishes: 15,
-    },
-    {
-        dishId: 13,
-        name: "Grilled Chicken",
-        imageUrl: "https://via.placeholder.com/150",
-        categoryId: 2,
-        categoryName: "Grilled",
-        totalWishes: 8,
-    },
-];
-
-// Mock user wish
-const mockUserWish: UserWish = {
-    name: "Beef Soup",
-    dishId: 12,
-    dishName: "Beef Soup",
-    dishNameKh: "ស៊ុបសាច់គោ",
-    image: "https://pub-26c75c3ff0b349439d5f6ea652b128d8.r2.dev/dishes/1757131117500_BeefSoup.jpg",
-    description: "A healthy soup made with beef and Khmer herbs",
-    descriptionKh: "ស៊ុបសាច់គោខ្មែរ",
-    categoryId: 1,
-    categoryName: "Soups & Stews",
-    updatedAt: "2025-09-12T07:31:05.830Z",
-};
-
 const Wishlist = () => {
-    // const [dishes, setDishes] = useState<Dish[]>([]);
-    // const [categories, setCategories] = useState<Category[]>([]);
-    // const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-    // const [loading, setLoading] = useState(false);
-    // const [error, setError] = useState<string | null>(null);
-    // const [total, setTotal] = useState(0);
-    // const [currentPage, setCurrentPage] = useState(1);
-    // const [wishes, setWishes] = useState<WishData[]>([]);
-    // const [userWish, setUserWish] = useState<UserWish | null>(null);
-    // const limit = 10;
-
-    const [dishes, setDishes] = useState<Dish[]>(mockDishes);
-    const [categories, setCategories] = useState<Category[]>(mockCategories);
-    const [wishes, setWishes] = useState<WishData[]>(mockWishes);
-    const [userWish, setUserWish] = useState<UserWish | null>(mockUserWish);
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(true);
+    const [dishes, setDishes] = useState<Dish[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [total, setTotal] = useState(mockDishes.length);
+    const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
+    const [wishes, setWishes] = useState<WishData[]>([]);
+    const [userWish, setUserWish] = useState<UserWish | null>(null);
     const limit = 10;
 
     useEffect(() => {
