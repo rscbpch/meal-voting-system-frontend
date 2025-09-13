@@ -66,8 +66,8 @@ const HistoryPage = () => {
             <PageTransition>
                 <div></div>
             </PageTransition>
-            <div>
-                <h1 className="text-left font-bold text-2xl mb-6">History</h1>
+            <div className="flex justify-between">
+                <h1 className="text-left text-[32px] font-bold text-2xl mb-6">History</h1>
                 <button 
                     className="mb-4 px-4 py-2 bg-green-600 text-white rounded"
                     onClick={() => setShowDatePicker(true)}
