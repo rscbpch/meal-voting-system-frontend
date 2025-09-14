@@ -380,9 +380,9 @@ const FoodCard = ({
                                             ${isVote
                                                 ? (hasVoted
                                                     ? (isVoted
-                                                        ? 'bg-[#429818] text-white cursor-default'
-                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed')
-                                                    : 'bg-[#429818] text-white hover:bg-[#3E7B27]')
+                                                        ? 'bg-[#429818] text-white cursor-default' // voted dish: green bg, white text
+                                                        : 'bg-gray-200 text-[#429818] cursor-not-allowed') // not voted dish: gray bg, green text
+                                                    : 'bg-[#429818] text-white hover:bg-[#3E7B27]') // not voted yet: green bg, white text
                                                 : 'bg-[#429818] text-white hover:bg-[#3E7B27]'}
                                         `}
                                         style={isVote && isVoted ? { pointerEvents: 'none' } : {}}
@@ -401,7 +401,9 @@ const FoodCard = ({
                                         </svg>
 
                                         {isVote
-                                            ? (hasVoted ? (isVoted ? 'Voted' : 'Vote Now') : 'Vote Now')
+                                            ? (hasVoted
+                                                ? 'Voted'
+                                                : 'Vote Now')
                                             : (disabled ? 'Voted' : 'Vote Now')}
                                     </button>
                                 )}
