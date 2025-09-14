@@ -12,6 +12,9 @@ const CanteenPick = () => {
 	const intervalRef = useRef<number | null>(null);
 	const touchStartX = useRef<number | null>(null);
 	const touchDeltaX = useRef<number>(0);
+	const [swipeX, setSwipeX] = useState(0); // for smooth swipe
+	const [isSwiping, setIsSwiping] = useState(false);
+	const [animating, setAnimating] = useState(false);
 	const [categories, setCategories] = useState<Category[]>([]);
 	const [catError, setCatError] = useState<string | null>(null);
 
@@ -87,24 +90,42 @@ const CanteenPick = () => {
 		if (total <= 1) return;
 		touchStartX.current = e.touches[0].clientX;
 		touchDeltaX.current = 0;
+		setIsSwiping(true);
+		setAnimating(false);
 		if (intervalRef.current) window.clearInterval(intervalRef.current);
 	};
 
 	const onTouchMove = (e: React.TouchEvent) => {
 		if (touchStartX.current == null) return;
 		const currentX = e.touches[0].clientX;
-		touchDeltaX.current = currentX - touchStartX.current;
+		const delta = currentX - touchStartX.current;
+		touchDeltaX.current = delta;
+		setSwipeX(delta);
 	};
 
 	const onTouchEnd = () => {
 		if (touchStartX.current == null) return;
 		const threshold = 40; // px to trigger swipe
+		setAnimating(true);
 		if (touchDeltaX.current > threshold) {
-			goPrev();
+			setSwipeX(120); // animate out right
+			setTimeout(() => {
+				setSwipeX(0);
+				setAnimating(false);
+				goPrev();
+			}, 180);
 		} else if (touchDeltaX.current < -threshold) {
-			goNext();
+			setSwipeX(-120); // animate out left
+			setTimeout(() => {
+				setSwipeX(0);
+				setAnimating(false);
+				goNext();
+			}, 180);
+		} else {
+			setSwipeX(0); // snap back
+			setTimeout(() => setAnimating(false), 180);
 		}
-		// reset and restart autoplay
+		setIsSwiping(false);
 		touchStartX.current = null;
 		resetAutoPlay();
 	};
@@ -142,12 +163,18 @@ const CanteenPick = () => {
 				{catError && <p className="text-xs text-red-500 mb-2">{catError}</p>}
 				{/* Single card display */}
 				<div
-					className="border-2 border-dashed border-gray-300 rounded-lg p-1 md:p-2 flex flex-col items-center justify-center h-full transition-all touch-pan-y select-none"
+					className="border-2 border-dashed border-gray-300 rounded-lg p-1 md:p-2 flex flex-col items-center justify-center h-full touch-pan-y select-none"
 					onTouchStart={onTouchStart}
 					onTouchMove={onTouchMove}
 					onTouchEnd={onTouchEnd}
 				>
-					<div className="bg-white rounded-[10px] flex flex-col items-center justify-center w-full h-fill min-h-[100px] md:min-h-[180px]">
+					<div
+						className="bg-white rounded-[10px] flex flex-col items-center justify-center w-full h-fill min-h-[100px] md:min-h-[180px] transition-transform duration-200"
+						style={{
+							transform: swipeX !== 0 ? `translateX(${swipeX}px)` : undefined,
+							transition: animating ? 'transform 180ms cubic-bezier(.4,0,.2,1)' : (isSwiping ? 'none' : undefined),
+						}}
+					>
 						<div className="flex flex-col md:flex-row items-center justify-between w-full h-full p-3 md:p-6">
 							<div className="flex flex-row w-full gap-4 py-4 items-center max-h-[88px] md:max-h-[140px]">
 								<img
