@@ -4,6 +4,7 @@ export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || "http://localhos
 
 const API = axios.create({
     baseURL: BACKEND_URL,
+    withCredentials: true,
 })
 
 // always attach the token
