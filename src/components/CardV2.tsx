@@ -59,7 +59,9 @@ const FoodCard = ({
     const isFavorite = isWishlist && cardDishId && currentWishDishId === cardDishId;
 
     // For isVote: highlight voted dish
+    // If currentWishDishId is null, user hasn't voted yet
     const isVoted = isVote && cardDishId && currentWishDishId === cardDishId;
+    const hasVoted = isVote && currentWishDishId !== null && currentWishDishId !== undefined;
 
     // Handler for wishlist heart click
     const handleWishlistClick = (e: React.MouseEvent) => {
@@ -373,12 +375,14 @@ const FoodCard = ({
                                 ) : (
                                     <button
                                         onClick={handleVote}
-                                        disabled={disabled}
+                                        disabled={disabled || (hasVoted && !isVoted)}
                                         className={`rounded-md px-3 py-2 text-sm font-semibold flex justify-center items-center gap-2
                                             ${isVote
-                                                ? (isVoted
-                                                    ? 'bg-[#429818] text-white cursor-default'
-                                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed')
+                                                ? (hasVoted
+                                                    ? (isVoted
+                                                        ? 'bg-[#429818] text-white cursor-default'
+                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed')
+                                                    : 'bg-[#429818] text-white hover:bg-[#3E7B27]')
                                                 : 'bg-[#429818] text-white hover:bg-[#3E7B27]'}
                                         `}
                                         style={isVote && isVoted ? { pointerEvents: 'none' } : {}}
@@ -392,11 +396,13 @@ const FoodCard = ({
                                         >
                                             <path
                                                 d="M7.384 2.49698C7.51661 2.26757 7.73484 2.10018 7.99077 2.03156C8.24671 1.96293 8.51941 1.99869 8.749 2.13098L11 3.43098C11.2297 3.56359 11.3973 3.782 11.4659 4.03818C11.5345 4.29435 11.4986 4.5673 11.366 4.79698L10.095 6.99998H11C11.1326 6.99998 11.2598 7.05265 11.3536 7.14642C11.4473 7.24019 11.5 7.36737 11.5 7.49998C11.5 7.63258 11.4473 7.75976 11.3536 7.85353C11.2598 7.9473 11.1326 7.99998 11 7.99998H5C4.86739 7.99998 4.74021 7.9473 4.64645 7.85353C4.55268 7.75976 4.5 7.63258 4.5 7.49998C4.5 7.36737 4.55268 7.24019 4.64645 7.14642C4.74021 7.05265 4.86739 6.99998 5 6.99998H5.675C5.51067 6.84554 5.40337 6.64009 5.37052 6.41699C5.33766 6.19389 5.38118 5.96623 5.494 5.77098L7.384 2.49698ZM7.621 6.99998H8.94L10.5 4.29698L8.25 2.99698L6.36 6.27098L7.621 6.99998ZM4.515 4.99998H4.784L4.627 5.27098C4.49 5.50898 4.407 5.76298 4.375 6.01998C4.26718 6.05152 4.17313 6.11845 4.108 6.20998L2.114 8.99998H13.886L11.892 6.20998C11.8596 6.16431 11.8197 6.12442 11.774 6.09198L12.232 5.29698C12.246 5.27298 12.2593 5.24831 12.272 5.22298C12.4422 5.32772 12.5898 5.46541 12.706 5.62798L14.721 8.44798C14.902 8.70298 15 9.00798 15 9.31998V12.5C15 12.8978 14.842 13.2793 14.5607 13.5606C14.2794 13.8419 13.8978 14 13.5 14H2.5C2.10218 14 1.72064 13.8419 1.43934 13.5606C1.15804 13.2793 1 12.8978 1 12.5V9.31998C1.00035 9.00757 1.09824 8.70307 1.28 8.44898L3.294 5.62898C3.43263 5.43461 3.61564 5.27614 3.82783 5.16674C4.04003 5.05734 4.27627 5.00017 4.515 4.99998ZM14 9.99998H2V12.5C2 12.6326 2.05268 12.7598 2.14645 12.8535C2.24021 12.9473 2.36739 13 2.5 13H13.5C13.6326 13 13.7598 12.9473 13.8536 12.8535C13.9473 12.7598 14 12.6326 14 12.5V9.99998Z"
-                                                fill={isVote && isVoted ? 'white' : '#429818'}
+                                                fill={isVote && hasVoted ? (isVoted ? 'white' : '#429818') : 'white'}
                                             />
                                         </svg>
 
-                                        {isVote ? (isVoted ? 'Voted' : 'Vote Now') : (disabled ? 'Voted' : 'Vote Now')}
+                                        {isVote
+                                            ? (hasVoted ? (isVoted ? 'Voted' : 'Vote Now') : 'Vote Now')
+                                            : (disabled ? 'Voted' : 'Vote Now')}
                                     </button>
                                 )}
                             </div>
