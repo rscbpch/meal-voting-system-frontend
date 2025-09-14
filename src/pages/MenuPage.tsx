@@ -43,6 +43,7 @@ const Menu = () => {
     const [todayError, setTodayError] = useState<string | null>(null);
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
     const [todayVote, setTodayVote] = useState<any>(null);
+    const [alreadyVotedPopup, setAlreadyVotedPopup] = useState(false);
 
     useEffect(() => {
         setVotedDishId(null);
@@ -96,7 +97,7 @@ const Menu = () => {
         const votedUserId = localStorage.getItem("votedUserId");
 
         if (votedDishId && votedUserId !== currentUserId) {
-            alert("You have already voted. You can only vote once per vote poll.");
+            setAlreadyVotedPopup(true);
             return;
         }
         try {
@@ -126,7 +127,11 @@ const Menu = () => {
             }));
             setDishes(mappedDishes);
         } catch (error: any) {
-            alert(error?.message || "Failed to vote. Please try again.");
+            if (error?.message === "You have already voted today on this device.") {
+                setAlreadyVotedPopup(true);
+            } else {
+                alert(error?.message || "Failed to vote. Please try again.");
+            }
             console.error("Vote error:", error);
         }
     };
@@ -172,6 +177,7 @@ const Menu = () => {
                                         handleVote(dishIdNum);
                                     }}
                                     currentVoteCount={dish.voteCount}
+                                    currentVoteDishId={votedDishId}
                                 />
                             );
                         })}
@@ -186,6 +192,20 @@ const Menu = () => {
                 </main>
             </PageTransition>
             <Footer/>
+            {/* Already voted popup */}
+            {alreadyVotedPopup && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-xs w-full flex flex-col items-center">
+                        <div className="text-lg font-semibold mb-4 text-center">You have already voted today on this device.</div>
+                        <button
+                            className="mt-2 px-6 py-2 bg-[#429818] text-white rounded hover:bg-[#367A14] transition"
+                            onClick={() => setAlreadyVotedPopup(false)}
+                        >
+                            Got it
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
