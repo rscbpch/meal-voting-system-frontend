@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { getCategories } from "../services/dishService";
 import Loading from "../components/Loading";
-import { getTodayResult, voteForDish, updateVoteForDish, getTodayVote } from "../services/resultService";
+import { getTodayResult, updateVoteForDish, getTodayVote } from "../services/resultService";
 import PageTransition from "../components/PageTransition";
 import type { Dish as BaseDish, Category } from "../services/dishService";
 
@@ -42,7 +42,7 @@ const Menu = () => {
     const [loading, setLoading] = useState(true);
     const [todayError, setTodayError] = useState<string | null>(null);
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
-    const [todayVote, setTodayVote] = useState<any>(null);
+    const [, setTodayVote] = useState<any>(null); // Remove todayVote unused var
     const [alreadyVotedPopup, setAlreadyVotedPopup] = useState(false);
     const [changeVotePopup, setChangeVotePopup] = useState(false);
     const [pendingVoteDishId, setPendingVoteDishId] = useState<number | null>(null);
@@ -94,9 +94,9 @@ const Menu = () => {
             return;
         }
 
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const currentUserId = user.id;
-        const votedUserId = localStorage.getItem("votedUserId");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const currentUserId = user.id;
+    const votedUserId = localStorage.getItem("votedUserId");
 
         // If user has already voted for a different dish, show confirmation popup
         if (votedDishId && votedDishId !== dishId) {
@@ -114,15 +114,18 @@ const Menu = () => {
 
     // Helper to perform the vote or update
     const performVote = async (dishId: number) => {
+        const votedUserId = localStorage.getItem("votedUserId");
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const currentUserId = user.id;
+
+        // If votedUserId in localStorage is not the current user, show already voted popup and do not update
+        if (votedUserId && votedUserId !== String(currentUserId)) {
+            setAlreadyVotedPopup(true);
+            return;
+        }
+
         try {
-            if (!todayVote?.userVote) {
-                await voteForDish(dishId);
-                localStorage.setItem("votedUserId", currentUserId);
-            } else {
-                await updateVoteForDish(dishId);
-            }
+            await updateVoteForDish(dishId);
 
             const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
             setTodayVote(newVote);
@@ -145,8 +148,6 @@ const Menu = () => {
         } catch (error: any) {
             // Show already voted popup if backend returns status 403
             if (error?.status === 403 || error?.response?.status === 403) {
-                setAlreadyVotedPopup(true);
-            } else if (error?.message === "You have already voted today on this device.") {
                 setAlreadyVotedPopup(true);
             } else {
                 alert(error?.message || "Failed to vote. Please try again.");
@@ -213,15 +214,20 @@ const Menu = () => {
             <Footer/>
             {/* Already voted popup */}
             {alreadyVotedPopup && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-xs w-full flex flex-col items-center">
-                        <div className="text-lg font-semibold mb-4 text-center">You have already voted today on this device.</div>
-                        <button
-                            className="mt-2 px-6 py-2 bg-[#429818] text-white rounded hover:bg-[#367A14] transition"
-                            onClick={() => setAlreadyVotedPopup(false)}
-                        >
-                            Got it
-                        </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                    <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 flex flex-col items-center">
+                        <h3 className="text-lg font-semibold mb-2 text-center">Already voted</h3>
+                        <p className="text-sm text-gray-600 mb-4 text-center">
+                            You have already voted today on this device.
+                        </p>
+                        <div className="flex justify-end w-full">
+                            <button
+                                onClick={() => setAlreadyVotedPopup(false)}
+                                className="px-4 py-2 text-sm rounded-md bg-[#429818] text-white hover:bg-[#367A14] ml-auto"
+                            >
+                                Got it
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
