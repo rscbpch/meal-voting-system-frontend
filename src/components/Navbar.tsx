@@ -8,8 +8,8 @@ import {
     FiChevronDown,
     FiLogIn,
 } from "react-icons/fi";
-import { MdRestaurantMenu } from "react-icons/md";
-import { HiOutlineMenuAlt2 } from "react-icons/hi";
+import { LuVote } from "react-icons/lu";
+import { TbBowlSpoon } from "react-icons/tb";
 import { TbHistoryToggle } from "react-icons/tb";
 import LogoWhite from "../assets/LogoWhite-removebg.svg";
 import { Link } from "react-router-dom";
@@ -427,8 +427,8 @@ const Navbar = () => {
                                                 : "text-gray-700 hover:text-[#3E7B27] hover:bg-[#EAF6E7] font-medium"
                                         }`}
                                     >
-                                        <HiOutlineMenuAlt2 className="w-5 h-5" />
-                                        <span>Menu</span>
+                                        <LuVote className="w-5 h-5" />
+                                        <span>Voting</span>
                                     </Link>
 
                                     <Link
@@ -494,7 +494,7 @@ const Navbar = () => {
                                                     : "text-gray-700 hover:text-[#3E7B27] hover:bg-[#EAF6E7] font-medium"
                                             }`}
                                         >
-                                            <MdRestaurantMenu size={20} />
+                                            <TbBowlSpoon size={20} />
                                             <span>Menu</span>
                                         </Link>
                                         <Link

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FiHeart, FiTrash2 } from "react-icons/fi";
-import { updateUserWish } from "../services/wishService";
 
 interface Card {
     name: string;
@@ -16,7 +15,6 @@ interface Card {
     isVote?: boolean;
     onEdit?: () => void;
     onDelete?: () => void;
-    onWishChange?: () => void;
     averageRating?: number;
     wishlistCount?: number;
     onViewDetails?: () => void;
@@ -27,6 +25,7 @@ interface Card {
     currentVoteCount?: number;
     isDeleting?: boolean;
     currentWishDishId?: number | null;
+    onWishlistClick?: (dishId: number, name: string) => void;
 }
 
 const FoodCard = ({
@@ -44,59 +43,31 @@ const FoodCard = ({
     onEdit,
     onDelete,
     onViewDetails,
-    onWishChange,
     averageFoodRating,
     totalWishes,
     ranking,
     currentVoteCount,
     isDeleting = false,
     currentWishDishId,
+    onWishlistClick,
 }: Card ) => {
     const [votes, setVotes] = useState<number>(initialVotes);
-    const [loading, setLoading] = useState<boolean>(false);
+    // local loading not required now; delegate to parent if needed
+    const [loading] = useState<boolean>(false);
     const cardDishId = dishId;
     // Use prop for current favorite dishId
     const isFavorite = isWishlist && cardDishId && currentWishDishId === cardDishId;
 
     // Handler for wishlist heart click
-    const handleWishlistClick = async (e: React.MouseEvent) => {
+    const handleWishlistClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (loading) return;
-        setLoading(true);
-        try {
-            if (isWishlist) {
-                if (!cardDishId) {
-                    alert("Dish ID not found.");
-                    setLoading(false);
-                    return;
-                }
-                // If already favorite, do nothing
-                if (currentWishDishId === cardDishId) {
-                    setLoading(false);
-                    return;
-                }
-                // If another wish exists, confirm before changing
-                if (currentWishDishId && currentWishDishId !== cardDishId) {
-                    const confirmChange = window.confirm(
-                        `You have already wished for another dish. Do you want to change your wish to "${name}"?`
-                    );
-                    if (!confirmChange) {
-                        setLoading(false);
-                        return;
-                    }
-                }
-                // Update backend
-                await updateUserWish(Number(cardDishId));
-                onWishChange?.();
-                setLoading(false);
-                return;
-            }
-            setLoading(false);
-        } catch (err: any) {
-            alert(err.message || "Failed to update wish.");
-        } finally {
-            setLoading(false);
+        if (!isWishlist) return;
+        if (!cardDishId) {
+            alert("Dish ID not found.");
+            return;
         }
+        onWishlistClick?.(cardDishId, name);
     };
 
     const handleVote = () => {
@@ -117,13 +88,15 @@ const FoodCard = ({
     );
 
     return (
-        <div className="flex items-end h-100 w-69">
+        <div 
+            className="flex items-end h-100"
+        >
             <div 
-                className={`flex bg-white rounded-lg shadow-md overflow-visible w-full ${onViewDetails ? 'cursor-pointer hover:shadow-lg transition-shadow duration-300' : ''}`}
+                className={`flex bg-white rounded-lg shadow-md overflow-visible px-4 pb-4 md:w-full  ${onViewDetails ? 'cursor-pointer hover:shadow-lg transition-shadow duration-300' : ''}`}
                 onClick={onViewDetails}
             >
                 {/* Inner container */}
-                <div className="relative flex flex-col p-4 pt-34 gap-4 w-full">
+                <div className={`relative flex flex-col gap-4 pt-34 w-full ${isWishlist ? "md:min-w-50" : "min-w-63"}`}>
                     {/* Floating Image */}
                     <img
                         src={imgURL}
@@ -135,11 +108,11 @@ const FoodCard = ({
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-col items-start gap-1">
                                 <div className="flex flex-col gap-1">
-                                    <h1 className="text-[14px] md:text-[18px] font-bold text-gray-800 max-h-[42px] md:max-h-[54px] min-h-[42px] md:min-h-[54px] flex">
+                                    <h1 className="text-[14px] lg:text-base font-bold text-gray-800 max-h-[42px] md:max-h-[54px] min-h-[42px] md:min-h-[54px] flex">
                                         {name}
                                     </h1>
                                     {isMenuManagement && (
-                                        <div className="flex flex-row gap-2">
+                                        <div className="flex flex-row gap-1">
                                             <p className="bg-gray-100 text-gray-600 text-[10px] px-1 py-0.5 md:text-[12px] md:px-2 md:py-1 rounded font-medium w-fit">
                                                 {categoryName}
                                             </p>
@@ -162,7 +135,7 @@ const FoodCard = ({
                                     </p>
                                 )}
                             </div>
-                            <div className="text-sm text-[#6B6B6B] line-clamp-3 min-h-[3.75rem]">
+                            <div className="text-sm text-[#6B6B6B] line-clamp-3 min-h-[3.75rem] w-fit">
                                 {description}
                             </div>
                         </div>
