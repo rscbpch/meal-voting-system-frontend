@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getTodayPoll } from "../services/staffBoardVotepollService";
-import { finalizeVotePoll } from "../services/votePollService";
+import { finalizeVotePoll, getUpcomingResults, type UpcomingResultsResponse } from "../services/votePollService";
 import CustomAlert from "./CustomAlert";
 
 interface FoodRow {
@@ -24,6 +24,7 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
     const [pollId, setPollId] = useState<number | string | null>(null);
     const [isVotingOpen, setIsVotingOpen] = useState<boolean>(true); // Track if voting is still open
     const [mealDate, setMealDate] = useState<string>("");
+    const [upcomingResults, setUpcomingResults] = useState<UpcomingResultsResponse | null>(null);
     const [popup, setPopup] = useState<{
         isOpen: boolean;
         title: string;
@@ -36,21 +37,135 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
         type: 'info'
     });
 
+    // Function to clear poll state
+    const clearPollState = () => {
+        localStorage.removeItem("poll_finalized");
+        localStorage.removeItem("selected_dishes");
+        localStorage.removeItem("current_poll_id");
+        setFinalized(false);
+        setIsVotingOpen(true);
+        setSelected({});
+        setUpcomingResults(null);
+        console.log('Poll state cleared');
+    };
+
+    // Expose clear function to window for debugging
+    React.useEffect(() => {
+        (window as any).clearPollState = clearPollState;
+        return () => {
+            delete (window as any).clearPollState;
+        };
+    }, []);
+
+    // Function to fetch upcoming results
+    const fetchUpcomingResults = async () => {
+        try {
+            const results = await getUpcomingResults();
+            setUpcomingResults(results);
+            
+            // Convert upcoming results to FoodRow format
+            const rows: FoodRow[] = results.dish.map((d) => ({
+                dishId: d.Dish.id,
+                name: d.Dish.name || d.Dish.name_kh || `Dish ${d.Dish.id}`,
+                votes: 0, // Finalized dishes don't have vote counts
+            }));
+            
+            setData(rows);
+            setFinalized(true);
+            setIsVotingOpen(false);
+            
+            // Update localStorage with current poll ID
+            localStorage.setItem("current_poll_id", results.votePollId.toString());
+            localStorage.setItem("poll_finalized", "true");
+            
+            // Set selected dishes based on what was actually finalized
+            const selectedMap: { [dishId: string]: boolean } = {};
+            results.dish.forEach((d) => {
+                if (d.isSelected) {
+                    selectedMap[d.Dish.id.toString()] = true;
+                }
+            });
+            setSelected(selectedMap);
+            
+            // Set meal date from results
+            if (results.mealDate) {
+                const date = new Date(results.mealDate);
+                if (!isNaN(date.getTime())) {
+                    const formattedDate = date.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    setMealDate(formattedDate);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching upcoming results:', error);
+            // If no upcoming results, clear the state and continue with normal flow
+            clearPollState();
+        }
+    };
+
     // Load selected dishes and finalized state from localStorage
     useEffect(() => {
-        const selectedDishes = JSON.parse(localStorage.getItem("selected_dishes") || "[]");
-        const selectedMap: { [dishId: string]: boolean } = {};
-        selectedDishes.forEach((dishId: string) => { selectedMap[dishId] = true; });
-        setSelected(selectedMap);
+        // Load finalized state first
         const finalizedFlag = localStorage.getItem("poll_finalized") === "true";
         setFinalized(finalizedFlag);
+        
+        // Load current poll ID
+        const storedPollId = localStorage.getItem("current_poll_id");
+        if (storedPollId) {
+            setPollId(storedPollId);
+        }
+        
         // If poll is finalized, voting is closed
         setIsVotingOpen(!finalizedFlag);
+        
+        // Only fetch upcoming results if we know the poll is finalized
+        if (finalizedFlag) {
+            fetchUpcomingResults();
+        }
+        
+        // Load selected dishes from localStorage (only if not finalized)
+        if (!finalizedFlag) {
+            const selectedDishes = JSON.parse(localStorage.getItem("selected_dishes") || "[]");
+            const selectedMap: { [dishId: string]: boolean } = {};
+            selectedDishes.forEach((dishId: string) => { selectedMap[dishId] = true; });
+            setSelected(selectedMap);
+        }
+    }, []);
+
+    // Check for old poll data and clear if needed
+    useEffect(() => {
+        const checkForOldPollData = async () => {
+            try {
+                // Try to fetch current poll data
+                const currentPoll = await getTodayPoll();
+                const currentPollId = currentPoll?.votePollId?.toString();
+                const storedPollId = localStorage.getItem("current_poll_id");
+                
+                // If we have a stored poll ID but it's different from current, clear old data
+                if (storedPollId && currentPollId && storedPollId !== currentPollId) {
+                    console.log(`Clearing old poll data: stored=${storedPollId}, current=${currentPollId}`);
+                    clearPollState();
+                }
+            } catch (error) {
+                console.error('Error checking for old poll data:', error);
+            }
+        };
+        
+        checkForOldPollData();
     }, []);
 
     useEffect(() => {
         if (items && items.length > 0) {
             setData(items.slice());
+            return;
+        }
+
+        // If we have upcoming results and the poll is finalized, don't fetch the regular poll data
+        if (upcomingResults && finalized) {
             return;
         }
 
@@ -64,6 +179,12 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
                     return;
                 }
 
+                // Update voting status based on poll status from API
+                const pollStatus = res?.status;
+                if (pollStatus) {
+                    setIsVotingOpen(pollStatus === "open");
+                }
+
                 const rows: FoodRow[] = dishes.map((d: any) => ({
                     dishId: d.dishId ?? d.id,
                     name: d.name ?? d.dish ?? d.Dish?.name ?? `Dish ${d.dishId ?? d.id ?? ''}`,
@@ -73,7 +194,28 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
                 rows.sort((a, b) => b.votes - a.votes);
                 if (mounted) setData(rows);
                 // Save pollId for finalizeVotePoll
-                if (res?.votePollId) setPollId(res.votePollId);
+                if (res?.votePollId) {
+                    const currentPollId = res.votePollId.toString();
+                    const storedPollId = localStorage.getItem("current_poll_id");
+                    
+                    // Check if this is a different poll than what we had stored
+                    if (storedPollId && storedPollId !== currentPollId) {
+                        console.log(`New poll detected: ${storedPollId} -> ${currentPollId}. Clearing old state.`);
+                        // Clear old poll state if this is a new poll
+                        clearPollState();
+                    }
+                    
+                    setPollId(res.votePollId);
+                    // Update localStorage with current poll ID
+                    localStorage.setItem("current_poll_id", currentPollId);
+                    
+                    // If this is a new poll, also clear the finalized state
+                    if (storedPollId && storedPollId !== currentPollId) {
+                        localStorage.removeItem("poll_finalized");
+                        setFinalized(false);
+                        setIsVotingOpen(true);
+                    }
+                }
                 
                 // Set meal date - debug what's available in the response
                 console.log('API Response:', res);
@@ -148,7 +290,7 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
             });
 
         return () => { mounted = false; };
-    }, [items]);
+    }, [items, upcomingResults, finalized]);
 
     const display = data ?? items ?? [];
 
@@ -228,10 +370,17 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
             setFinalized(true);
             setIsVotingOpen(false); // Close voting
             localStorage.setItem("poll_finalized", "true");
+            
+            // Save selected dishes to localStorage
+            localStorage.setItem("selected_dishes", JSON.stringify(selectedIds));
+            
+            // Fetch the updated results after successful finalization
+            await fetchUpcomingResults();
+            
             setPopup({
                 isOpen: true,
                 title: "Success",
-                message: "Poll has been successfully finalized! Voting is now closed and you can select dishes.",
+                message: "Poll has been successfully finalized! The finalized dishes are now displayed.",
                 type: 'success'
             });
         } catch (err: any) {
@@ -252,18 +401,22 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
         <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+                    <h3 className="text-xl font-bold text-gray-800">
+                        {upcomingResults ? 'Finalized Dishes' : title}
+                    </h3>
                     <p className="text-sm text-gray-600 mt-1">
                         {mealDate || "Loading date..."}
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        isVotingOpen 
+                        upcomingResults
+                            ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                            : isVotingOpen 
                             ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' 
                             : 'bg-green-100 text-green-800 border border-green-200'
                     }`}>
-                        {isVotingOpen ? 'Voting Open' : 'Voting Closed'}
+                        {upcomingResults ? 'Finalized' : isVotingOpen ? 'Voting Open' : 'Voting Closed'}
                     </div>
                     <div className="text-sm text-gray-500">
                         {display.length} {display.length === 1 ? 'item' : 'items'}
@@ -303,12 +456,14 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
                                 <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     Votes
                                 </th>
-                                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
-                                    Action
-                                    <div className="text-[10px] text-gray-400 font-normal mt-1">
-                                        (Min 3 required)
-                                    </div>
-                                </th>
+                                {!upcomingResults && (
+                                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
+                                        Action
+                                        <div className="text-[10px] text-gray-400 font-normal mt-1">
+                                            (Min 3 required)
+                                        </div>
+                                    </th>
+                                )}
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -332,44 +487,56 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                                            {row.name}
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                                                {row.name}
+                                            </div>
+                                            {upcomingResults && selected[row.dishId] && (
+                                                <div className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                    Selected
+                                                </div>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
                                         <div className="text-sm font-semibold text-gray-900">
-                                            {row.votes.toLocaleString()}
+                                            {upcomingResults ? 'Finalized' : row.votes.toLocaleString()}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-center w-40">
-                                        <button
-                                            className={`inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 min-w-[100px] h-[36px] ${
-                                                selected[row.dishId] 
-                                                    ? "bg-[#429818] text-white shadow-md hover:bg-[#35701e] hover:shadow-lg" 
-                                                    : isVotingOpen
-                                                    ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
-                                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 border border-gray-300"
-                                            } ${finalized ? 'opacity-50 cursor-not-allowed' : isVotingOpen ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                                            disabled={finalized || isVotingOpen}
-                                            onClick={() => handleSelect(row.dishId)}
-                                        >
-                                            {selected[row.dishId] ? (
-                                                <>
-                                                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                    Selected
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                    </svg>
-                                                    Select
-                                                </>
-                                            )}
-                                        </button>
-                                    </td>
+                                    {!upcomingResults && (
+                                        <td className="px-6 py-4 whitespace-nowrap text-center w-40">
+                                            <button
+                                                className={`inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 min-w-[100px] h-[36px] ${
+                                                    selected[row.dishId] 
+                                                        ? "bg-[#429818] text-white shadow-md hover:bg-[#35701e] hover:shadow-lg" 
+                                                        : isVotingOpen
+                                                        ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 border border-gray-300"
+                                                } ${finalized ? 'opacity-50 cursor-not-allowed' : isVotingOpen ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                                disabled={finalized || isVotingOpen}
+                                                onClick={() => handleSelect(row.dishId)}
+                                            >
+                                                {selected[row.dishId] ? (
+                                                    <>
+                                                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                        </svg>
+                                                        Selected
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                        </svg>
+                                                        Select
+                                                    </>
+                                                )}
+                                            </button>
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>
@@ -378,7 +545,7 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
             )}
 
             {/* Voting status message */}
-            {isVotingOpen && (
+            {isVotingOpen && !upcomingResults && (
                 <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-center">
                         <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -390,54 +557,73 @@ const AllFoodsRank: React.FC<Props> = ({ items, title = "All Foods" }) => {
                     </div>
                 </div>
             )}
-            
-            {/* Selection count and submit button */}
-            <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
-                <div className="text-sm text-gray-600">
-                    <span className="font-medium">
-                        {Object.keys(selected).length} of {display.length} dishes selected
-                    </span>
-                    {Object.keys(selected).length < 3 && !isVotingOpen && (
-                        <span className="ml-2 text-orange-600">
-                            (Minimum 3 required)
-                        </span>
-                    )}
+
+            {/* Finalized results message */}
+            {upcomingResults && (
+                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center">
+                        <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-sm text-green-800">
+                            <strong>Poll has been finalized.</strong> The dishes below have been selected for the upcoming meal.
+                        </p>
+                    </div>
                 </div>
-                <button
-                    className={`inline-flex items-center px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-200 ${
-                        finalized 
-                            ? "bg-green-500 text-white shadow-md" 
-                            : isVotingOpen
-                            ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                            : "bg-[#429818] text-white hover:bg-[#35701e] hover:shadow-lg transform hover:-translate-y-0.5"
-                    } ${finalized || isVotingOpen ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                    disabled={finalized || isVotingOpen}
-                    onClick={handleFinalizeSubmit}
-                >
-                    {finalized ? (
-                        <>
-                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                            Poll Finalized
-                        </>
-                    ) : isVotingOpen ? (
-                        <>
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Wait for Voting to End
-                        </>
-                    ) : (
-                        <>
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Submit Selected ({Object.keys(selected).length})
-                        </>
-                    )}
-                </button>
-            </div>
+            )}
+            
+            {/* Selection count and submit button - only show when not displaying finalized results */}
+            {!upcomingResults && (
+                <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                    <div className="text-sm text-gray-600">
+                        <span className="font-medium">
+                            {upcomingResults 
+                                ? `${Object.keys(selected).length} finalized dishes`
+                                : `${Object.keys(selected).length} of ${display.length} dishes selected`
+                            }
+                        </span>
+                        {Object.keys(selected).length < 3 && !isVotingOpen && !upcomingResults && (
+                            <span className="ml-2 text-orange-600">
+                                (Minimum 3 required)
+                            </span>
+                        )}
+                    </div>
+                    <button
+                        className={`inline-flex items-center px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                            finalized 
+                                ? "bg-green-500 text-white shadow-md" 
+                                : isVotingOpen
+                                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                : "bg-[#429818] text-white hover:bg-[#35701e] hover:shadow-lg transform hover:-translate-y-0.5"
+                        } ${finalized || isVotingOpen ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                        disabled={finalized || isVotingOpen}
+                        onClick={handleFinalizeSubmit}
+                    >
+                        {finalized ? (
+                            <>
+                                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Poll Finalized
+                            </>
+                        ) : isVotingOpen ? (
+                            <>
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Wait for Voting to End
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Submit Selected ({Object.keys(selected).length})
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
 
             {/* Custom Alert */}
             <CustomAlert
