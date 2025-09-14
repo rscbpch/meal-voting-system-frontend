@@ -94,38 +94,52 @@ const Menu = () => {
             return;
         }
 
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const currentUserId = user.id;
-    const votedUserId = localStorage.getItem("votedUserId");
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const currentUserId = String(user.id);
+        const votedUserId = localStorage.getItem("votedUserId");
+
+        // If no vote yet (first vote)
+        if (!votedDishId) {
+            // If localStorage has a userId and it's not the current user, block voting
+            if (votedUserId && votedUserId !== currentUserId) {
+                setAlreadyVotedPopup(true);
+                return;
+            }
+            // Otherwise, allow voting (will set votedUserId after success)
+            await performVote(dishId, true, currentUserId);
+            return;
+        }
 
         // If user has already voted for a different dish, show confirmation popup
         if (votedDishId && votedDishId !== dishId) {
+            // Only allow changing vote if votedUserId matches current user
+            if (votedUserId && votedUserId !== currentUserId) {
+                setAlreadyVotedPopup(true);
+                return;
+            }
             setPendingVoteDishId(dishId);
             setChangeVotePopup(true);
             return;
         }
 
-        if (votedDishId && votedUserId !== currentUserId) {
+        // If user tries to vote again for the same dish, block if not the original user
+        if (votedUserId && votedUserId !== currentUserId) {
             setAlreadyVotedPopup(true);
             return;
         }
-        await performVote(dishId);
+        await performVote(dishId, false, currentUserId);
     };
 
     // Helper to perform the vote or update
-    const performVote = async (dishId: number) => {
-        const votedUserId = localStorage.getItem("votedUserId");
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const currentUserId = user.id;
-
-        // If votedUserId in localStorage is not the current user, show already voted popup and do not update
-        if (votedUserId && votedUserId !== String(currentUserId)) {
-            setAlreadyVotedPopup(true);
-            return;
-        }
-
+    // performVote: isFirstVote = true if this is the first vote (no votedDishId yet)
+    const performVote = async (dishId: number, isFirstVote = false, currentUserId?: string) => {
         try {
             await updateVoteForDish(dishId);
+
+            // On first vote, store userId in localStorage
+            if (isFirstVote && currentUserId) {
+                localStorage.setItem("votedUserId", currentUserId);
+            }
 
             const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
             setTodayVote(newVote);
