@@ -31,110 +31,102 @@ const HistoryPage = () => {
             .catch ((err) => setError(err.message || "Failed to load data"))
             .finally(() => setLoading(false));
     }, [selectedDate]);
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center min-h-[300px] w-full">
-                <Loading />
-            </div>
-        );
-    }
 
-    // Error state
-    if (error) {
-        return <div className="text-center text-red-500 mt-10">{error}</div>;
-    }
-
-    // No history state
-    if (!history) {
-        return <div className="text-center mt-10">No history available.</div>;
-    }
-
-    // Main content
     return (
         <div>
             <Navbar />
-            <div className="p-4">
-                <PageTransition>
-                    <div className="flex justify-between pt-4">
-                        <h1 className="text-left text-[32px] font-bold text-2xl mb-6">History</h1>
-                        <div className="relative inline-block">
-                            <button
-                                className="mb-4 px-4 py-2 bg-[#FFFEFE] text-[#3A4038] shadow-md rounded"
-                                onClick={() => setShowDatePicker(true)}
-                            >
-                                Pick a Date
-                            </button>
-                            {showDatePicker && (
-                                <>
-                                    <div
-                                        className="fixed inset-0 z-40"
-                                        onClick={() => setShowDatePicker(false)}
-                                        aria-label="Close date picker"
-                                    />
-                                    <div className="absolute z-50 -left-31 mt-2">
-                                        <DatePicker
-                                            selectedDate={selectedDate}
-                                            onDateSelect={date => {
-                                                setSelectedDate(date);
-                                                setShowDatePicker(false);
-                                            }}
-                                            showDatePicker={showDatePicker}
-                                            onClose={() => setShowDatePicker(false)}
+            <div className="p-4 min-h-[60vh]">
+                {loading ? (
+                    <div className="flex justify-center items-center min-h-[300px] w-full">
+                        <Loading />
+                    </div>
+                ) : error ? (
+                    <div className="text-center text-red-500 mt-10">{error}</div>
+                ) : !history ? (
+                    <div className="text-center mt-10">No history available.</div>
+                ) : (
+                    <PageTransition>
+                        <div className="flex justify-between pt-4">
+                            <h1 className="text-left text-[32px] font-bold text-2xl mb-6">History</h1>
+                            <div className="relative inline-block">
+                                <button
+                                    className="mb-4 px-4 py-2 bg-[#FFFEFE] text-[#3A4038] shadow-md rounded"
+                                    onClick={() => setShowDatePicker(true)}
+                                >
+                                    Pick a Date
+                                </button>
+                                {showDatePicker && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-40"
+                                            onClick={() => setShowDatePicker(false)}
+                                            aria-label="Close date picker"
                                         />
-                                    </div>
-                                </>
+                                        <div className="absolute z-50 -left-31 mt-2">
+                                            <DatePicker
+                                                selectedDate={selectedDate}
+                                                onDateSelect={date => {
+                                                    setSelectedDate(date);
+                                                    setShowDatePicker(false);
+                                                }}
+                                                showDatePicker={showDatePicker}
+                                                onClose={() => setShowDatePicker(false)}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Your Pick */}
+                        <div>
+                            <div className="text-[24px] font-bold mb-16">
+                                <p>
+                                    Your <span className="text-[#429818]">Pick</span>
+                                </p>
+                            </div>
+                            {history.userVote ? (
+                                <LatestVote
+                                    key={history.userVote.id}
+                                    name={history.userVote.Dish.name}
+                                    id={history.userVote.dishId}
+                                    description={history.userVote.Dish.description || ""}
+                                    totalVote={
+                                        history.dishes?.find(d => d.dishId === history.userVote?.dishId)?.voteCount ?? 1
+                                    }
+                                    votedAt={history.userVote.updatedAt || history.userVote.createdAt}
+                                    imgURL={history.userVote.Dish.imageURL || ""}
+                                />
+                            ) : (
+                                <div className="text-center text-gray-500">You have not voted yet.</div>
                             )}
                         </div>
-                    </div>
 
-                    {/* Your Pick */}
-                    <div>
-                        <div className="text-[24px] font-bold mb-16">
-                            <p>
-                                Your <span className="text-[#429818]">Pick</span>
-                            </p>
+                        {/* Result Section */}
+                        <div>
+                            <h2 className="text-xl font-semibold mt-10 mb-16 text-left text-[32px]">
+                                Result
+                            </h2>
+                            {upcomingResults && Array.isArray(upcomingResults.dish) && upcomingResults.dish.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {upcomingResults.dish.map(dish => (
+                                        <ResultCard
+                                            key={dish.dishId}
+                                            name={dish.Dish?.name}
+                                            description={dish.Dish?.description || "No description available."}
+                                            imgURL={dish.Dish?.imageURL || ""}
+                                            votes={dish.voteCount}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center text-gray-500 text-[14px] lg:text-base">
+                                    Result hasn't been finalized yet.
+                                </div>
+                            )}
                         </div>
-                        {history.userVote ? (
-                            <LatestVote
-                                key={history.userVote.id}
-                                name={history.userVote.Dish.name}
-                                id={history.userVote.dishId}
-                                description={history.userVote.Dish.description || ""}
-                                totalVote={
-                                    history.dishes?.find(d => d.dishId === history.userVote?.dishId)?.voteCount ?? 1
-                                }
-                                votedAt={history.userVote.updatedAt || history.userVote.createdAt}
-                                imgURL={history.userVote.Dish.imageURL || ""}
-                            />
-                        ) : (
-                            <div className="text-center text-gray-500">You have not voted yet.</div>
-                        )}
-                    </div>
-
-                    {/* Result Section */}
-                    <div>
-                        <h2 className="text-xl font-semibold mt-10 mb-16 text-left text-[32px]">
-                            Result
-                        </h2>
-                        {upcomingResults && Array.isArray(upcomingResults.dish) && upcomingResults.dish.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {upcomingResults.dish.map(dish => (
-                                    <ResultCard
-                                        key={dish.dishId}
-                                        name={dish.Dish?.name}
-                                        description={dish.Dish?.description || "No description available."}
-                                        imgURL={dish.Dish?.imageURL || ""}
-                                        votes={dish.voteCount}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center text-gray-500 text-[14px] lg:text-base">
-                                Result hasn't been finalized yet.
-                            </div>
-                        )}
-                    </div>
-                </PageTransition>
+                    </PageTransition>
+                )}
             </div>
             <Footer />
         </div>
