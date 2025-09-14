@@ -113,8 +113,24 @@ const Wishlist = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+
+    // Helper to check cooldown status for a dish change
+    const checkCooldownStatus = async (dishId: number) => {
+        // Use attemptUpdateUserWish, but do not change the wish if not confirmed
+        const result = await attemptUpdateUserWish(dishId);
+        if (result.status === 403 && result.cooldownRemaining !== undefined) {
+            setCooldownRemaining(result.cooldownRemaining);
+            setShowCooldown(true);
+            setShowConfirm(false);
+            setPendingWish(null);
+            return false;
+        }
+        // If not in cooldown, do not change wish yet, just allow confirmation
+        return true;
+    };
+
     // Parent handler for wishlist click from card
-    const handleWishlistClick = (dishId: number, name: string) => {
+    const handleWishlistClick = async (dishId: number, name: string) => {
         if (!isLoggedIn) {
             navigate('/sign-in');
             return;
@@ -122,9 +138,12 @@ const Wishlist = () => {
         // If already the current wish, ignore
         if (userWish?.dishId === dishId) return;
         setPendingWish({ dishId, name });
-        // If user has an existing different wish, confirm change first
+        // If user has an existing different wish, check cooldown first
         if (userWish && userWish.dishId && userWish.dishId !== dishId) {
-            setShowConfirm(true);
+            const canChange = await checkCooldownStatus(dishId);
+            if (canChange) {
+                setShowConfirm(true);
+            }
         } else {
             // Directly attempt wish update (first wish) respecting cooldown
             confirmWishChange(dishId);
@@ -133,13 +152,14 @@ const Wishlist = () => {
 
     const confirmWishChange = async (dishId: number) => {
         setActionLoading(true);
+        // We already checked cooldown before showing confirmation, so just update
         const result = await attemptUpdateUserWish(dishId);
         if (result.success) {
-            // refresh wishes and user wish
             await handleWishChange();
             setShowConfirm(false);
             setPendingWish(null);
         } else if (result.status === 403 && result.cooldownRemaining !== undefined) {
+            // Edge case: cooldown just started between check and confirm
             setCooldownRemaining(result.cooldownRemaining);
             setShowCooldown(true);
             setShowConfirm(false);
@@ -149,6 +169,26 @@ const Wishlist = () => {
         }
         setActionLoading(false);
     };
+
+    // Live countdown for cooldown popup
+    useEffect(() => {
+        let timer: number | null = null;
+        if (showCooldown && cooldownRemaining !== null) {
+            timer = window.setInterval(() => {
+                setCooldownRemaining(prev => {
+                    if (prev === null) return null;
+                    if (prev <= 1) {
+                        setShowCooldown(false);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+        return () => {
+            if (timer !== null) clearInterval(timer);
+        };
+    }, [showCooldown, cooldownRemaining]);
 
     return (
         <div>
@@ -403,18 +443,22 @@ const Wishlist = () => {
                             <h3 className="text-lg font-semibold mb-2">Cooldown active</h3>
                             <p className="text-sm text-gray-600 mb-4">
                                 You can only wish once per hour.<br />
-                                {cooldownRemaining !== null && (
+                                {cooldownRemaining !== null && cooldownRemaining > 0 && (
                                     <span>
                                         Please wait <span className="font-semibold text-[#4B8F29]">
                                         {Math.floor(cooldownRemaining / 60)}m {cooldownRemaining % 60}s
                                         </span> before wishing again.
                                     </span>
                                 )}
+                                {cooldownRemaining === 0 && (
+                                    <span className="text-green-600 font-semibold">You can now change your wish!</span>
+                                )}
                             </p>
                             <div className="flex justify-end">
                                 <button
                                     onClick={() => { setShowCooldown(false); setPendingWish(null); }}
                                     className="px-4 py-2 text-sm rounded-md bg-[#4B8F29] text-white hover:bg-[#35701e]"
+                                    disabled={cooldownRemaining !== 0}
                                 >
                                     Got it
                                 </button>
