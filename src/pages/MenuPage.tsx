@@ -44,6 +44,8 @@ const Menu = () => {
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
     const [todayVote, setTodayVote] = useState<any>(null);
     const [alreadyVotedPopup, setAlreadyVotedPopup] = useState(false);
+    const [changeVotePopup, setChangeVotePopup] = useState(false);
+    const [pendingVoteDishId, setPendingVoteDishId] = useState<number | null>(null);
 
     useEffect(() => {
         setVotedDishId(null);
@@ -96,10 +98,24 @@ const Menu = () => {
         const currentUserId = user.id;
         const votedUserId = localStorage.getItem("votedUserId");
 
+        // If user has already voted for a different dish, show confirmation popup
+        if (votedDishId && votedDishId !== dishId) {
+            setPendingVoteDishId(dishId);
+            setChangeVotePopup(true);
+            return;
+        }
+
         if (votedDishId && votedUserId !== currentUserId) {
             setAlreadyVotedPopup(true);
             return;
         }
+        await performVote(dishId);
+    };
+
+    // Helper to perform the vote or update
+    const performVote = async (dishId: number) => {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const currentUserId = user.id;
         try {
             if (!todayVote?.userVote) {
                 await voteForDish(dishId);
@@ -127,7 +143,10 @@ const Menu = () => {
             }));
             setDishes(mappedDishes);
         } catch (error: any) {
-            if (error?.message === "You have already voted today on this device.") {
+            // Show already voted popup if backend returns status 403
+            if (error?.status === 403 || error?.response?.status === 403) {
+                setAlreadyVotedPopup(true);
+            } else if (error?.message === "You have already voted today on this device.") {
                 setAlreadyVotedPopup(true);
             } else {
                 alert(error?.message || "Failed to vote. Please try again.");
@@ -203,6 +222,38 @@ const Menu = () => {
                         >
                             Got it
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Change vote confirmation popup */}
+            {changeVotePopup && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-xs w-full flex flex-col items-center">
+                        <div className="text-lg font-semibold mb-4 text-center">You have already voted. Do you want to change your vote to this dish?</div>
+                        <div className="flex gap-4 mt-2">
+                            <button
+                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                                onClick={() => {
+                                    setChangeVotePopup(false);
+                                    setPendingVoteDishId(null);
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-6 py-2 bg-[#429818] text-white rounded hover:bg-[#367A14] transition"
+                                onClick={async () => {
+                                    if (pendingVoteDishId) {
+                                        setChangeVotePopup(false);
+                                        await performVote(pendingVoteDishId);
+                                        setPendingVoteDishId(null);
+                                    }
+                                }}
+                            >
+                                Yes, change vote
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
