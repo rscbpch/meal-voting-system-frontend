@@ -26,6 +26,7 @@ interface Card {
     isDeleting?: boolean;
     currentWishDishId?: number | null;
     onWishlistClick?: (dishId: number, name: string) => void;
+    currentVoteDishId?: number | null;
 }
 
 const FoodCard = ({
@@ -50,6 +51,7 @@ const FoodCard = ({
     isDeleting = false,
     currentWishDishId,
     onWishlistClick,
+    currentVoteDishId,
 }: Card ) => {
     const [votes, setVotes] = useState<number>(initialVotes);
     // local loading not required now; delegate to parent if needed
@@ -58,10 +60,10 @@ const FoodCard = ({
     // Use prop for current favorite dishId
     const isFavorite = isWishlist && cardDishId && currentWishDishId === cardDishId;
 
-    // For isVote: highlight voted dish
-    // If currentWishDishId is null, user hasn't voted yet
-    const isVoted = isVote && cardDishId && currentWishDishId === cardDishId;
-    const hasVoted = isVote && currentWishDishId !== null && currentWishDishId !== undefined;
+    // For isVote: highlight voted dish using currentVoteDishId
+    // If currentVoteDishId is null, user hasn't voted yet
+    const isVoted = isVote && cardDishId && currentVoteDishId === cardDishId;
+    const hasVoted = isVote && currentVoteDishId !== null && currentVoteDishId !== undefined;
 
     // Handler for wishlist heart click
     const handleWishlistClick = (e: React.MouseEvent) => {
