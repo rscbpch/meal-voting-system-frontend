@@ -77,9 +77,13 @@ export const getTodayResult = async (): Promise<TodayResult> => {
     return res.data;
 }
 
-export const getUpcomingResults = async (): Promise<UpcomingResult[]> => {
-    const res = await API.get<UpcomingResult[]>("/results/upcoming");
-    return res.data;
+export const getUpcomingResults = async (): Promise<UpcomingResult | null> => {
+    try {
+        const res = await API.get<UpcomingResult>("/results/upcoming");
+        return res.data;
+    } catch {
+        return null;
+    }
 };
 
 export const getTopThreeToday = async (): Promise<Array<{name: string; description?: string; imageURL?: string | null; voteCount: number;}>> => {

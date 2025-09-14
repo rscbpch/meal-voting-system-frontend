@@ -90,7 +90,7 @@ const HistoryPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
+    const [upcomingResults, setUpcomingResults] = useState<UpcomingResult | null>(null);
 
     useEffect(() => {
         // setHistory(mockHistory);
@@ -108,7 +108,9 @@ const HistoryPage = () => {
         ])
             .then(([historyData, upcomingData]) => {
                 setHistory(historyData);
-                setUpcomingResults(Array.isArray(upcomingData) ? upcomingData : []);
+                // setDishes(dishesData.items);
+                // setResult(resultData?.dishes ?? null);
+                setUpcomingResults(upcomingData);
             })
             .catch ((err) => setError(err.message || "Failed to load data"))
             .finally(() => setLoading(false));
@@ -198,10 +200,9 @@ const HistoryPage = () => {
                     </div>
                     <div>
                         <h2 className="text-xl font-semibold mt-10 mb-16 text-left text-[32px]">Result</h2>
-                        {upcomingResults && upcomingResults.some(upcoming => Array.isArray(upcoming.dish) && upcoming.dish.length > 0) ? (
+                        {upcomingResults && Array.isArray(upcomingResults.dish) && upcomingResults.dish.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {upcomingResults.flatMap((upcoming) =>
-                                    (Array.isArray(upcoming.dish) ? upcoming.dish : []).map((dish) => (
+                                {upcomingResults.dish.map((dish) =>
                                     <ResultCard
                                         key={dish.dishId}
                                         name={dish.Dish?.name}
@@ -209,8 +210,7 @@ const HistoryPage = () => {
                                         imgURL={dish.Dish?.imageURL || ""}
                                         votes={dish.voteCount}
                                     />
-                                ))
-                            )}
+                                )}
                             </div>
                         ) : (
                             <div className="text-center text-gray-500 text-[14px] lg:text-base">
