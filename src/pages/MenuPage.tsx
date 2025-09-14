@@ -9,6 +9,7 @@ import { getTodayResult, updateVoteForDish, getTodayVote } from "../services/res
 import PageTransition from "../components/PageTransition";
 import type { Dish as BaseDish, Category } from "../services/dishService";
 import FoodDetailsPopup from "../components/FoodDetailsPopup";
+import CanteenPick from "../components/CanteenPick";
 
 // Locally extend Dish to include voteCount for this page
 type Dish = BaseDish & { voteCount?: number };
@@ -170,6 +171,9 @@ const Menu = () => {
             <Navbar/>
             <PageTransition>
                 <main className="min-h-screen mx-auto pt-10 pb-16 px-4 sm:px-6 lg:px-14 bg-[#F6FFE8]">
+                    <div className="mb-8">
+                        <CanteenPick />
+                    </div>
                     <div>
                         <h2 className="text-[20px] font-bold mb-4">Vote poll</h2>
                     </div>
