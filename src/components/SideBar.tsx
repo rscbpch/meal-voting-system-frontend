@@ -107,7 +107,7 @@ const Sidebar = () => {
                                 <span className="absolute left-0 top-0 h-full w-1 bg-[#429818] shadow-[1px_0_4px_rgba(62,123,39,0.2)] rounded-tr-md rounded-br-md"></span>
                             )}
                             <PiBowlFood className="w-5 h-5 z-10" />
-                            Food For Voters
+                            VotePoll Management
                         </a>
                     </div>
                     <div className="mt-6 border-t border-gray-200  p-4 pt-2">

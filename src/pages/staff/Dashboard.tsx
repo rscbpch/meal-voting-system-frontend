@@ -1,8 +1,7 @@
 import Sidebar from "../../components/SideBar";
 import PageTransition from "../../components/PageTransition";
-import TopFoods from "../../components/TopFoods";
 import AllFoodsRank from "../../components/AllFoodsRank";
-import VotingChart from "../../components/VotingChart";
+import VotingChartV3 from "../../components/VotingChartV3";
 
 const Dashboard = () => {
     return (
@@ -16,18 +15,13 @@ const Dashboard = () => {
                         </h1>
                     </div>
 
-                    <div className="p-6 space-y-6">
+                    <div className="p-6 pt-2 space-y-6">
                         <div>
-                            <VotingChart />
+                            <VotingChartV3 />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <TopFoods />
-                            </div>
-                            <div>
-                                <AllFoodsRank />
-                            </div>
+                        <div className="w-full">
+                            <AllFoodsRank />
                         </div>
                     </div>
                 </PageTransition>
