@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getTopThreeToday } from '../services/resultService';
+import FoodDetailsPopup from './FoodDetailsPopup';
 
 type TopItem = {
     name: string;
@@ -8,10 +9,13 @@ type TopItem = {
     voteCount: number;
 };
 
+
 const RankingPodium: React.FC = () => {
     const [items, setItems] = useState<TopItem[] | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // For food detail popup (mobile)
+    const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
     useEffect(() => {
         let mounted = true;
@@ -117,7 +121,8 @@ const RankingPodium: React.FC = () => {
                 {[0, 1, 2].map((idx) => (
                     <div
                         key={idx}
-                        className="flex items-center bg-white rounded-lg shadow p-3 min-h-[80px] flex-shrink flex-grow"
+                        className="flex items-center bg-white rounded-lg shadow p-3 min-h-[80px] flex-shrink flex-grow cursor-pointer hover:bg-gray-50 transition"
+                        onClick={() => slots[idx] && setSelectedIdx(idx)}
                     >
                         {/* Ranking */}
                         <div className="text-xl font-extrabold w-6 text-center">{idx + 1}</div>
@@ -136,7 +141,7 @@ const RankingPodium: React.FC = () => {
                             )}
                         </div>
                         {/* Food name */}
-                        <div className="text-[14px] text-gray-800 max-h-[42px] max-w-[178px] overflow-hidden">{slots[idx]?.name ?? '—'}</div>
+                        <div className="w-full text-[14px] text-gray-800 max-h-[42px] max-w-[178px] overflow-hidden">{slots[idx]?.name ?? '—'}</div>
                         {/* Gap */}
                         <div className="w-4" />
                         {/* Vote count */}
@@ -147,6 +152,20 @@ const RankingPodium: React.FC = () => {
                         </div>
                     </div>
                 ))}
+                {/* FoodDetailsPopup for mobile */}
+                {selectedIdx !== null && slots[selectedIdx] && (
+                    <FoodDetailsPopup
+                        isOpen={true}
+                        isVoter={false}
+                        onClose={() => setSelectedIdx(null)}
+                        dish={{
+                            id: selectedIdx, // fallback id for popup
+                            name: slots[selectedIdx]!.name,
+                            description: slots[selectedIdx]!.description,
+                            imageURL: slots[selectedIdx]!.imageURL,
+                        }}
+                    />
+                )}
             </div>
         </div>
     );
