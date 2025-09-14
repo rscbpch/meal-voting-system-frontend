@@ -27,6 +27,8 @@ export interface UpcomingDish {
     Dish: {
         id: number;
         name: string;
+        description?: string;
+        imageURL?: string;
     };
     // some backends may include a vote count; make optional
     voteCount?: number;
