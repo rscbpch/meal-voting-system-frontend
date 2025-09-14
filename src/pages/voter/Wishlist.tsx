@@ -13,7 +13,6 @@ import FoodDetailsPopup from "../../components/FoodDetailsPopup";
 import type { WishData, UserWish } from "../../services/wishService";
 import { getProfile } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
-import Foodpic from "../../assets/Food.png";
 
 const Wishlist = () => {
     const navigate = useNavigate();
