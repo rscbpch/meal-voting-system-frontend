@@ -8,6 +8,7 @@ import Loading from "../components/Loading";
 import { getTodayResult, updateVoteForDish, getTodayVote } from "../services/resultService";
 import PageTransition from "../components/PageTransition";
 import type { Dish as BaseDish, Category } from "../services/dishService";
+import FoodDetailsPopup from "../components/FoodDetailsPopup";
 
 // Locally extend Dish to include voteCount for this page
 type Dish = BaseDish & { voteCount?: number };
@@ -46,6 +47,8 @@ const Menu = () => {
     const [alreadyVotedPopup, setAlreadyVotedPopup] = useState(false);
     const [changeVotePopup, setChangeVotePopup] = useState(false);
     const [pendingVoteDishId, setPendingVoteDishId] = useState<number | null>(null);
+    const [showDetailsPopup, setShowDetailsPopup] = useState(false);
+    const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
 
     useEffect(() => {
         setVotedDishId(null);
@@ -98,35 +101,26 @@ const Menu = () => {
         const currentUserId = String(user.id);
         const votedUserId = localStorage.getItem("votedUserId");
 
-        // If no vote yet (first vote)
+        // If there is a votedUserId in localStorage and it does not match the current user, block all voting actions
+        if (votedUserId && votedUserId !== currentUserId) {
+            setAlreadyVotedPopup(true);
+            return;
+        }
+
+        // If no vote yet (first vote), allow and set votedUserId after success
         if (!votedDishId) {
-            // If localStorage has a userId and it's not the current user, block voting
-            if (votedUserId && votedUserId !== currentUserId) {
-                setAlreadyVotedPopup(true);
-                return;
-            }
-            // Otherwise, allow voting (will set votedUserId after success)
             await performVote(dishId, true, currentUserId);
             return;
         }
 
         // If user has already voted for a different dish, show confirmation popup
         if (votedDishId && votedDishId !== dishId) {
-            // Only allow changing vote if votedUserId matches current user
-            if (votedUserId && votedUserId !== currentUserId) {
-                setAlreadyVotedPopup(true);
-                return;
-            }
             setPendingVoteDishId(dishId);
             setChangeVotePopup(true);
             return;
         }
 
-        // If user tries to vote again for the same dish, block if not the original user
-        if (votedUserId && votedUserId !== currentUserId) {
-            setAlreadyVotedPopup(true);
-            return;
-        }
+        // If user tries to vote again for the same dish, just allow (since userId matches)
         await performVote(dishId, false, currentUserId);
     };
 
@@ -187,8 +181,9 @@ const Menu = () => {
                         )}
                         {!loading && dishes.slice(0, limit).map(dish => {
                             const user = JSON.parse(localStorage.getItem("user") || "{}");
-                            const currentUserId = user.id;
+                            const currentUserId = String(user.id);
                             const votedUserId = localStorage.getItem("votedUserId");
+                            // Only disable voting for users who are NOT the original voter
                             const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
                             const categoryName = categories.find(cat => String(cat.id) === String(dish.categoryId))?.name || dish.categoryName || "";
                             const dishIdNum = typeof dish.id === 'string' ? parseInt(dish.id, 10) : dish.id;
@@ -212,9 +207,20 @@ const Menu = () => {
                                     }}
                                     currentVoteCount={dish.voteCount}
                                     currentVoteDishId={votedDishId}
+                                    onViewDetails={() => {
+                                        setSelectedDish(dish);
+                                        setShowDetailsPopup(true);
+                                    }}
                                 />
                             );
                         })}
+                        {/* Food Details Popup */}
+                        <FoodDetailsPopup
+                            isOpen={showDetailsPopup}
+                            onClose={() => setShowDetailsPopup(false)}
+                            dish={selectedDish}
+                            isVoter={true}
+                        />
                     </div>
                     <div>
                         {todayError && (
