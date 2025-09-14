@@ -458,7 +458,6 @@ const Wishlist = () => {
                                 <button
                                     onClick={() => { setShowCooldown(false); setPendingWish(null); }}
                                     className="px-4 py-2 text-sm rounded-md bg-[#4B8F29] text-white hover:bg-[#35701e]"
-                                    disabled={cooldownRemaining !== 0}
                                 >
                                     Got it
                                 </button>
