@@ -3,6 +3,8 @@ import API from './axios';
 export interface UserVote {
     id: number;
     dishId: number;
+    createdAt: string;
+    updatedAt: string;
     Dish: {
         id: number;
         name: string;
