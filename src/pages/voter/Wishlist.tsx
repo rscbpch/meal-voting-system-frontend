@@ -8,7 +8,7 @@ import Pagination from "../../components/Pagination";
 import { getMostWishedDishes, getCategories } from "../../services/dishService";
 import Loading from "../../components/Loading";
 import type { Dish, Category } from "../../services/dishService";
-import { fetchAllWishes, fetchAndStoreUserWishes, attemptUpdateUserWish, removeUserWish } from "../../services/wishService";
+import { fetchAllWishes, fetchAndStoreUserWishes, attemptUpdateUserWish } from "../../services/wishService";
 import FoodDetailsPopup from "../../components/FoodDetailsPopup";
 import type { WishData, UserWish } from "../../services/wishService";
 import { getProfile } from "../../services/authService";
