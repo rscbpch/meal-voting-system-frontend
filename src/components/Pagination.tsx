@@ -65,21 +65,21 @@ const Pagination = ({
 
     return (
         <div
-            className={`flex items-center justify-center gap-10 p-10 ${className}`}
+            className={`flex items-center justify-center gap-4 sm:gap-6 md:gap-10 p-4 sm:p-6 md:p-10 ${className}`}
         >
             {/* Previous Button */}
             {showPrevNext && (
                 <button
                     onClick={handlePrevious}
                     disabled={disabled || currentPage === 1}
-                    className="p-2 rounded-full bg-transparent hover:bg-[#E3F2B8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-1 sm:p-2 rounded-full bg-transparent hover:bg-[#E3F2B8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     aria-label="Go to previous page"
                 >
-                    <FiChevronLeft className="w-4 h-4 text-gray-700" />
+                    <FiChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
                 </button>
             )}
 
-            <div className="flex gap-4">
+            <div className="flex gap-2 sm:gap-3 md:gap-4">
                 {/* First Page + Ellipsis */}
                 {/* Page Numbers */}
                 {visiblePages[0] > 1 && (
@@ -87,7 +87,7 @@ const Pagination = ({
                         <button
                             onClick={() => handlePageClick(1)}
                             disabled={disabled}
-                            className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                            className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-colors ${
                                 currentPage === 1
                                     ? "bg-[#429818] text-white"
                                     : "bg-[#F1F9D9] hover:bg-[#E3F2B8] text-gray-700"
@@ -96,8 +96,8 @@ const Pagination = ({
                             1
                         </button>
                         {showFirstEllipsis && (
-                            <span className="px-2 text-gray-500 flex items-center justofy-center">
-                                <FiMoreHorizontal className="w-4 h-4" />
+                            <span className="px-1 sm:px-2 text-gray-500 flex items-center justofy-center">
+                                <FiMoreHorizontal className="w-3 h-3 sm:w-4 sm:h-4" />
                             </span>
                         )}
                     </>
@@ -108,7 +108,7 @@ const Pagination = ({
                         key={page}
                         onClick={() => handlePageClick(page)}
                         disabled={disabled}
-                        className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                        className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-colors ${
                             page === currentPage
                                 ? "bg-[#429818] text-white"
                                 : "bg-[#F1F9D9] hover:bg-[#E3F2B8] text-gray-700"
@@ -121,14 +121,14 @@ const Pagination = ({
                 {visiblePages[visiblePages.length - 1] < totalPages && (
                     <>
                         {showLastEllipsis && (
-                              <span className="px-2 text-gray-500 flex items-center justofy-center">
-                                <FiMoreHorizontal className="w-4 h-4" />
+                              <span className="px-1 sm:px-2 text-gray-500 flex items-center justofy-center">
+                                <FiMoreHorizontal className="w-3 h-3 sm:w-4 sm:h-4" />
                             </span>
                         )}
                         <button
                             onClick={() => handlePageClick(totalPages)}
                             disabled={disabled}
-                            className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                            className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-colors ${
                                 currentPage === totalPages
                                     ? "bg-[#429818] text-white"
                                     : "bg-[#F1F9D9] hover:bg-[#E3F2B8] text-gray-700"
@@ -145,10 +145,10 @@ const Pagination = ({
                 <button
                     onClick={handleNext}
                     disabled={disabled || currentPage === totalPages}
-                    className="p-2 rounded-full bg-transparent hover:bg-[#E3F2B8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-1 sm:p-2 rounded-full bg-transparent hover:bg-[#E3F2B8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     aria-label="Next page"
                 >
-                    <FiChevronRight className="w-4 h-4 text-gray-700" />
+                    <FiChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
                 </button>
             )}
         </div>

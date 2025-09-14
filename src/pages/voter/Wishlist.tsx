@@ -9,6 +9,7 @@ import { getMostWishedDishes, getCategories } from "../../services/dishService";
 import Loading from "../../components/Loading";
 import type { Dish, Category } from "../../services/dishService";
 import { fetchAllWishes, fetchAndStoreUserWishes, attemptUpdateUserWish } from "../../services/wishService";
+import FoodDetailsPopup from "../../components/FoodDetailsPopup";
 import type { WishData, UserWish } from "../../services/wishService";
 import { getProfile } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,10 @@ const Wishlist = () => {
     const [pendingWish, setPendingWish] = useState<{ dishId: number; name: string } | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [limit, setLimit] = useState(12);
+    // Food details popup state
+    const [showDetailsPopup, setShowDetailsPopup] = useState(false);
+    const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
+    const [selectedDishTotalWishes, setSelectedDishTotalWishes] = useState<number | null>(null);
 
     // Update limit based on screen size (grid columns)
     useEffect(() => {
@@ -197,7 +202,7 @@ const Wishlist = () => {
                 <main className="min-h-screen mx-auto pt-10 pb-16 px-4 sm:px-6 lg:px-14 bg-[#F6FFE8]">
                     <div>
                         <div>
-                            <h2 className="text-[20px] font-bold">Your wishlist</h2>
+                            <h2 className="text-[20px] font-bold mb-4">Your wishlist</h2>
                         </div>
                         {/* Show user wish card if logged in */}
                         {isLoggedIn === true ? (
@@ -222,6 +227,7 @@ const Wishlist = () => {
                                                                 src={imgSrc}
                                                                 alt={userWish.dishName || "Favorite Dish"}
                                                                 className="w-16 h-16 md:w-28 md:h-28 object-cover rounded-full border-2 border-[#E6F4D7] shadow-md"
+                
                                                             />
 
                                                             <div className="flex flex-col ml-3 md:ml-6 gap-1 md:gap-2">
@@ -263,14 +269,19 @@ const Wishlist = () => {
                                                                                 fill="#A3D47C"
                                                                             />
                                                                         </svg>
-                                                                        <p>{wishCount.toLocaleString()} {wishCount === 1 ? "like" : "likes"}</p>
+                                                                        <p>
+                                                                            {wishCount.toLocaleString()} 
+                                                                            {wishCount === 1 
+                                                                                ? "like" 
+                                                                                : "likes"}
+                                                                        </p>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         {/* ranking and wish counts on md */}
-                                                        <div className="hidden md:block flex-col items-end gap-4 mt-6 min-w-[140px] pt-5">
+                                                        <div className="hidden md:block flex-col min-w-[140px] justify-between h-full">
                                                             {/* green heart */}
                                                             <div className="flex items-center justify-end">
                                                                 <svg 
@@ -375,7 +386,7 @@ const Wishlist = () => {
                                     <h2 className="text-[20px] font-bold">All menu</h2>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
+                                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5   gap-2 md:gap-6 w-full">
                                     {(Array.isArray(dishes) ? dishes.slice((currentPage - 1) * limit, currentPage * limit) : []).map((dish, idx) => {
                                         const categoryName = dish.categoryName || categories.find(cat => String(cat.id) === String(dish.categoryId))?.name || "";
                                         const wishCount = wishes.find(w => w.dishId === Number(dish.id))?.totalWishes || 0;
@@ -383,6 +394,7 @@ const Wishlist = () => {
 
                                         return (
                                             <CardV2
+                                                
                                                 key={dish.id}
                                                 name={dish.name}
                                                 dishId={Number(dish.id)}
@@ -395,6 +407,11 @@ const Wishlist = () => {
                                                 ranking={ranking}
                                                 currentWishDishId={userWish?.dishId ?? null}
                                                 onWishlistClick={handleWishlistClick}
+                                                onViewDetails={() => {
+                                                    setSelectedDish(dish);
+                                                    setSelectedDishTotalWishes(wishCount);
+                                                    setShowDetailsPopup(true);
+                                                }}
                                             />
                                         );
                                     })}
@@ -465,6 +482,14 @@ const Wishlist = () => {
                         </div>
                     </div>
                 )}
+            {/* Food Details Popup */}
+            <FoodDetailsPopup
+                isOpen={showDetailsPopup}
+                onClose={() => setShowDetailsPopup(false)}
+                dish={selectedDish}
+                isVoter={true}
+                totalWishes={selectedDishTotalWishes}
+            />
             </PageTransition>
             <Footer />
         </div>
