@@ -200,7 +200,7 @@ const HistoryPage = () => {
                     </div>
                     <div>
                         <h2 className="text-xl font-semibold mt-10 mb-16 text-left text-[32px]">Result</h2>
-                        {upcomingResults && upcomingResults.some(upcoming => upcoming.dish && upcoming.dish.length > 0) ? (
+                        {upcomingResults && upcomingResults.some(upcoming => Array.isArray(upcoming.dish) && upcoming.dish.length > 0) ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {upcomingResults.flatMap((upcoming) =>
                                     upcoming.dish.map((dish) => (
