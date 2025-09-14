@@ -8,7 +8,7 @@ export interface UserVote {
         name: string;
         description: string;
         imageURL: string;
-        categoryId: number;
+        // categoryId: number;
     };
 }
 
