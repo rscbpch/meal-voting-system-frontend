@@ -37,7 +37,7 @@ const LatestVote: React.FC<LatestVoteProps> = ({
         {/* Column 2: Details */}
         <div className="flex flex-col justify-center">
             <h1 className="font-bold text-2xl mb-2">{name}</h1>
-            <div className="flex items-left justify-center gap-2">
+            <div className="flex items-left gap-2">
                 <svg
                     width="22"
                     height="22"

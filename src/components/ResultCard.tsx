@@ -36,7 +36,7 @@ const ResultCard = ({ name, description, imgURL, votes }: ResultCardProps) => {
             {/* <div className="text-left mt-auto">
                 <p className="font-medium">Votes: {votes ?? 0}</p>
             </div> */}
-            <div className="flex items-left justify-center gap-2">
+            <div className="items-left flex gap-2">
                 <svg
                     width="22"
                     height="22"
