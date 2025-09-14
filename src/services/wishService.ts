@@ -167,3 +167,16 @@ export const getUserWishesFromStorage = (): UserWish[] => {
         return [];
     }
 };
+
+export const removeUserWish = async (): Promise<void> => {
+    try {
+        await API.delete("/wishes");
+    } catch (err: any) {
+        const msg =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            err.message ||
+            "Failed to remove user wish";
+        throw new Error(msg);
+    }
+};

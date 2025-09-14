@@ -8,7 +8,7 @@ import Pagination from "../../components/Pagination";
 import { getMostWishedDishes, getCategories } from "../../services/dishService";
 import Loading from "../../components/Loading";
 import type { Dish, Category } from "../../services/dishService";
-import { fetchAllWishes, fetchAndStoreUserWishes, attemptUpdateUserWish } from "../../services/wishService";
+import { fetchAllWishes, fetchAndStoreUserWishes, attemptUpdateUserWish, removeUserWish } from "../../services/wishService";
 import FoodDetailsPopup from "../../components/FoodDetailsPopup";
 import type { WishData, UserWish } from "../../services/wishService";
 import { getProfile } from "../../services/authService";
@@ -251,7 +251,7 @@ const Wishlist = () => {
                                                                 {/* ranking and wish counts on sm */}
                                                                 <div className="flex flex-col gap-1">
                                                                     <span className="md:hidden bg-gray-100 text-gray-600 text-[10px] px-1 py-0.5 md:text-[12px] md:px-2 md:py-1 rounded font-medium w-fit">
-                                                                        {dishName}
+                                                                        {categoryName}
                                                                     </span>
                                                                     <div className="flex items-center gap-2 md:hidden min-h-[20px]">
                                                                         {/* ranking */}
