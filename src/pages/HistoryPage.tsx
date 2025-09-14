@@ -108,9 +108,7 @@ const HistoryPage = () => {
         ])
             .then(([historyData, upcomingData]) => {
                 setHistory(historyData);
-                // setDishes(dishesData.items);
-                // setResult(resultData?.dishes ?? null);
-                setUpcomingResults(upcomingData ?? []);
+                setUpcomingResults(Array.isArray(upcomingData) ? upcomingData : []);
             })
             .catch ((err) => setError(err.message || "Failed to load data"))
             .finally(() => setLoading(false));
@@ -203,16 +201,16 @@ const HistoryPage = () => {
                         {upcomingResults && upcomingResults.some(upcoming => Array.isArray(upcoming.dish) && upcoming.dish.length > 0) ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {upcomingResults.flatMap((upcoming) =>
-                                    upcoming.dish.map((dish) => (
-                                        <ResultCard
-                                            key={dish.dishId}
-                                            name={dish.Dish?.name}
-                                            description={dish.Dish?.description || "No description available."}
-                                            imgURL={dish.Dish?.imageURL || ""}
-                                            votes={dish.voteCount}
-                                        />
-                                    ))
-                                )}
+                                    (Array.isArray(upcoming.dish) ? upcoming.dish : []).map((dish) => (
+                                    <ResultCard
+                                        key={dish.dishId}
+                                        name={dish.Dish?.name}
+                                        description={dish.Dish?.description || "No description available."}
+                                        imgURL={dish.Dish?.imageURL || ""}
+                                        votes={dish.voteCount}
+                                    />
+                                ))
+                            )}
                             </div>
                         ) : (
                             <div className="text-center text-gray-500 text-[14px] lg:text-base">
