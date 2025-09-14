@@ -375,17 +375,16 @@ const FoodCard = ({
                                 ) : (
                                     <button
                                         onClick={handleVote}
-                                        disabled={disabled || (hasVoted && !isVoted)}
+                                        disabled={isVote ? (hasVoted && !isVoted) : disabled}
                                         className={`rounded-md px-3 py-2 text-sm font-semibold flex justify-center items-center gap-2
                                             ${isVote
                                                 ? (hasVoted
                                                     ? (isVoted
-                                                        ? 'bg-[#429818] text-white cursor-default' // voted dish: green bg, white text
+                                                        ? 'bg-[#429818] text-white cursor-not-allowed' // voted dish: green bg, white text
                                                         : 'bg-gray-200 text-[#429818] cursor-not-allowed') // not voted dish: gray bg, green text
                                                     : 'bg-[#429818] text-white hover:bg-[#3E7B27]') // not voted yet: green bg, white text
                                                 : 'bg-[#429818] text-white hover:bg-[#3E7B27]'}
                                         `}
-                                        style={isVote && isVoted ? { pointerEvents: 'none' } : {}}
                                     >
                                         <svg
                                             width="16"
@@ -399,11 +398,8 @@ const FoodCard = ({
                                                 fill={isVote && hasVoted ? (isVoted ? 'white' : '#429818') : 'white'}
                                             />
                                         </svg>
-
                                         {isVote
-                                            ? (hasVoted
-                                                ? 'Voted'
-                                                : 'Vote Now')
+                                            ? (hasVoted ? 'Voted' : 'Vote Now')
                                             : (disabled ? 'Voted' : 'Vote Now')}
                                     </button>
                                 )}
