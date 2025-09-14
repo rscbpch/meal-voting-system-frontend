@@ -108,7 +108,9 @@ const SetupAccount = () => {
         }, 3000);
 
         try {
-            await API.post("/auth/setup-graduation", {skip: true});
+            await API.post("/auth/setup-graduation", {
+                generation: parseInt(generation)
+            });
 
             // Fetch user profile to get role and update auth context immediately
             const response = await API.get("/user/profile");
@@ -148,7 +150,7 @@ const SetupAccount = () => {
 
         try {
             // Skip generation selection
-            await API.post("/auth/setup-graduation", {});
+            await API.post("/auth/setup-graduation", {skip: true});
 
             // Fetch user profile to get role and update auth context immediately
             const response = await API.get("/user/profile");
