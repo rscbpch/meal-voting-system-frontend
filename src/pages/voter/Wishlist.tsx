@@ -8,7 +8,7 @@ import Pagination from "../../components/Pagination";
 import { getMostWishedDishes, getCategories } from "../../services/dishService";
 import Loading from "../../components/Loading";
 import type { Dish, Category } from "../../services/dishService";
-import { fetchAllWishes, fetchAndStoreUserWishes } from "../../services/wishService";
+import { fetchAllWishes, fetchAndStoreUserWishes, attemptUpdateUserWish } from "../../services/wishService";
 import type { WishData, UserWish } from "../../services/wishService";
 import { getProfile } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +24,33 @@ const Wishlist = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [wishes, setWishes] = useState<WishData[]>([]);
     const [userWish, setUserWish] = useState<UserWish | null>(null);
-    const limit = 10;
+    // Modal / popup state
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [showCooldown, setShowCooldown] = useState(false);
+    const [cooldownRemaining, setCooldownRemaining] = useState<number | null>(null);
+    const [pendingWish, setPendingWish] = useState<{ dishId: number; name: string } | null>(null);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [limit, setLimit] = useState(12);
+
+    // Update limit based on screen size (grid columns)
+    useEffect(() => {
+        function updateLimit() {
+            const width = window.innerWidth;
+            // Tailwind breakpoints: xl:1280px, lg:1024px, md:768px
+            if (width >= 1280) {
+                setLimit(15); // 5 columns
+            } else if (width >= 1024) {
+                setLimit(12); // 3 columns (lg)
+            } else if (width >= 768) {
+                setLimit(12); // 3 columns (md)
+            } else {
+                setLimit(10); // fallback for mobile
+            }
+        }
+        updateLimit();
+        window.addEventListener('resize', updateLimit);
+        return () => window.removeEventListener('resize', updateLimit);
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -85,6 +111,43 @@ const Wishlist = () => {
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
         window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    // Parent handler for wishlist click from card
+    const handleWishlistClick = (dishId: number, name: string) => {
+        if (!isLoggedIn) {
+            navigate('/sign-in');
+            return;
+        }
+        // If already the current wish, ignore
+        if (userWish?.dishId === dishId) return;
+        setPendingWish({ dishId, name });
+        // If user has an existing different wish, confirm change first
+        if (userWish && userWish.dishId && userWish.dishId !== dishId) {
+            setShowConfirm(true);
+        } else {
+            // Directly attempt wish update (first wish) respecting cooldown
+            confirmWishChange(dishId);
+        }
+    };
+
+    const confirmWishChange = async (dishId: number) => {
+        setActionLoading(true);
+        const result = await attemptUpdateUserWish(dishId);
+        if (result.success) {
+            // refresh wishes and user wish
+            await handleWishChange();
+            setShowConfirm(false);
+            setPendingWish(null);
+        } else if (result.status === 403 && result.cooldownRemaining !== undefined) {
+            setCooldownRemaining(result.cooldownRemaining);
+            setShowCooldown(true);
+            setShowConfirm(false);
+        } else {
+            alert(result.message || 'Failed to update wish');
+            setShowConfirm(false);
+        }
+        setActionLoading(false);
     };
 
     return (
@@ -272,7 +335,7 @@ const Wishlist = () => {
                                     <h2 className="text-[20px] font-bold">All menu</h2>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
                                     {(Array.isArray(dishes) ? dishes.slice((currentPage - 1) * limit, currentPage * limit) : []).map((dish, idx) => {
                                         const categoryName = dish.categoryName || categories.find(cat => String(cat.id) === String(dish.categoryId))?.name || "";
                                         const wishCount = wishes.find(w => w.dishId === Number(dish.id))?.totalWishes || 0;
@@ -290,8 +353,8 @@ const Wishlist = () => {
                                                 wishlistCount={wishCount}
                                                 totalWishes={wishCount}
                                                 ranking={ranking}
-                                                onWishChange={handleWishChange}
                                                 currentWishDishId={userWish?.dishId ?? null}
+                                                onWishlistClick={handleWishlistClick}
                                             />
                                         );
                                     })}
@@ -306,6 +369,59 @@ const Wishlist = () => {
                         )}
                     </div>
                 </main>
+                {/* Confirmation Modal */}
+                {showConfirm && pendingWish && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                        <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
+                            <h3 className="text-lg font-semibold mb-2">Change your wish?</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                You can only wish once per hour. Are you sure you want to change your wish to <span className="font-medium">{pendingWish.name}</span>?
+                            </p>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={() => { setShowConfirm(false); setPendingWish(null); }}
+                                    className="px-4 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-100"
+                                    disabled={actionLoading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => confirmWishChange(pendingWish.dishId)}
+                                    className="px-4 py-2 text-sm rounded-md bg-[#4B8F29] text-white hover:bg-[#35701e] disabled:opacity-60"
+                                    disabled={actionLoading}
+                                >
+                                    {actionLoading ? 'Updating...' : 'Yes, Change'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* Cooldown Modal */}
+                {showCooldown && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                        <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
+                            <h3 className="text-lg font-semibold mb-2">Cooldown active</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                You can only wish once per hour.<br />
+                                {cooldownRemaining !== null && (
+                                    <span>
+                                        Please wait <span className="font-semibold text-[#4B8F29]">
+                                        {Math.floor(cooldownRemaining / 60)}m {cooldownRemaining % 60}s
+                                        </span> before wishing again.
+                                    </span>
+                                )}
+                            </p>
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={() => { setShowCooldown(false); setPendingWish(null); }}
+                                    className="px-4 py-2 text-sm rounded-md bg-[#4B8F29] text-white hover:bg-[#35701e]"
+                                >
+                                    Got it
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </PageTransition>
             <Footer />
         </div>
