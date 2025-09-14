@@ -191,7 +191,7 @@ const HistoryPage = () => {
                                 id={history.userVote.dishId}
                                 description={history.userVote.Dish.description || ""}
                                 totalVote={userDishVotes}
-                                votedAt={history.voteDate}
+                                votedAt={history.userVote.createdAt || history.userVote.updatedAt}
                                 imgURL={history.userVote.Dish.imageURL || ""}
                             />
                         ) : (
