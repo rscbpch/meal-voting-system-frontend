@@ -7,7 +7,6 @@ import { getCategories } from "../services/dishService";
 import Loading from "../components/Loading";
 import { getTodayResult, voteForDish, updateVoteForDish, getTodayVote } from "../services/resultService";
 import PageTransition from "../components/PageTransition";
-import Pagination from "../components/Pagination";
 import type { Dish as BaseDish, Category } from "../services/dishService";
 
 // Locally extend Dish to include voteCount for this page
@@ -19,8 +18,6 @@ const Menu = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [limit, setLimit] = useState(12);
-    const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.ceil(dishes.length / limit);
 
     // Update limit based on screen size (grid columns)
     useEffect(() => {
@@ -42,20 +39,10 @@ const Menu = () => {
         return () => window.removeEventListener('resize', updateLimit);
     }, []);
 
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
     const [loading, setLoading] = useState(true);
-    // const [error, setError] = useState<string | null>(null);
-    // const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
     const [todayError, setTodayError] = useState<string | null>(null);
-    // const [upcomingError, setUpcomingError] = useState<string | null>(null);
-    // const [votePollId, setVotePollId] = useState<number | null>(null);
     const [votedDishId, setVotedDishId] = useState<number | null>((null));
     const [todayVote, setTodayVote] = useState<any>(null);
-    // const [votedDishId, setVotedDishId] = useState<number | null>(null);
 
     useEffect(() => {
         setVotedDishId(null);
@@ -98,31 +85,6 @@ const Menu = () => {
             .catch(() => {});
     }, []);
 
-    // const upcomingBannerItems = useMemo(() => {
-    //     if (!upcomingResults || upcomingResults.length === 0) return [];
-    //     if (!foods || foods.length === 0) return [];
-    //     const first = upcomingResults[0] as any;
-    //     const candidates: any[] = first?.dish ?? first?.dishes ?? first?.items ?? first?.data ?? [];
-    //     if (!Array.isArray(candidates) || candidates.length === 0) return [];
-    //     const selected = candidates.filter((c: any) => c.isSelected === true);
-    //     if (!selected || selected.length === 0) return [];
-
-    //     return selected.map((candidate: any) => {
-    //         // candidate may be shape: { id, votePollId, dishId, isSelected, Dish: { id, name }, voteCount? }
-    //         const dishId = candidate.dishId ?? candidate.Dish?.id ?? candidate.dish?.id ?? null;
-    //         const dishName = candidate.Dish?.name ?? candidate.dish ?? candidate.name ?? "";
-    //         const dishInfo = foods.find((dish) => dish.id == dishId) as any;
-    //         const voteCount = candidate.voteCount ?? candidate.votes ?? 0;
-    //         return {
-    //             title: dishName,
-    //             subtitle: `Selected`,
-    //             description: dishInfo?.description ?? "",
-    //             imgSrc: dishInfo?.imageURL ?? dishInfo?.imageUrl ?? candidate.Dish?.imageURL ?? "",
-    //             voteCount: voteCount,
-    //         };
-    //     });
-    // },[upcomingResults, foods]);
-
     const handleVote = async (dishId: number) => {
         if (!isLoggedIn) {
             navigate('/sign-in');
@@ -132,7 +94,6 @@ const Menu = () => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const currentUserId = user.id;
         const votedUserId = localStorage.getItem("votedUserId");
-        // console.log("vote:", vote, "currentUserId:", currentUserId, "votedUserId:", votedUserId);
 
         if (votedDishId && votedUserId !== currentUserId) {
             alert("You have already voted. You can only vote once per vote poll.");
@@ -177,7 +138,7 @@ const Menu = () => {
             <PageTransition>
                 <main className="min-h-screen mx-auto pt-10 pb-16 px-4 sm:px-6 lg:px-14 bg-[#F6FFE8]">
                     <div>
-                        <h2 className="text-[20px] font-bold">Vote poll</h2>
+                        <h2 className="text-[20px] font-bold mb-4">Vote poll</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-2 md:gap-6 w-full">
                         {loading && (
@@ -185,7 +146,7 @@ const Menu = () => {
                                 <Loading />
                             </div>
                         )}
-                        {!loading && dishes.slice((currentPage - 1) * limit, currentPage * limit).map(dish => {
+                        {!loading && dishes.map(dish => {
                             const user = JSON.parse(localStorage.getItem("user") || "{}");
                             const currentUserId = user.id;
                             const votedUserId = localStorage.getItem("votedUserId");
@@ -215,11 +176,6 @@ const Menu = () => {
                             );
                         })}
                     </div>
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                    />
                     <div>
                         {todayError && (
                             <div className="flex justify-center items-center w-full my-8">
