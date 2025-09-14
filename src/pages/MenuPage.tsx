@@ -146,7 +146,7 @@ const Menu = () => {
                                 <Loading />
                             </div>
                         )}
-                        {!loading && dishes.map(dish => {
+                        {!loading && dishes.slice(0, limit).map(dish => {
                             const user = JSON.parse(localStorage.getItem("user") || "{}");
                             const currentUserId = user.id;
                             const votedUserId = localStorage.getItem("votedUserId");
