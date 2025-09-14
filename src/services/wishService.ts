@@ -82,6 +82,42 @@ export const updateUserWish = async (dishId: number): Promise<UserWish> => {
     }
 };
 
+// Attempt to update wish but expose cooldown info (403) instead of throwing generic error
+export interface AttemptWishUpdateResult {
+    success: boolean;
+    wish?: UserWish;
+    cooldownRemaining?: number; // seconds remaining (as provided by backend)
+    message?: string;
+    status?: number;
+}
+
+export const attemptUpdateUserWish = async (dishId: number): Promise<AttemptWishUpdateResult> => {
+    try {
+        const res = await API.put("/wishes", { dishId });
+        return { success: true, wish: res.data, message: "Wish updated" };
+    } catch (err: any) {
+        const status = err?.response?.status;
+        const backendMsg = err?.response?.data?.message;
+        if (status === 403 && backendMsg === "Cooldown active") {
+            return {
+                success: false,
+                cooldownRemaining: err?.response?.data?.cooldownRemaining,
+                message: backendMsg,
+                status,
+            };
+        }
+        return {
+            success: false,
+            message:
+                backendMsg ||
+                err?.response?.data?.error ||
+                err.message ||
+                "Failed to update user wish",
+            status,
+        };
+    }
+};
+
 const USER_WISHES_KEY = "user_wishes";
 
 // Fetch current user's wishes and store in localStorage
