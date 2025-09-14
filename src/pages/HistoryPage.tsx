@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getVoteHistory, type VoteHistoryResponse } from "../services/historyService";
 // import { getDishes, type Dish } from "../services/dishService";
-import { getTodayResult, type CandidateDish } from "../services/resultService";
+// import { getTodayResult, type CandidateDish } from "../services/resultService";
 import LatestVote from "../components/LatestVote";
 import ResultCard from "../components/ResultCard";
 import Navbar from "../components/Navbar";
@@ -85,7 +85,7 @@ import { getUpcomingResults, type UpcomingResult } from "../services/resultServi
 const HistoryPage = () => {
     const [history, setHistory] = useState<VoteHistoryResponse | null>(null);
     // const [dishes, setDishes] = useState<Dish[]>([]);
-    const [result, setResult] = useState<CandidateDish[] | null>(null);
+    // const [result, setResult] = useState<CandidateDish[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<string>("");
@@ -103,13 +103,13 @@ const HistoryPage = () => {
         Promise.all([
             getVoteHistory(selectedDate ? selectedDate : undefined),
             // getDishes(),
-            getTodayResult(),
+            // getTodayResult(),
             getUpcomingResults(),
         ])
-            .then(([historyData, resultData, upcomingData]) => {
+            .then(([historyData, upcomingData]) => {
                 setHistory(historyData);
                 // setDishes(dishesData.items);
-                setResult(resultData?.dishes ?? null);
+                // setResult(resultData?.dishes ?? null);
                 setUpcomingResults(upcomingData ?? []);
             })
             .catch ((err) => setError(err.message || "Failed to load data"))
@@ -200,9 +200,9 @@ const HistoryPage = () => {
                     </div>
                     <div>
                         <h2 className="text-xl font-semibold mt-10 mb-16 text-left text-[32px]">Result</h2>
-                        {upcomingResults && upcomingResults.length > 0 ? (
+                        {upcomingResults && upcomingResults.some(upcoming => upcoming.dish && upcoming.dish.length > 0) ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {upcomingResults.map((upcoming) => 
+                                {upcomingResults.flatMap((upcoming) =>
                                     upcoming.dish.map((dish) => (
                                         <ResultCard
                                             key={dish.dishId}
@@ -214,22 +214,10 @@ const HistoryPage = () => {
                                     ))
                                 )}
                             </div>
-                        ) : result && result.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {result.map(dish => (
-                                    <ResultCard
-                                        key={dish.dishId}
-                                        name={dish.name}
-                                        description={dish.description ? dish.description : "No description available."}
-                                        imgURL={dish.imageURL}
-                                        votes={dish.voteCount}
-                                    />
-                                ))}
-                            </div>
                         ) : (
-                        <div className="text-center text-gray-500 text-[14px] lg:text-base">
-                            Result hasn't finalized yet.
-                        </div>
+                            <div className="text-center text-gray-500 text-[14px] lg:text-base">
+                                Result hasn't been finalized yet.
+                            </div>
                         )}
                     </div>
                 </PageTransition>
