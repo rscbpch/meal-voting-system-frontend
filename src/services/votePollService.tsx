@@ -192,3 +192,45 @@ export const finalizeVotePoll = async (
     );
   }
 };
+
+export interface FinalizedDish {
+  id: number;
+  votePollId: number;
+  dishId: number;
+  isSelected: boolean;
+  Dish: {
+    id: number;
+    name: string;
+    name_kh: string;
+    description: string;
+    description_kh: string;
+    imageURL: string;
+    categoryId: number;
+  };
+}
+
+export interface UpcomingResultsResponse {
+  votePollId: number;
+  mealDate: string;
+  voteDate: string;
+  status: string;
+  dish: FinalizedDish[];
+}
+
+/**
+ * Get upcoming finalized results
+ * @returns Promise<UpcomingResultsResponse>
+ */
+export const getUpcomingResults = async (): Promise<UpcomingResultsResponse> => {
+  try {
+    const response = await API.get("/results/upcoming");
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching upcoming results:", error);
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch upcoming results"
+    );
+  }
+};

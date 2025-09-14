@@ -206,7 +206,7 @@ const VotingChartV3: React.FC = () => {
         );
     }
 
-    if (status !== "open") {
+    if (status === "closed" || status === "finalized") {
         return (
             <div className="p-8 text-center text-gray-500">
                 <div className="text-lg font-medium mb-2">Voting Not Available</div>
