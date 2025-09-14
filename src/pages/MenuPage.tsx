@@ -3,15 +3,50 @@ import FoodCard from "../components/CardV2";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
+import { getCategories } from "../services/dishService";
 import Loading from "../components/Loading";
-import { getTodayResult, voteForDish, updateVoteForDish, type CandidateDish, getTodayVote } from "../services/resultService";
+import { getTodayResult, voteForDish, updateVoteForDish, getTodayVote } from "../services/resultService";
 import PageTransition from "../components/PageTransition";
+import Pagination from "../components/Pagination";
+import type { Dish as BaseDish, Category } from "../services/dishService";
+
+// Locally extend Dish to include voteCount for this page
+type Dish = BaseDish & { voteCount?: number };
 
 const Menu = () => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-    // const [foods, setFoods] = useState<Dish[]>([]);
-    const [candidate, setCandidate] = useState<CandidateDish[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [dishes, setDishes] = useState<Dish[]>([]);
+    const [limit, setLimit] = useState(12);
+    const [currentPage, setCurrentPage] = useState(1);
+    const totalPages = Math.ceil(dishes.length / limit);
+
+    // Update limit based on screen size (grid columns)
+    useEffect(() => {
+        function updateLimit() {
+            const width = window.innerWidth;
+            // Tailwind breakpoints: xl:1280px, lg:1024px, md:768px
+            if (width >= 1280) {
+                setLimit(15); // 5 columns
+            } else if (width >= 1024) {
+                setLimit(12); // 3 columns (lg)
+            } else if (width >= 768) {
+                setLimit(12); // 3 columns (md)
+            } else {
+                setLimit(10); // fallback for mobile
+            }
+        }
+        updateLimit();
+        window.addEventListener('resize', updateLimit);
+        return () => window.removeEventListener('resize', updateLimit);
+    }, []);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     const [loading, setLoading] = useState(true);
     // const [error, setError] = useState<string | null>(null);
     // const [upcomingResults, setUpcomingResults] = useState<UpcomingResult[]>([]);
@@ -23,27 +58,28 @@ const Menu = () => {
     // const [votedDishId, setVotedDishId] = useState<number | null>(null);
 
     useEffect(() => {
-        // const token = localStorage.getItem("token");
-        // setIsLoggedIn(!!token);
         setVotedDishId(null);
         setIsLoggedIn(!!localStorage.getItem("token"));
         setLoading(true);
 
-        // getDishes()
-        //     .then((res) => setFoods(res.items))
-        //     .catch(() => setError("Failed to fetch dishes"));
-
+        // Fetch today's dishes and vote info
         getTodayResult()
             .then((res) => {
-                setCandidate(res.dishes);
-                // setVotePollId(res.votePollId);
-
+                // Map CandidateDish[] to Dish[] with voteCount
+                const mappedDishes = (res.dishes || []).map((c) => ({
+                    id: c.dishId,
+                    name: c.name,
+                    description: c.description,
+                    imageURL: c.imageURL,
+                    categoryId: c.categoryId,
+                    categoryName: c.categoryName,
+                    voteCount: c.voteCount,
+                }));
+                setDishes(mappedDishes);
                 getTodayVote().then((vote) => {
                     setTodayVote(vote);
                     if (vote && vote.votePollId === res.votePollId && vote.userVote) {
                         setVotedDishId(vote.userVote.dishId);
-                        // localStorage.setItem("votedDishId", String(vote.userVote.dishId));
-                        // localStorage.setItem("votePollId", String(vote.userVote.votePollId));
                     } else {
                         setVotedDishId(null);
                     }
@@ -54,21 +90,13 @@ const Menu = () => {
                 setTodayError("Failed to fetch today's result");
                 setLoading(false);
             });
+    }, []);
 
-        // getUpcomingResults()
-        //     .then((res: any) => {
-        //         if (Array.isArray(res)) {
-        //             setUpcomingResults(res);
-        //             return;
-        //         }
-        //         const wrapper = res?.data ?? res?.items ?? res?.upcoming ?? res?.results ?? res;
-        //         if (!wrapper) return setUpcomingResults([]);
-        //         if (Array.isArray(wrapper)) setUpcomingResults(wrapper);
-        //         else if (typeof wrapper === "object") setUpcomingResults([wrapper]);
-        //         else setUpcomingResults([]);
-        //     })
-        //     .catch(() => setUpcomingError("Failed to fetch upcoming results"));
-    }, []); 
+    useEffect(() => {
+        getCategories()
+            .then(setCategories)
+            .catch(() => {});
+    }, []);
 
     // const upcomingBannerItems = useMemo(() => {
     //     if (!upcomingResults || upcomingResults.length === 0) return [];
@@ -125,13 +153,24 @@ const Menu = () => {
             } else {
                 setVotedDishId(null);
             }
-            setCandidate(todayResult.dishes);
+            // Update dishes after voting
+            const mappedDishes = (todayResult.dishes || []).map((c) => ({
+                id: c.dishId,
+                name: c.name,
+                description: c.description,
+                imageURL: c.imageURL,
+                categoryId: c.categoryId,
+                categoryName: c.categoryName,
+                voteCount: c.voteCount,
+            }));
+            setDishes(mappedDishes);
         } catch (error: any) {
             alert(error?.message || "Failed to vote. Please try again.");
             console.error("Vote error:", error);
         }
     };
     
+
     return (
         <div>
             <Navbar/>
@@ -140,42 +179,47 @@ const Menu = () => {
                     <div>
                         <h2 className="text-[20px] font-bold">Vote poll</h2>
                     </div>
-                        <div className="grid grid-cols-4 gap-x-6 gap-y-30 mb-10 p-10">
-                            {loading && (
-                                <div className="flex justify-center items-center w-full col-span-4 py-10">
-                                    <Loading />
-                                </div>
-                            )}
-                            {!loading && candidate.map(candidate => {
-                                const user = JSON.parse(localStorage.getItem("user") || "{}");
-                                const currentUserId = user.id;
-                                const votedUserId = localStorage.getItem("votedUserId");
-                                // Disable voting if device has voted with a different user
-                                const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
-
-                                return (
-                                    <FoodCard
-                                        key={candidate.dishId}
-                                        name={candidate.name}
-                                        dishId={candidate.dishId}
-                                        categoryName={candidate.categoryName ?? ""}
-                                        description={candidate.description ?? ""}
-                                        imgURL={candidate.imageURL ?? ""}
-                                        initialVotes={candidate.voteCount}
-                                        disabled={votingDisabled}
-                                        isVote={true}
-                                        onVote={() => {
-                                            if (!isLoggedIn) {
-                                                navigate("/sign-in");
-                                                return;
-                                            }
-                                            handleVote(candidate.dishId);
-                                        }}
-                                        currentVoteCount={candidate.voteCount}
-                                    />
-                                );
-                            })}
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-2 md:gap-6 w-full">
+                        {loading && (
+                            <div className="flex justify-center items-center w-full col-span-4 py-10">
+                                <Loading />
+                            </div>
+                        )}
+                        {!loading && dishes.slice((currentPage - 1) * limit, currentPage * limit).map(dish => {
+                            const user = JSON.parse(localStorage.getItem("user") || "{}");
+                            const currentUserId = user.id;
+                            const votedUserId = localStorage.getItem("votedUserId");
+                            const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
+                            const categoryName = categories.find(cat => String(cat.id) === String(dish.categoryId))?.name || dish.categoryName || "";
+                            const dishIdNum = typeof dish.id === 'string' ? parseInt(dish.id, 10) : dish.id;
+                            return (
+                                <FoodCard
+                                    key={dishIdNum}
+                                    name={dish.name}
+                                    dishId={dishIdNum}
+                                    categoryName={categoryName}
+                                    description={dish.description ?? ""}
+                                    imgURL={dish.imageURL ?? ""}
+                                    initialVotes={dish.voteCount}
+                                    disabled={votingDisabled}
+                                    isVote={true}
+                                    onVote={() => {
+                                        if (!isLoggedIn) {
+                                            navigate("/sign-in");
+                                            return;
+                                        }
+                                        handleVote(dishIdNum);
+                                    }}
+                                    currentVoteCount={dish.voteCount}
+                                />
+                            );
+                        })}
+                    </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
                     <div>
                         {todayError && (
                             <div className="flex justify-center items-center w-full my-8">

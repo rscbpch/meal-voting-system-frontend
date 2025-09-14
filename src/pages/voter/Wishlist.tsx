@@ -418,7 +418,7 @@ const Wishlist = () => {
                                     <h2 className="text-[20px] font-bold">All menu</h2>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5   gap-2 md:gap-6 w-full">
+                                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-2 md:gap-6 w-full">
                                     {(Array.isArray(dishes) ? dishes.slice((currentPage - 1) * limit, currentPage * limit) : []).map((dish, idx) => {
                                         const categoryName = dish.categoryName || categories.find(cat => String(cat.id) === String(dish.categoryId))?.name || "";
                                         const wishCount = wishes.find(w => w.dishId === Number(dish.id))?.totalWishes || 0;
