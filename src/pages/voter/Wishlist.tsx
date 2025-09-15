@@ -239,7 +239,7 @@ const Wishlist = () => {
                                                             <div className="flex flex-col ml-3 md:ml-6 gap-1 md:gap-2 w-full sm:max-w-[210px] md:max-w-[700px]">
                                                                 {/* food info */}
                                                                 <h3 className="text-[12px] md:text-[18px] lg:text-[22px] font-bold text-gray-800 max-h-[42px] md:max-h-[54px] md:max-w-[700px]">
-                                                                    {dishName}
+                                                                    
                                                                 </h3>
                                                                 <span className="hidden md:block bg-gray-100 text-gray-600 text-[10px] px-1 py-0.5 md:text-[12px] md:px-2 md:py-1 rounded font-medium w-fit">
                                                                     {categoryName}
