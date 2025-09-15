@@ -5,18 +5,19 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { getCategories } from "../services/dishService";
 import Loading from "../components/Loading";
-import { getTodayResult, updateVoteForDish, getTodayVote } from "../services/resultService";
+import { getTodayResult, updateVoteForDish, getTodayVote, voteForDish } from "../services/resultService";
 import PageTransition from "../components/PageTransition";
 import type { Dish as BaseDish, Category } from "../services/dishService";
 import FoodDetailsPopup from "../components/FoodDetailsPopup";
 import CanteenPick from "../components/CanteenPick";
+import { useAuth } from "../context/AuthContext";
 
 // Locally extend Dish to include voteCount for this page
 type Dish = BaseDish & { voteCount?: number };
 
 const Menu = () => {
     const navigate = useNavigate();
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const { user, isAuthenticated } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [limit, setLimit] = useState(12);
@@ -53,7 +54,6 @@ const Menu = () => {
 
     useEffect(() => {
         setVotedDishId(null);
-        setIsLoggedIn(!!localStorage.getItem("token"));
         setLoading(true);
 
         // Fetch today's dishes and vote info
@@ -93,12 +93,11 @@ const Menu = () => {
     }, []);
 
     const handleVote = async (dishId: number) => {
-        if (!isLoggedIn) {
+        if (!isAuthenticated || !user) {
             navigate('/sign-in');
             return;
         }
 
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
         const currentUserId = String(user.id);
         const votedUserId = localStorage.getItem("votedUserId");
 
@@ -129,7 +128,12 @@ const Menu = () => {
     // performVote: isFirstVote = true if this is the first vote (no votedDishId yet)
     const performVote = async (dishId: number, isFirstVote = false, currentUserId?: string) => {
         try {
-            await updateVoteForDish(dishId);
+            // Use POST for first vote, PUT for vote update
+            if (isFirstVote) {
+                await voteForDish(dishId);
+            } else {
+                await updateVoteForDish(dishId);
+            }
 
             // On first vote, store userId in localStorage
             if (isFirstVote && currentUserId) {
@@ -184,8 +188,7 @@ const Menu = () => {
                             </div>
                         )}
                         {!loading && dishes.slice(0, limit).map(dish => {
-                            const user = JSON.parse(localStorage.getItem("user") || "{}");
-                            const currentUserId = String(user.id);
+                            const currentUserId = user ? String(user.id) : "";
                             const votedUserId = localStorage.getItem("votedUserId");
                             // Only disable voting for users who are NOT the original voter
                             const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
@@ -203,7 +206,7 @@ const Menu = () => {
                                     disabled={votingDisabled}
                                     isVote={true}
                                     onVote={() => {
-                                        if (!isLoggedIn) {
+                                        if (!isAuthenticated || !user) {
                                             navigate("/sign-in");
                                             return;
                                         }
