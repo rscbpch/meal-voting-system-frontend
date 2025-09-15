@@ -89,7 +89,7 @@ const DatePicker = ({ selectedDate, onDateSelect, showDatePicker, onClose }: Dat
     if (!showDatePicker) return null;
 
     return (
-        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-50 w-[240px]">
+        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-50 w-[240px] max-w-[90vw] sm:max-w-none">
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
                 <button
