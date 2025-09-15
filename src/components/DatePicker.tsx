@@ -10,7 +10,6 @@ interface DatePickerProps {
 const DatePicker = ({ selectedDate, onDateSelect, showDatePicker, onClose }: DatePickerProps) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const today = new Date();
-    const minDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
     const getDaysInMonth = (date: Date) => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -32,16 +31,14 @@ const DatePicker = ({ selectedDate, onDateSelect, showDatePicker, onClose }: Dat
     };
 
     const isDateDisabled = (date: Date) => {
-        const isPastDate = date < minDate;
-        const isWeekend = date.getDay() === 0 || date.getDay() === 6; // 0 = Sunday, 6 = Saturday
-        return isPastDate || isWeekend;
+        // Allow all dates - no restrictions
+        return false;
     };
 
     const handleDateSelect = (date: Date) => {
-        if (!isDateDisabled(date)) {
-            onDateSelect(formatDate(date));
-            onClose();
-        }
+        // Allow selection of any date
+        onDateSelect(formatDate(date));
+        onClose();
     };
 
     const goToPreviousMonth = () => {
@@ -70,25 +67,23 @@ const DatePicker = ({ selectedDate, onDateSelect, showDatePicker, onClose }: Dat
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
         const isSelected = isDateSelected(date);
-        const isDisabled = isDateDisabled(date);
+        const isToday = formatDate(date) === formatDate(today);
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-        const isPastDate = date < minDate;
         
         days.push(
             <button
                 key={day}
                 onClick={() => handleDateSelect(date)}
-                disabled={isDisabled}
                 className={`h-7 w-7 rounded text-xs font-medium transition-colors relative z-10 ${
                     isSelected
                         ? 'bg-[#429818] text-white'
-                        : isDisabled
-                        ? isWeekend
-                            ? 'text-red-300 cursor-not-allowed bg-red-50'
-                            : 'text-gray-300 cursor-not-allowed'
+                        : isToday
+                        ? 'bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200'
+                        : isWeekend
+                        ? 'text-gray-600 hover:bg-[#F6FFE8] hover:text-[#429818]'
                         : 'text-gray-700 hover:bg-[#F6FFE8] hover:text-[#429818]'
                 }`}
-                title={isWeekend ? 'Weekend dates are not allowed' : isPastDate ? 'Past dates are not allowed' : ''}
+                title={isToday ? 'Today' : isWeekend ? 'Weekend' : ''}
             >
                 {day}
             </button>
