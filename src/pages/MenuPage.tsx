@@ -44,8 +44,7 @@ const Menu = () => {
 
     const [loading, setLoading] = useState(true);
     const [todayError, setTodayError] = useState<string | null>(null);
-    const [votedDishId, setVotedDishId] = useState<number | null>((null));
-    const [, setTodayVote] = useState<any>(null); // Remove todayVote unused var
+    const [votedDishId, setVotedDishId] = useState<number | null>(null);
     const [alreadyVotedPopup, setAlreadyVotedPopup] = useState(false);
     const [changeVotePopup, setChangeVotePopup] = useState(false);
     const [pendingVoteDishId, setPendingVoteDishId] = useState<number | null>(null);
@@ -57,10 +56,10 @@ const Menu = () => {
         setLoading(true);
 
         // Fetch today's dishes and vote info
-        getTodayResult()
-            .then((res) => {
+        Promise.all([getTodayResult(), getTodayVote()])
+            .then(([result, vote]) => {
                 // Map CandidateDish[] to Dish[] with voteCount
-                const mappedDishes = (res.dishes || []).map((c) => ({
+                const mappedDishes = (result.dishes || []).map((c) => ({
                     id: c.dishId,
                     name: c.name,
                     description: c.description,
@@ -70,17 +69,17 @@ const Menu = () => {
                     voteCount: c.voteCount,
                 }));
                 setDishes(mappedDishes);
-                getTodayVote().then((vote) => {
-                    setTodayVote(vote);
-                    if (vote && vote.votePollId === res.votePollId && vote.userVote) {
-                        setVotedDishId(vote.userVote.dishId);
-                    } else {
-                        setVotedDishId(null);
-                    }
-                    setLoading(false);
-                });
+                
+                // Set vote information from backend
+                if (vote && vote.votePollId === result.votePollId && vote.userVote) {
+                    setVotedDishId(vote.userVote.dishId);
+                } else {
+                    setVotedDishId(null);
+                }
+                setLoading(false);
             })
-            .catch(() => {
+            .catch((error) => {
+                console.error("Error fetching data:", error);
                 setTodayError("Failed to fetch today's result");
                 setLoading(false);
             });
@@ -98,18 +97,9 @@ const Menu = () => {
             return;
         }
 
-        const currentUserId = String(user.id);
-        const votedUserId = localStorage.getItem("votedUserId");
-
-        // If there is a votedUserId in localStorage and it does not match the current user, block all voting actions
-        if (votedUserId && votedUserId !== currentUserId) {
-            setAlreadyVotedPopup(true);
-            return;
-        }
-
-        // If no vote yet (first vote), allow and set votedUserId after success
+        // If no vote yet (first vote), allow
         if (!votedDishId) {
-            await performVote(dishId, true, currentUserId);
+            await performVote(dishId, true);
             return;
         }
 
@@ -120,13 +110,13 @@ const Menu = () => {
             return;
         }
 
-        // If user tries to vote again for the same dish, just allow (since userId matches)
-        await performVote(dishId, false, currentUserId);
+        // If user tries to vote again for the same dish, just allow
+        await performVote(dishId, false);
     };
 
     // Helper to perform the vote or update
     // performVote: isFirstVote = true if this is the first vote (no votedDishId yet)
-    const performVote = async (dishId: number, isFirstVote = false, currentUserId?: string) => {
+    const performVote = async (dishId: number, isFirstVote = false) => {
         try {
             // Use POST for first vote, PUT for vote update
             if (isFirstVote) {
@@ -135,18 +125,14 @@ const Menu = () => {
                 await updateVoteForDish(dishId);
             }
 
-            // Always store/update userId in localStorage when vote is successful
-            if (currentUserId) {
-                localStorage.setItem("votedUserId", currentUserId);
-            }
-
+            // Refresh vote status and results from backend
             const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
-            setTodayVote(newVote);
             if (newVote && newVote.userVote) {
                 setVotedDishId(newVote.userVote.dishId);
             } else {
                 setVotedDishId(null);
             }
+            
             // Update dishes after voting
             const mappedDishes = (todayResult.dishes || []).map((c) => ({
                 id: c.dishId,
@@ -188,12 +174,8 @@ const Menu = () => {
                             </div>
                         )}
                         {!loading && dishes.slice(0, limit).map(dish => {
-                            const currentUserId = user ? String(user.id) : "";
-                            const votedUserId = localStorage.getItem("votedUserId");
-                            // Only disable voting for users who are NOT the original voter
-                            // Allow the current user to vote (change their vote) even if they've already voted
-                            const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
-                            
+                            // Voting is now controlled by backend - no need for localStorage checks
+                            // The backend will handle vote validation and prevent duplicate votes
                             const categoryName = categories.find(cat => String(cat.id) === String(dish.categoryId))?.name || dish.categoryName || "";
                             const dishIdNum = typeof dish.id === 'string' ? parseInt(dish.id, 10) : dish.id;
                             return (
@@ -205,7 +187,7 @@ const Menu = () => {
                                     description={dish.description ?? ""}
                                     imgURL={dish.imageURL ?? ""}
                                     initialVotes={dish.voteCount}
-                                    disabled={votingDisabled}
+                                    disabled={false} // Backend handles vote validation
                                     isVote={true}
                                     onVote={() => {
                                         if (!isAuthenticated || !user) {
@@ -281,7 +263,7 @@ const Menu = () => {
                                 onClick={async () => {
                                     if (pendingVoteDishId) {
                                         setChangeVotePopup(false);
-                                        await performVote(pendingVoteDishId);
+                                        await performVote(pendingVoteDishId, false);
                                         setPendingVoteDishId(null);
                                     }
                                 }}
