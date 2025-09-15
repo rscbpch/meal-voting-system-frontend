@@ -16,9 +16,15 @@ export interface UserVote {
 }
 
 export interface PollDish {
-    candidateDishId: number;
     dishId: number;
-    dish: string;
+    name: string;
+    name_kh?: string;
+    ingredient?: string;
+    ingredients_kh?: string;
+    description?: string;
+    description_kh?: string;
+    imageURL?: string;
+    categoryId?: number;
     voteCount: number;
 }
 
@@ -39,8 +45,9 @@ export interface VoteHistoryResponse {
     votePollId: number;
     mealDate: string;
     voteDate: string;
+    status: string; // "open", "close", "finalized", "pending"
     userVote: UserVote | null;
-    dishes?: PollDish[]; // For open/close polls - top 5 dishes with vote counts
+    dishes?: PollDish[]; // For open/close polls - dishes with vote counts
     selectedDishes?: SelectedDish[]; // For finalized polls - selected dishes
 }
 export const getVoteHistory = async (date?: string): Promise<VoteHistoryResponse> => {

@@ -58,7 +58,7 @@ const HistoryPage = () => {
                                                     onClick={() => setShowDatePicker(false)}
                                                     aria-label="Close date picker"
                                                 />
-                                                <div className="absolute z-50 right-0 sm:right-auto sm:left-0 sm:-translate-x-1/2 sm:ml-4 mt-2">
+                                                <div className="absolute z-50 right-0 sm:right-auto sm:left-0 mt-2">
                                                     <DatePicker
                                                         selectedDate={selectedDate}
                                                         onDateSelect={date => {
@@ -116,7 +116,7 @@ const HistoryPage = () => {
                                     </div>
                                     
                                     {/* Display results based on poll status */}
-                                    {history.selectedDishes && history.selectedDishes.length > 0 ? (
+                                    {history.status === "finalized" && history.selectedDishes && history.selectedDishes.length > 0 ? (
                                         // Finalized poll - show selected dishes
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                                             {history.selectedDishes.map(dish => (
@@ -129,23 +129,31 @@ const HistoryPage = () => {
                                                 />
                                             ))}
                                         </div>
-                                    ) : history.dishes && history.dishes.length > 0 ? (
+                                    ) : (history.status === "open" || history.status === "close") && history.dishes && history.dishes.length > 0 ? (
                                         // Open/close poll - show top 5 dishes with vote counts
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                                            {history.dishes.slice(0, 5).map(dish => (
+                                            {history.dishes
+                                                .sort((a, b) => b.voteCount - a.voteCount)
+                                                .slice(0, 5)
+                                                .map(dish => (
                                                 <ResultCard
                                                     key={dish.dishId}
-                                                    name={dish.dish}
-                                                    description="No description available."
-                                                    imgURL=""
+                                                    name={dish.name}
+                                                    description={dish.description || "No description available."}
+                                                    imgURL={dish.imageURL || ""}
                                                     votes={dish.voteCount}
                                                 />
                                             ))}
                                         </div>
-                                    ) : (
+                                    ) : history.status === "pending" ? (
                                         // Pending poll - no results yet
                                         <div className="text-center text-gray-500 text-[14px] lg:text-base">
                                             Vote poll is pending. Results will be available once voting begins.
+                                        </div>
+                                    ) : (
+                                        // Fallback for any other status
+                                        <div className="text-center text-gray-500 text-[14px] lg:text-base">
+                                            No results available for this date.
                                         </div>
                                     )}
                                 </div>
