@@ -245,34 +245,34 @@ const Menu = () => {
 
             {/* Change vote confirmation popup */}
             {changeVotePopup && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-xs w-full flex flex-col items-center">
-                        <div className="text-lg font-semibold mb-4 text-center">You have already voted. Do you want to change your vote to this dish?</div>
-                        <div className="flex gap-4 mt-2">
-                            <button
-                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
-                                onClick={() => {
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center bg-black bg-opacity-40">
+                <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                    <div className="text-md font-semibold mb-4 text-center">You have already voted. Do you want to change your vote to this dish?</div>
+                    <div className="flex justify-end gap-4 mt-2">
+                        <button
+                            className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                            onClick={() => {
+                                setChangeVotePopup(false);
+                                setPendingVoteDishId(null);
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="px-6 py-2 bg-[#429818] text-white rounded hover:bg-[#367A14] transition"
+                            onClick={async () => {
+                                if (pendingVoteDishId) {
                                     setChangeVotePopup(false);
+                                    await performVote(pendingVoteDishId, false);
                                     setPendingVoteDishId(null);
-                                }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="px-6 py-2 bg-[#429818] text-white rounded hover:bg-[#367A14] transition"
-                                onClick={async () => {
-                                    if (pendingVoteDishId) {
-                                        setChangeVotePopup(false);
-                                        await performVote(pendingVoteDishId, false);
-                                        setPendingVoteDishId(null);
-                                    }
-                                }}
-                            >
-                                Yes, change vote
-                            </button>
-                        </div>
+                                }
+                            }}
+                        >
+                            Yes
+                        </button>
                     </div>
                 </div>
+            </div>
             )}
         </div>
     );
