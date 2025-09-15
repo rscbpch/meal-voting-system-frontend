@@ -152,17 +152,17 @@ const CanteenPick = () => {
 
   return (
     <div ref={containerRef} className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[20px] font-bold">Meals on</h2>
-        <p>
-          {upcoming.mealDate
-            ? new Date(upcoming.mealDate).toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              })
-            : ""}
-        </p>
+      <div className="mb-4">
+        <h2 className="text-[20px] font-bold mb-2">Meals on</h2>
+        {upcoming.mealDate && (
+          <p className="text-gray-600 text-sm mb-2">
+            {new Date(upcoming.mealDate).toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </p>
+        )}
         {/* Removed header next/prev buttons */}
       </div>
       <div className="relative">
