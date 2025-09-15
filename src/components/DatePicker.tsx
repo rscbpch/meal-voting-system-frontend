@@ -30,10 +30,6 @@ const DatePicker = ({ selectedDate, onDateSelect, showDatePicker, onClose }: Dat
         return formatDate(date) === selectedDate;
     };
 
-    const isDateDisabled = (date: Date) => {
-        // Allow all dates - no restrictions
-        return false;
-    };
 
     const handleDateSelect = (date: Date) => {
         // Allow selection of any date
