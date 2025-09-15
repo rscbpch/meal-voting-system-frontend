@@ -135,8 +135,8 @@ const Menu = () => {
                 await updateVoteForDish(dishId);
             }
 
-            // On first vote, store userId in localStorage
-            if (isFirstVote && currentUserId) {
+            // Always store/update userId in localStorage when vote is successful
+            if (currentUserId) {
                 localStorage.setItem("votedUserId", currentUserId);
             }
 
@@ -191,7 +191,9 @@ const Menu = () => {
                             const currentUserId = user ? String(user.id) : "";
                             const votedUserId = localStorage.getItem("votedUserId");
                             // Only disable voting for users who are NOT the original voter
+                            // Allow the current user to vote (change their vote) even if they've already voted
                             const votingDisabled = !!votedUserId && votedUserId !== currentUserId;
+                            
                             const categoryName = categories.find(cat => String(cat.id) === String(dish.categoryId))?.name || dish.categoryName || "";
                             const dishIdNum = typeof dish.id === 'string' ? parseInt(dish.id, 10) : dish.id;
                             return (
