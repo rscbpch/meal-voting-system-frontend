@@ -77,7 +77,8 @@ const FoodCard = ({
         onWishlistClick?.(cardDishId, name);
     };
 
-    const handleVote = () => {
+    const handleVote = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent event bubbling to parent container
         if (!disabled && onVote) {
             setVotes(votes + 1);
             onVote();
@@ -221,7 +222,7 @@ const FoodCard = ({
                             </div>
                         </div>
                         <button
-                            onClick={handleVote}
+                            onClick={(e) => handleVote(e)}
                             disabled={disabled}
                             className={`rounded-md px-3 py-2 text-sm font-semibold flex justify-center items-center gap-2
                                 ${isVote
@@ -453,7 +454,7 @@ const FoodCard = ({
                                     </button>
                                 ) : (
                                     <button
-                                        onClick={handleVote}
+                                        onClick={(e) => handleVote(e)}
                                         disabled={disabled}
                                         className={`rounded-md px-3 py-2 text-sm font-semibold flex justify-center items-center gap-2
                                             ${isVote
