@@ -135,7 +135,14 @@ const CanteenPick = () => {
 	return (
 		<div ref={containerRef} className="w-full">
 			<div className="flex items-center justify-between mb-4">
-				<h2 className="text-[20px] font-bold">Upcoming Canteen Menu</h2>
+				<h2 className="text-[20px] font-bold">
+					Meals on {upcoming.mealDate ? new Date(upcoming.mealDate).toLocaleDateString('en-US', { 
+						weekday: 'long', 
+						year: 'numeric', 
+						month: 'long', 
+						day: 'numeric' 
+					}) : ''}
+				</h2>
 		        {/* Removed header next/prev buttons */}
 			</div>
 			<div className="relative">
