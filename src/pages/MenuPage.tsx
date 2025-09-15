@@ -21,6 +21,7 @@ const Menu = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [limit, setLimit] = useState(12);
+    const [voteDate, setVoteDate] = useState<string | null>(null);
 
     // Update limit based on screen size (grid columns)
     useEffect(() => {
@@ -69,6 +70,9 @@ const Menu = () => {
                     voteCount: c.voteCount,
                 }));
                 setDishes(mappedDishes);
+                
+                // Set vote date
+                setVoteDate(result.voteDate);
                 
                 // Set vote information from backend
                 if (vote && vote.votePollId === result.votePollId && vote.userVote) {
@@ -133,6 +137,9 @@ const Menu = () => {
                 setVotedDishId(null);
             }
             
+            // Update vote date
+            setVoteDate(todayResult.voteDate);
+            
             // Update dishes after voting
             const mappedDishes = (todayResult.dishes || []).map((c) => ({
                 id: c.dishId,
@@ -165,7 +172,16 @@ const Menu = () => {
                         <CanteenPick />
                     </div>
                     <div>
-                        <h2 className="text-[20px] font-bold mb-4">Vote poll</h2>
+                        <h2 className="text-[20px] font-bold mb-2">Vote poll</h2>
+                        {voteDate && (
+                            <p className="text-gray-600 text-sm mb-4">
+                                {new Date(voteDate).toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </p>
+                        )}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-2 md:gap-6 w-full">
                         {loading && (
