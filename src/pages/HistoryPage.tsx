@@ -6,7 +6,6 @@ import Navbar from "../components/Navbar";
 import PageTransition from "../components/PageTransition";
 import DatePicker from "../components/DatePicker";
 import Footer from "../components/Footer";
-import { getUpcomingResults, type UpcomingResult } from "../services/resultService";
 import Loading from "../components/Loading";
 
 const HistoryPage = () => {
@@ -15,20 +14,15 @@ const HistoryPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [upcomingResults, setUpcomingResults] = useState<UpcomingResult | null>(null);
 
     useEffect(() => {
         setError(null);
         setLoading(true);
-        Promise.all([
-            getVoteHistory(selectedDate ? selectedDate : undefined),
-            getUpcomingResults(),
-        ])
-            .then(([historyData, upcomingData]) => {
+        getVoteHistory(selectedDate ? selectedDate : undefined)
+            .then((historyData) => {
                 setHistory(historyData);
-                setUpcomingResults(upcomingData);
             })
-            .catch ((err) => setError(err.message || "Failed to load data"))
+            .catch((err) => setError(err.message || "Failed to load data"))
             .finally(() => setLoading(false));
     }, [selectedDate]);
 
@@ -110,22 +104,48 @@ const HistoryPage = () => {
                                         <h2 className="text-[18px] sm:text-[20px] lg:text-[24px] font-bold">
                                             Result
                                         </h2>
+                                        {history.mealDate && (
+                                            <p className="text-gray-600 text-sm mb-2">
+                                                {new Date(history.mealDate).toLocaleDateString('en-US', {
+                                                    weekday: 'long',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </p>
+                                        )}
                                     </div>
-                                    {upcomingResults && Array.isArray(upcomingResults.dish) && upcomingResults.dish.length > 0 ? (
+                                    
+                                    {/* Display results based on poll status */}
+                                    {history.selectedDishes && history.selectedDishes.length > 0 ? (
+                                        // Finalized poll - show selected dishes
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                                            {upcomingResults.dish.map(dish => (
+                                            {history.selectedDishes.map(dish => (
                                                 <ResultCard
                                                     key={dish.dishId}
                                                     name={dish.Dish?.name}
                                                     description={dish.Dish?.description || "No description available."}
                                                     imgURL={dish.Dish?.imageURL || ""}
+                                                    votes={0} // Selected dishes don't have vote counts in finalized polls
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : history.dishes && history.dishes.length > 0 ? (
+                                        // Open/close poll - show top 5 dishes with vote counts
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                                            {history.dishes.slice(0, 5).map(dish => (
+                                                <ResultCard
+                                                    key={dish.dishId}
+                                                    name={dish.dish}
+                                                    description="No description available."
+                                                    imgURL=""
                                                     votes={dish.voteCount}
                                                 />
                                             ))}
                                         </div>
                                     ) : (
+                                        // Pending poll - no results yet
                                         <div className="text-center text-gray-500 text-[14px] lg:text-base">
-                                            Result hasn't been finalized yet.
+                                            Vote poll is pending. Results will be available once voting begins.
                                         </div>
                                     )}
                                 </div>
