@@ -58,7 +58,7 @@ const HistoryPage = () => {
                                                     onClick={() => setShowDatePicker(false)}
                                                     aria-label="Close date picker"
                                                 />
-                                                <div className="absolute z-50 right-0 sm:right-auto sm:left-1/2 sm:transform sm:-translate-x-1/2 mt-2">
+                                                <div className="absolute z-50 right-0 sm:right-auto sm:left-0 mt-2">
                                                     <DatePicker
                                                         selectedDate={selectedDate}
                                                         onDateSelect={date => {
