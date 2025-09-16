@@ -276,22 +276,24 @@ const Navbar = () => {
                                                 </span>
                                                 <span>Profile</span>
                                             </button>
-                                            <button
-                                                onClick={() => {
-                                                    navigate("/history")
-                                                    setShowUserDropdown(false);
-                                                    console.log("clicked");
-                                                }}
-                                                className="flex items-center gap-3 px-5 py-3 text-[#222] hover:bg-[#F7F7F7] transition-colors text-base font-medium focus:outline-none"
-                                            >
-                                                <span className="bg-[#EAF6E7] p-2 rounded-full">
-                                                    <FiRotateCw
-                                                        size={18}
-                                                        className="text-[#429818]"
-                                                    />
-                                                </span>
-                                                <span>History</span>
-                                            </button>
+                                            {isAuthenticated && (
+                                                <button
+                                                    onClick={() => {
+                                                        navigate("/history");
+                                                        setShowUserDropdown(false);
+                                                        console.log("clicked");
+                                                    }}
+                                                    className="flex items-center gap-3 px-5 py-3 text-[#222] hover:bg-[#F7F7F7] transition-colors text-base font-medium focus:outline-none"
+                                                >
+                                                    <span className="bg-[#EAF6E7] p-2 rounded-full">
+                                                        <FiRotateCw
+                                                            size={18}
+                                                            className="text-[#429818]"
+                                                        />
+                                                    </span>
+                                                    <span>History</span>
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={handleLogout}
                                                 disabled={isLoggingOut}
@@ -497,17 +499,19 @@ const Navbar = () => {
                                             <TbBowlSpoon size={20} />
                                             <span>Menu</span>
                                         </Link>
-                                        <Link
-                                            to="/history"
-                                            className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
-                                                location.pathname === "/history"
-                                                    ? "text-[#3E7B27] bg-[#EAF6E7] font-semibold"
-                                                    : "text-gray-700 hover:text-[#3E7B27] hover:bg-[#EAF6E7] font-medium"
-                                            }`}
-                                        >
-                                            <TbHistoryToggle size={22} />
-                                            <span>History</span>
-                                        </Link>
+                                        {isAuthenticated && user && (    
+                                            <Link
+                                                to="/history"
+                                                className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
+                                                    location.pathname === "/history"
+                                                        ? "text-[#3E7B27] bg-[#EAF6E7] font-semibold"
+                                                        : "text-gray-700 hover:text-[#3E7B27] hover:bg-[#EAF6E7] font-medium"
+                                                }`}
+                                            >
+                                                <TbHistoryToggle size={22} />
+                                                <span>History</span>
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
 

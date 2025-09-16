@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { getVoteHistory, type VoteHistoryResponse } from "../services/historyService";
-import LatestVote from "../components/LatestVote";
-import ResultCard from "../components/ResultCard";
-import Navbar from "../components/Navbar";
-import PageTransition from "../components/PageTransition";
-import DatePicker from "../components/DatePicker";
-import Footer from "../components/Footer";
-import Loading from "../components/Loading";
+import { getVoteHistory, type VoteHistoryResponse } from "../../services/historyService";
+import LatestVote from "../../components/LatestVote";
+import ResultCard from "../../components/ResultCard";
+import Navbar from "../../components/Navbar";
+import PageTransition from "../../components/PageTransition";
+import DatePicker from "../../components/DatePicker";
+import Footer from "../../components/Footer";
+import Loading from "../../components/Loading";
 
 const HistoryPage = () => {
     const [history, setHistory] = useState<VoteHistoryResponse | null>(null);

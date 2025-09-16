@@ -16,7 +16,7 @@ import Feedback from "./pages/voter/Feedback";
 import MenuManagement from "./pages/staff/MenuManagement";
 import FoodForVoter from "./pages/staff/FoodForVoter";
 import AboutUs from "./pages/AboutUs";
-import HistoryPage from "./pages/HistoryPage";
+import HistoryPage from "./pages/voter/HistoryPage";
 
 const AppRoutes = () => {
     const location = useLocation();
@@ -50,7 +50,6 @@ const AppRoutes = () => {
                 <Route path="/auth/callback" element={<Callback />} />
                 <Route path="/setup-account" element={<SetupAccount />} />
                 <Route path="/about-us" element={<AboutUs />} />
-                <Route path="/history" element={<HistoryPage />} />
 
                 {/* Private routes */}
                 <Route
@@ -61,6 +60,16 @@ const AppRoutes = () => {
                         </PrivateRoute>
                     }
                 />
+                
+                <Route 
+                    path="/history" 
+                    element={
+                        <PrivateRoute allowedRoles={["voter"]}>
+                            <HistoryPage />
+                        </PrivateRoute>
+                    } 
+                />
+                
                 <Route
                     path="/dashboard"
                     element={

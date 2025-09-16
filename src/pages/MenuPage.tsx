@@ -51,6 +51,7 @@ const Menu = () => {
     const [pendingVoteDishId, setPendingVoteDishId] = useState<number | null>(null);
     const [showDetailsPopup, setShowDetailsPopup] = useState(false);
     const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
+    const [voteClosedPopup, setVoteClosedPopup] = useState(false);
 
     useEffect(() => {
         setVotedDishId(null);
