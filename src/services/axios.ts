@@ -3,7 +3,8 @@ import axios from "axios";
 export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || "http://localhost:3000") + "/api";
 
 const API = axios.create({
-    baseURL: BACKEND_URL
+    baseURL: BACKEND_URL,
+    withCredentials: true,
 })
 
 // always attach the token

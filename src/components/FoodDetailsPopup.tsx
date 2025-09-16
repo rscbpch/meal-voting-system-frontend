@@ -249,10 +249,10 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, totalWishes }: FoodD
                 {/* Header */}
                 <div className="flex items-center justify-between p-3 pb-2">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-[#EAF6E7] flex items-center justify-center text-[#3E7B27] text-lg">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#EAF6E7] flex items-center justify-center text-[#3E7B27] text-sm sm:text-lg">
                             <AnimalIcon />
                         </div>
-                        <span className="text-gray-700 font-medium text-sm">
+                        <span className="text-gray-700 font-medium text-xs sm:text-sm">
                             Anonymous
                         </span>
                     </div>
@@ -265,7 +265,7 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, totalWishes }: FoodD
                 <div className="border-t border-gray-100"></div>
 
                 {/* Content */}
-                <div className="p-4 space-y-3">
+                <div className="p-3 sm:p-4 space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="flex items-center gap-1 bg-green-50 rounded-full px-2 py-1">
                             <span className="text-gray-600 text-xs font-medium">
@@ -282,7 +282,7 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, totalWishes }: FoodD
                         </div>
                     </div>
 
-                    <p className="text-gray-700 text-sm whitespace-pre-wrap break-words">
+                    <p className="text-gray-700 text-xs sm:text-sm whitespace-pre-wrap break-words">
                         {feedback.content}
                     </p>
                 </div>
@@ -306,40 +306,40 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, totalWishes }: FoodD
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full h-[90vh] flex flex-col overflow-hidden"
+                        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col overflow-hidden mx-2 sm:mx-0"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                            <h2 className="text-2xl font-bold text-gray-900">
+                        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                                 Food Details
                             </h2>
                             <button
                                 onClick={onClose}
                                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                             >
-                                <XMarkIcon className="w-6 h-6 text-gray-500" />
+                                <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
                             </button>
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto">
                             {/* Top Section - Food Info */}
-                            <div className="p-6 border-b border-gray-200">
-                                <div className="flex items-start gap-6">
+                            <div className="p-4 sm:p-6 border-b border-gray-200">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
                                     {/* Food Image */}
                                     <div className="relative flex-shrink-0">
                                         <img
                                             src={dish.imageURL || "/placeholder-food.jpg"}
                                             alt={dish.name}
-                                            className="w-32 h-32 object-cover rounded-full shadow-md"
+                                            className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full shadow-md"
                                         />
                                     </div>
 
                                     {/* Food Details */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <h3 className="text-2xl font-bold text-gray-900">
+                                    <div className="flex-1 min-w-0 w-full text-center sm:text-left">
+                                        <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 mb-2">
+                                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
                                                 {dish.name}
                                             </h3>
                                             {/* Backend Total Wishes */}
@@ -354,21 +354,21 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, totalWishes }: FoodD
                                         </div>
                                         
                                         {/* Description */}
-                                        <p className="text-gray-600 leading-relaxed mb-4">
+                                        <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
                                             {dish.description || "No description available"}
                                         </p>
 
                                         {/* Ingredients */}
                                         {dish.ingredient && (
                                             <div className="mb-4">
-                                                <h4 className="text-md font-semibold text-gray-700 mb-2">
+                                                <h4 className="text-sm sm:text-md font-semibold text-gray-700 mb-2">
                                                     Main ingredients
                                                 </h4>
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                                                     {dish.ingredient.split(',').map((ingredient, index) => (
                                                         <span
                                                             key={index}
-                                                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white border"
+                                                            className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium text-white border"
                                                             style={{ backgroundColor: '#AAD36C', borderColor: '#AAD36C' }}
                                                         >
                                                             {ingredient.trim()}
@@ -384,13 +384,13 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, totalWishes }: FoodD
                             </div>
 
                             {/* Bottom Section - Feedback */}
-                            <div className="p-6 pb-12">
-                                <div className={`grid grid-cols-1 gap-6 ${isVoter ? 'lg:grid-cols-2' : 'lg:grid-cols-1 lg:w-3/4 lg:mx-auto'}`}>
+                            <div className="p-4 sm:p-6 pb-8 sm:pb-12">
+                                <div className={`grid grid-cols-1 gap-4 sm:gap-6 ${isVoter ? 'lg:grid-cols-2' : 'lg:grid-cols-1 lg:w-3/4 lg:mx-auto'}`}>
                                     {/* Feedback Form (only for voters) */}
                                     {isVoter && (
                                         <div className="lg:sticky lg:top-6 lg:self-start">
-                                            <div className="bg-white rounded-xl shadow p-5 border border-gray-100">
-                                                <h4 className="text-lg font-semibold mb-2">
+                                            <div className="bg-white rounded-xl shadow p-4 sm:p-5 border border-gray-100">
+                                                <h4 className="text-base sm:text-lg font-semibold mb-2">
                                                     Leave anonymous feedback
                                                 </h4>
                                                 <p className="text-xs text-gray-500 mb-4">
@@ -437,11 +437,11 @@ const FoodDetailsPopup = ({ isOpen, onClose, dish, isVoter, totalWishes }: FoodD
 
                                     {/* Feedback List */}
                                     <div className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="text-lg font-semibold">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                            <h4 className="text-base sm:text-lg font-semibold">
                                                 Recent feedback
                                             </h4>
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                                                 <div className="flex items-center gap-1">
                                                     <Star filled={ratingStats.totalRatings > 0} />
                                                     <span className="font-medium">

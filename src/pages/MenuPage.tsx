@@ -5,21 +5,23 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { getCategories } from "../services/dishService";
 import Loading from "../components/Loading";
-import { getTodayResult, updateVoteForDish, getTodayVote } from "../services/resultService";
+import { getTodayResult, updateVoteForDish, getTodayVote, voteForDish } from "../services/resultService";
 import PageTransition from "../components/PageTransition";
 import type { Dish as BaseDish, Category } from "../services/dishService";
 import FoodDetailsPopup from "../components/FoodDetailsPopup";
 import CanteenPick from "../components/CanteenPick";
+import { useAuth } from "../context/AuthContext";
 
 // Locally extend Dish to include voteCount for this page
 type Dish = BaseDish & { voteCount?: number };
 
 const Menu = () => {
     const navigate = useNavigate();
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const { user, isAuthenticated } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
     const [dishes, setDishes] = useState<Dish[]>([]);
     const [limit, setLimit] = useState(12);
+    const [voteDate, setVoteDate] = useState<string | null>(null);
 
     // Update limit based on screen size (grid columns)
     useEffect(() => {
@@ -43,8 +45,7 @@ const Menu = () => {
 
     const [loading, setLoading] = useState(true);
     const [todayError, setTodayError] = useState<string | null>(null);
-    const [votedDishId, setVotedDishId] = useState<number | null>((null));
-    const [, setTodayVote] = useState<any>(null); // Remove todayVote unused var
+    const [votedDishId, setVotedDishId] = useState<number | null>(null);
     const [alreadyVotedPopup, setAlreadyVotedPopup] = useState(false);
     const [changeVotePopup, setChangeVotePopup] = useState(false);
     const [pendingVoteDishId, setPendingVoteDishId] = useState<number | null>(null);
@@ -53,14 +54,13 @@ const Menu = () => {
 
     useEffect(() => {
         setVotedDishId(null);
-        setIsLoggedIn(!!localStorage.getItem("token"));
         setLoading(true);
 
         // Fetch today's dishes and vote info
-        getTodayResult()
-            .then((res) => {
+        Promise.all([getTodayResult(), getTodayVote()])
+            .then(([result, vote]) => {
                 // Map CandidateDish[] to Dish[] with voteCount
-                const mappedDishes = (res.dishes || []).map((c) => ({
+                const mappedDishes = (result.dishes || []).map((c) => ({
                     id: c.dishId,
                     name: c.name,
                     description: c.description,
@@ -70,17 +70,20 @@ const Menu = () => {
                     voteCount: c.voteCount,
                 }));
                 setDishes(mappedDishes);
-                getTodayVote().then((vote) => {
-                    setTodayVote(vote);
-                    if (vote && vote.votePollId === res.votePollId && vote.userVote) {
-                        setVotedDishId(vote.userVote.dishId);
-                    } else {
-                        setVotedDishId(null);
-                    }
-                    setLoading(false);
-                });
+                
+                // Set vote date
+                setVoteDate(result.voteDate);
+                
+                // Set vote information from backend
+                if (vote && vote.votePollId === result.votePollId && vote.userVote) {
+                    setVotedDishId(vote.userVote.dishId);
+                } else {
+                    setVotedDishId(null);
+                }
+                setLoading(false);
             })
-            .catch(() => {
+            .catch((error) => {
+                console.error("Error fetching data:", error);
                 setTodayError("Failed to fetch today's result");
                 setLoading(false);
             });
@@ -93,14 +96,14 @@ const Menu = () => {
     }, []);
 
     const handleVote = async (dishId: number) => {
-        if (!isLoggedIn) {
+        if (!isAuthenticated || !user) {
             navigate('/sign-in');
             return;
         }
 
         // If no vote yet (first vote), allow
         if (!votedDishId) {
-            await performVote(dishId);
+            await performVote(dishId, true);
             return;
         }
 
@@ -112,23 +115,31 @@ const Menu = () => {
         }
 
         // If user tries to vote again for the same dish, just allow
-    await performVote(dishId);
+        await performVote(dishId, false);
     };
 
     // Helper to perform the vote or update
     // performVote: isFirstVote = true if this is the first vote (no votedDishId yet)
-    const [voteClosedPopup, setVoteClosedPopup] = useState(false);
-    const performVote = async (dishId: number) => {
+    const performVote = async (dishId: number, isFirstVote = false) => {
         try {
-            await updateVoteForDish(dishId);
+            // Use POST for first vote, PUT for vote update
+            if (isFirstVote) {
+                await voteForDish(dishId);
+            } else {
+                await updateVoteForDish(dishId);
+            }
 
+            // Refresh vote status and results from backend
             const [newVote, todayResult] = await Promise.all([getTodayVote(), getTodayResult()]);
-            setTodayVote(newVote);
             if (newVote && newVote.userVote) {
                 setVotedDishId(newVote.userVote.dishId);
             } else {
                 setVotedDishId(null);
             }
+            
+            // Update vote date
+            setVoteDate(todayResult.voteDate);
+            
             // Update dishes after voting
             const mappedDishes = (todayResult.dishes || []).map((c) => ({
                 id: c.dishId,
@@ -162,7 +173,16 @@ const Menu = () => {
                         <CanteenPick />
                     </div>
                     <div>
-                        <h2 className="text-[20px] font-bold mb-4">Vote poll</h2>
+                        <h2 className="text-[20px] font-bold mb-2">Vote poll</h2>
+                        {voteDate && (
+                            <p className="text-gray-600 text-sm mb-4">
+                                {new Date(voteDate).toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </p>
+                        )}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-2 md:gap-6 w-full">
                         {loading && (
@@ -182,10 +202,10 @@ const Menu = () => {
                                     description={dish.description ?? ""}
                                     imgURL={dish.imageURL ?? ""}
                                     initialVotes={dish.voteCount}
-                                    disabled={false}
+                                    disabled={false} // Backend handles vote validation
                                     isVote={true}
                                     onVote={() => {
-                                        if (!isLoggedIn) {
+                                        if (!isAuthenticated || !user) {
                                             navigate("/sign-in");
                                             return;
                                         }
@@ -259,34 +279,34 @@ const Menu = () => {
 
             {/* Change vote confirmation popup */}
             {changeVotePopup && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                    <div className="bg-white rounded-lg shadow-lg p-8 max-w-xs w-full flex flex-col items-center">
-                        <div className="text-lg font-semibold mb-4 text-center">You have already voted. Do you want to change your vote to this dish?</div>
-                        <div className="flex gap-4 mt-2">
-                            <button
-                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
-                                onClick={() => {
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center bg-black bg-opacity-40">
+                <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                    <div className="text-md font-semibold mb-4 text-center">You have already voted. Do you want to change your vote to this dish?</div>
+                    <div className="flex justify-end gap-4 mt-2">
+                        <button
+                            className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                            onClick={() => {
+                                setChangeVotePopup(false);
+                                setPendingVoteDishId(null);
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="px-6 py-2 bg-[#429818] text-white rounded hover:bg-[#367A14] transition"
+                            onClick={async () => {
+                                if (pendingVoteDishId) {
                                     setChangeVotePopup(false);
+                                    await performVote(pendingVoteDishId, false);
                                     setPendingVoteDishId(null);
-                                }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="px-6 py-2 bg-[#429818] text-white rounded hover:bg-[#367A14] transition"
-                                onClick={async () => {
-                                    if (pendingVoteDishId) {
-                                        setChangeVotePopup(false);
-                                        await performVote(pendingVoteDishId);
-                                        setPendingVoteDishId(null);
-                                    }
-                                }}
-                            >
-                                Yes, change vote
-                            </button>
-                        </div>
+                                }
+                            }}
+                        >
+                            Yes
+                        </button>
                     </div>
                 </div>
+            </div>
             )}
         </div>
     );

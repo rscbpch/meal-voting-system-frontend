@@ -77,7 +77,8 @@ const FoodCard = ({
         onWishlistClick?.(cardDishId, name);
     };
 
-    const handleVote = () => {
+    const handleVote = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent event bubbling to parent container
         if (!disabled && onVote) {
             setVotes(votes + 1);
             onVote();
@@ -221,14 +222,14 @@ const FoodCard = ({
                             </div>
                         </div>
                         <button
-                            onClick={handleVote}
-                            disabled={isVote ? (hasVoted && !isVoted) : disabled}
+                            onClick={(e) => handleVote(e)}
+                            disabled={disabled}
                             className={`rounded-md px-3 py-2 text-sm font-semibold flex justify-center items-center gap-2
                                 ${isVote
                                     ? (hasVoted
                                         ? (isVoted
                                             ? 'bg-[#429818] text-white cursor-not-allowed' // voted dish: green bg, white text
-                                            : 'bg-gray-200 text-[#429818] cursor-not-allowed') // not voted dish: gray bg, green text
+                                            : 'bg-gray-200 text-[#429818] cursor-pointer') // not voted dish: gray bg, green text, clickable
                                         : 'bg-[#429818] text-white hover:bg-[#3E7B27]') // not voted yet: green bg, white text
                                     : 'bg-[#429818] text-white hover:bg-[#3E7B27]'}
                             `}
@@ -453,14 +454,14 @@ const FoodCard = ({
                                     </button>
                                 ) : (
                                     <button
-                                        onClick={handleVote}
-                                        disabled={isVote ? (hasVoted && !isVoted) : disabled}
+                                        onClick={(e) => handleVote(e)}
+                                        disabled={disabled}
                                         className={`rounded-md px-3 py-2 text-sm font-semibold flex justify-center items-center gap-2
                                             ${isVote
                                                 ? (hasVoted
                                                     ? (isVoted
                                                         ? 'bg-[#429818] text-white cursor-not-allowed' // voted dish: green bg, white text
-                                                        : 'bg-gray-200 text-[#429818] cursor-not-allowed') // not voted dish: gray bg, green text
+                                                        : 'bg-gray-200 text-[#429818] cursor-pointer') // not voted dish: gray bg, green text, clickable
                                                     : 'bg-[#429818] text-white hover:bg-[#3E7B27]') // not voted yet: green bg, white text
                                                 : 'bg-[#429818] text-white hover:bg-[#3E7B27]'}
                                         `}

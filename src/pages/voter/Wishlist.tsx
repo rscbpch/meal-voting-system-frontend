@@ -8,11 +8,12 @@ import Pagination from "../../components/Pagination";
 import { getMostWishedDishes, getCategories } from "../../services/dishService";
 import Loading from "../../components/Loading";
 import type { Dish, Category } from "../../services/dishService";
-import { fetchAllWishes, fetchAndStoreUserWishes, attemptUpdateUserWish } from "../../services/wishService";
+import { fetchAllWishes, fetchAndStoreUserWishes, attemptUpdateUserWish, removeUserWish } from "../../services/wishService";
 import FoodDetailsPopup from "../../components/FoodDetailsPopup";
 import type { WishData, UserWish } from "../../services/wishService";
 import { getProfile } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const Wishlist = () => {
     const navigate = useNavigate();
@@ -31,6 +32,9 @@ const Wishlist = () => {
     const [cooldownRemaining, setCooldownRemaining] = useState<number | null>(null);
     const [pendingWish, setPendingWish] = useState<{ dishId: number; name: string } | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
+    // Remove wish state
+    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+    const [removeLoading, setRemoveLoading] = useState(false);
     const [limit, setLimit] = useState(12);
     // Food details popup state
     const [showDetailsPopup, setShowDetailsPopup] = useState(false);
@@ -118,7 +122,6 @@ const Wishlist = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-
     // Helper to check cooldown status for a dish change
     const checkCooldownStatus = async (dishId: number) => {
         // Use attemptUpdateUserWish, but do not change the wish if not confirmed
@@ -175,6 +178,24 @@ const Wishlist = () => {
         setActionLoading(false);
     };
 
+    // Handler for removing wish
+    const handleRemoveWish = () => {
+        setShowRemoveConfirm(true);
+    };
+
+    const confirmRemoveWish = async () => {
+        setRemoveLoading(true);
+        try {
+            await removeUserWish();
+            await handleWishChange();
+            setShowRemoveConfirm(false);
+        } catch (err: any) {
+            alert(err.message || 'Failed to remove wish');
+        } finally {
+            setRemoveLoading(false);
+        }
+    };
+
     // Live countdown for cooldown popup
     useEffect(() => {
         let timer: number | null = null;
@@ -219,7 +240,16 @@ const Wishlist = () => {
                                         const imgSrc = userWish.image && userWish.image.trim() !== "" ? userWish.image : fallbackImg;
 
                                         return (
-                                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-1 md:p-2 flex flex-col items-center justify-center h-full">
+                                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-1 md:p-2 flex flex-col items-center justify-center h-full relative">
+                                                {/* Remove Button */}
+                                                <button
+                                                    onClick={handleRemoveWish}
+                                                    className="absolute top-2 right-2 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-colors duration-200 group"
+                                                    title="Remove from wishlist"
+                                                >
+                                                    <XMarkIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                                </button>
+                                                
                                                 <div 
                                                     className="bg-white rounded-[10px] flex flex-col items-center justify-center w-full h-fill min-h-[100px] md:min-h-[180px]"
                                                     onClick={() => {
@@ -234,7 +264,7 @@ const Wishlist = () => {
                                                                 src={imgSrc}
                                                                 alt={userWish.dishName || "Favorite Dish"}
                                                                 className="w-16 h-16 md:w-28 md:h-28 object-cover rounded-full border-2 border-[#E6F4D7] shadow-md"
-                
+                                                
                                                             />
                                                             <div className="flex flex-col ml-3 md:ml-6 gap-1 md:gap-2 w-full sm:max-w-[210px] md:max-w-[700px]">
                                                                 {/* food info */}
@@ -285,7 +315,7 @@ const Wishlist = () => {
                                                                                 {wishCount.toLocaleString()} 
                                                                                 {wishCount === 1 
                                                                                     ? "like" 
-                                                                                    : "likes"}
+                                                                                    : " likes"}
                                                                             </p>
                                                                         </div>
                                                                     </div>
@@ -479,6 +509,33 @@ const Wishlist = () => {
                                     disabled={actionLoading}
                                 >
                                     {actionLoading ? 'Updating...' : 'Yes, Change'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* Remove Confirmation Modal */}
+                {showRemoveConfirm && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                        <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
+                            <h3 className="text-lg font-semibold mb-2">Remove from wishlist?</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Are you sure you want to remove this dish from your wishlist? You can always add it back later.
+                            </p>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={() => setShowRemoveConfirm(false)}
+                                    className="px-4 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-100"
+                                    disabled={removeLoading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmRemoveWish}
+                                    className="px-4 py-2 text-sm rounded-md bg-red-500 text-white hover:bg-red-600 disabled:opacity-60"
+                                    disabled={removeLoading}
+                                >
+                                    {removeLoading ? 'Removing...' : 'Yes, Remove'}
                                 </button>
                             </div>
                         </div>
