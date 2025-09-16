@@ -155,9 +155,10 @@ const Menu = () => {
             // Show already voted popup if backend returns status 403
             if (error?.status === 403 || error?.response?.status === 403) {
                 setAlreadyVotedPopup(true);
-            } else {
-                alert(error?.message || "Failed to vote. Please try again.");
+            } else if (error?.status === 400 || error?.response?.status === 400) {
+                setVoteClosedPopup(true);
             }
+            // Remove alert, just log
             console.error("Vote error:", error);
         }
     };
@@ -185,13 +186,11 @@ const Menu = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-2 md:gap-6 w-full">
                         {loading && (
-                            <div className="flex justify-center items-center w-full col-span-4 py-10">
+                            <div className="flex justify-center items-center w-full col-span-full min-h-[300px]">
                                 <Loading />
                             </div>
                         )}
                         {!loading && dishes.slice(0, limit).map(dish => {
-                            // Voting is now controlled by backend - no need for localStorage checks
-                            // The backend will handle vote validation and prevent duplicate votes
                             const categoryName = categories.find(cat => String(cat.id) === String(dish.categoryId))?.name || dish.categoryName || "";
                             const dishIdNum = typeof dish.id === 'string' ? parseInt(dish.id, 10) : dish.id;
                             return (
@@ -221,6 +220,25 @@ const Menu = () => {
                                 />
                             );
                         })}
+            {/* Vote closed popup */}
+            {voteClosedPopup && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                    <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 flex flex-col items-center">
+                        <h3 className="text-lg font-semibold mb-2 text-center">Voting Closed</h3>
+                        <p className="text-sm text-gray-600 mb-4 text-center">
+                            Voting is closed for today. Please come back tomorrow!
+                        </p>
+                        <div className="flex justify-end w-full">
+                            <button
+                                onClick={() => setVoteClosedPopup(false)}
+                                className="px-4 py-2 text-sm rounded-md bg-[#429818] text-white hover:bg-[#367A14] ml-auto"
+                            >
+                                Got it
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
                         {/* Food Details Popup */}
                         <FoodDetailsPopup
                             isOpen={showDetailsPopup}
